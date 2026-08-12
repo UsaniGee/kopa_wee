@@ -1,48 +1,45 @@
 # Pathway Implementation Plan: KopaWee Frontend MVP
 
-## Phase 1: Design System & Core Navigation Layout
+## Phase 1: Modular Design System & Onboarding ("LEGO Foundation")
 - [ ] Task: Set up global CSS tokens, dark/light theme variables, and fonts in `src/app/globals.css`
-- [ ] Task: Build main Navigation Header with role switcher, logo, and active links in `src/shared/components/Navbar.tsx`
-- [ ] Task: Build Footer component with brand links and disclaimer in `src/shared/components/Footer.tsx`
+- [ ] Task: Build Splash Screen & First-Time Onboarding Modal with "Who Are You?" 5-Role Selector in `src/shared/components/OnboardingModal.tsx`
+- [ ] Task: Build Modular Navbar & Global Role Switcher in `src/shared/components/Navbar.tsx`
+- [ ] Task: Build Shared UI Primitives (Cards, Badges, Tabs, Modals, Inputs, Status Badges)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2: Visionary Hero Landing Page (`/`)
-- [ ] Task: Implement Hero Section with animated badges, tagline, and dual CTA buttons in `src/app/page.tsx`
-- [ ] Task: Build Interactive Module Showcase component showcasing Companion, Marketplace, Housing, Safety, Workplace, CDS
-- [ ] Task: Build Rollout Timeline Infographic component (Year 1 to Year 4 official NYSC integrations)
-- [ ] Task: Build User Lifecycle Interactive Flowchart component (PCM -> Camp -> Serving -> POP/Alumni)
-- [ ] Task: Build Role Sign-Up Modal component
+## Phase 2: Visionary Landing Page (`/`)
+- [ ] Task: Implement Hero Section with animated tagline, live metrics, and dual CTA buttons in `src/app/page.tsx`
+- [ ] Task: Build Interactive Modular Architecture Showcase component (showing Lego-like mini-products)
+- [ ] Task: Build Rollout Timeline Infographic & User Lifecycle Flowchart components
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3: Companion & Smart Clearance Module (`/companion`)
-- [ ] Task: Build Companion Dashboard layout with call-up countdown widget in `src/app/companion/page.tsx`
-- [ ] Task: Build Smart Clearance Assistant UI with LGA schedule cards, calendar sync, and map route directions
-- [ ] Task: Build Offline Document Vault component with upload preview and document status badges
-- [ ] Task: Build Orientation Camp Guide & Packing Checklist component with progress bar
+## Phase 3: Prospective Corps Member Flow (`/dashboard/prospective`)
+- [ ] Task: Build Prospective Dashboard showing ONLY Camp Countdown, Packing Checklist, Registration Timeline, and Travel Planner in `src/app/dashboard/prospective/page.tsx`
+- [ ] Task: Build Interactive Camp Packing Checklist with progress bar and Orientation Camp Guide
+- [ ] Task: Build "Status Transition" modal (Upgrading Prospective -> Serving Corps Member)
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4: Peer-to-Peer Corper Marketplace (`/marketplace`)
-- [ ] Task: Build Marketplace Grid & Search/Filter bar (Category, Price, State, LGA) in `src/app/marketplace/page.tsx`
-- [ ] Task: Build Marketplace Product Card with corper verification badge & contact drawer
-- [ ] Task: Build "List Item" Modal Form for selling mattresses, gas cylinders, and appliances
+## Phase 4: Serving Corps Member Flow & Mini-Products (`/dashboard/serving`)
+- [ ] Task: Build Serving Dashboard (Today's Schedule, Clearance Reminder, Work Tomorrow, Nearby Corpers) in `src/app/dashboard/serving/page.tsx`
+- [ ] Task: Build Marketplace Mini-Product (`/marketplace`) with Buy/Sell feeds, Category filters, Saved items, and "List Item" form
+- [ ] Task: Build Safety Mini-Product (`/safety`) with Trusted Contacts, SOS Emergency trigger, Journey Sharing, and Nearby Hospitals/Police
+- [ ] Task: Build Community Mini-Product (`/community`) with People Near Me, CDS Group Hub, Events, and Chat
+- [ ] Task: Build Accommodation Mini-Product (`/accommodation`) with Corper Housing directory and Roommate Compatibility Finder
+- [ ] Task: Build AI Knowledge Assistant (`/ai`) interface for relocation & NYSC regulations
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 5: Accommodation & Roommate Matching (`/accommodation`)
-- [ ] Task: Build Housing Directory with apartment listings, PPA distance badges, and pricing in `src/app/accommodation/page.tsx`
-- [ ] Task: Build Roommate Finder interactive quiz component with compatibility score cards
+## Phase 5: PPA Representative Flow (`/dashboard/ppa`)
+- [ ] Task: Build PPA Employer Dashboard (Today's Attendance summary, Staff list, Pending Leave Requests, Announcements) in `src/app/dashboard/ppa/page.tsx`
+- [ ] Task: Build Attendance Clock-In & Mark Present/Absent/Late interface
+- [ ] Task: Build Leave Request Review & Approve/Reject workflow modal
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 6: Safety & Travel Tracker (`/safety`)
-- [ ] Task: Build Interstate Highway Trip Check-in Widget in `src/app/safety/page.tsx`
-- [ ] Task: Build SOS Emergency Broadcast Modal with mock contacts and location tracking display
+## Phase 6: CDS Executive & LGA Inspector Flows (`/dashboard/cds`, `/dashboard/lga`)
+- [ ] Task: Build CDS Executive Dashboard (Attendance Register, Projects Tracker, Dues Status, Gallery) in `src/app/dashboard/cds/page.tsx`
+- [ ] Task: Build LGA Inspector Dashboard (Today's Clearance Overview, Attendance Log, Statistics, Reports) in `src/app/dashboard/lga/page.tsx`
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 7: Workplace (PPA) & CDS Community Hub (`/workplace`, `/community`)
-- [ ] Task: Build PPA Onboarding Checklist & Employer Review Directory in `src/app/workplace/page.tsx`
-- [ ] Task: Build CDS Group Meeting Manager & Attendance Tracker in `src/app/community/page.tsx`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
-
-## Phase 8: Final Review & Polish Checkpoint
-- [ ] Task: Complete cross-browser and mobile responsive checks across all pages
-- [ ] Task: Verify dark/light mode toggle and interactive state transitions
+## Phase 7: Final Polish & Verification
+- [ ] Task: Verify role-based navigation switching across all 5 user profiles
+- [ ] Task: Complete mobile responsiveness & dark/light theme audit
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)

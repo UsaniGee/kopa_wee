@@ -1,43 +1,65 @@
 # Pathway Specification: KopaWee Frontend MVP
 
 ## Overview
-**KopaWee** is an active personal assistant and super-app for National Youth Service Corps (NYSC) members across Nigeria. This specification defines the **Frontend-First MVP**, establishing a visionary landing page that communicates KopaWee's mission, along with complete interactive frontend modules for the core corps member lifecycle: Companion, Marketplace, Accommodation, Safety, Workplace, and Community.
+**KopaWee** is a modular platform built like "LEGO" pieces—a unified app housing distinct mini-products tailored to the user's role. Rather than a single overwhelming dashboard, KopaWee uses a shared core infrastructure (Authentication, Profile, Notifications, Location, Payments, Messaging, Documents) and dynamically presents role-specific experiences.
 
-## Functional Requirements
+---
 
-### 1. Visionary Landing Page (`/`)
-- **Hero Banner:** Compelling value proposition ("The Active Personal Companion for Every Corps Member"), call-to-action buttons for Prospective Corps Members and PPA Employers, and live metric badges (50k+ Corps Members, 2k+ PPAs).
-- **Module Interactive Showcase:** Tabbed preview of core modules (Companion, Safety, Marketplace, Housing, Workplace, CDS).
-- **Rollout Flow Timeline:** Interactive visual depiction of KopaWee's 4-year scaling vision (Year 1: Companion/Safety/Marketplace -> Year 2: Workplace -> Year 3: CDS -> Year 4: Official NYSC Integrations).
-- **User Lifecycle Interactive Flow:** Interactive path showing PCM -> Orientation Camp -> Serving Corps Member -> POP / Alumni.
+## 1. Shared Core Infrastructure ("LEGO Foundation")
+- **Authentication & Onboarding:** Sign up (Email, Phone, Password, Verification) leading to the critical **"Who Are You?" Role Selector**:
+  - Prospective Corps Member
+  - Serving Corps Member
+  - Ex-Corps Member / Alumni
+  - PPA Representative (Employer)
+  - CDS Executive
+  - LGA Inspector / NYSC Official
+- **Global Role Switcher & Status Transition:** Allows seamless previewing and status upgrades (e.g., Prospective transitioning to Serving after Orientation Camp).
+- **Shared Utilities:** Notification Center, Location Services, P2P Payments mock, Messaging System, Document Storage Vault.
 
-### 2. Companion & Smart Clearance (`/companion`)
-- **Smart Clearance Assistant:** Interactive cards converting passive LGA clearance schedules into actionable calendar sync items, map routes, and required document checklists.
-- **Offline Document Vault:** UI for managing encrypted local uploads of call-up letters, green cards, and medical fitness certificates.
-- **Orientation Camp Guide:** Packing checklist with progress bar and camp survival tips.
+---
 
-### 3. Peer-to-Peer Corper Marketplace (`/marketplace`)
-- **Item Listings Feed:** Card grid displaying items (mattresses, gas cylinders, cooking utensils, fans, textbooks) filtered by Category, State, LGA, and Price.
-- **Corper Verification Badges:** Seller cards showing state code and verification status.
-- **List Item Modal:** Form to upload item image preview, title, price, LGA location, and contact options.
+## 2. Role-Based Dynamic Experiences (Mini-Products)
 
-### 4. Accommodation & Roommate Matching (`/accommodation`)
-- **Corper Lodges Directory:** Apartment listings near PPAs and LGA centers with pricing, distance, and amenities.
-- **Roommate Compatibility Finder:** Quiz filter (gender, LGA, budget, PPA proximity) with match percentage score cards.
+### Flow 1: Prospective Corps Member Experience
+Shows **ONLY** relevant pre-camp tools:
+- **Camp Countdown & Registration Timeline**
+- **Smart Packing Checklist** (with interactive progress)
+- **Orientation Camp Guide & State Orientation Guides**
+- **Travel Planner** (pre-camp travel routes & tips)
+- **AI Assistant** (Instant guidance on mobilization, call-up, and requirements)
 
-### 5. Travel Safety & Emergency Tracker (`/safety`)
-- **Trip Check-In Widget:** Interface for recording active interstate travel status (e.g. Lokoja-Abuja expressway).
-- **SOS Emergency Trigger:** Rapid emergency alert dialog with mock contacts and local rep notification.
+### Flow 2: Serving Corps Member Experience
+Unlocks active service year mini-products:
+- **Serving Dashboard:** Today's Schedule, Clearance Reminder, Work Tomorrow, Nearby Corps Members.
+- **Marketplace Mini-Product (`/marketplace`):** Buy, Sell, Nearby items (mattresses, gas cylinders, appliances), Categories, Saved items, and "List Item" Form.
+- **Safety Mini-Product (`/safety`):** Trusted Contacts, SOS Emergency trigger, Journey Sharing, Emergency Numbers, Nearby Police & Hospitals.
+- **Community Mini-Product (`/community`):** People Near Me, CDS Group Hub, Events, Groups, and Chat.
+- **Accommodation Mini-Product (`/accommodation`):** Housing Directory near PPA, Roommate Matching quiz and scorecards.
+- **AI Knowledge Assistant (`/ai`):** Dedicated query interface for relocation, clearance rules, and service regulations.
 
-### 6. PPA Workplace & CDS Hub (`/workplace`, `/community`)
-- **Workplace Portal:** PPA onboarding checklist, employer details, and corper review cards.
-- **CDS Community Manager:** CDS group directory, meeting reminders, and attendance log.
+### Flow 3: PPA Representative (Employer) Experience
+Tailored management portal for host organizations:
+- **PPA Dashboard:** Today's Attendance summary, Staff list, Pending Leave Requests, Announcements, Reports.
+- **Attendance Module:** Clock In/Out UI, Mark Present/Absent/Late log.
+- **Leave Request Management:** Review, Approve, or Reject corper leave applications with reason notes.
 
-## Non-Functional Requirements
-- **Design Excellence:** Emerald green palette, dark/light theme, modern typography (Inter/Geist), glassmorphism cards, responsive layouts.
-- **Performance:** Instant page transitions, smooth CSS micro-animations, client-side state reactivity.
+### Flow 4: CDS Executive Experience
+Leadership portal for Community Development Service groups:
+- **CDS Dashboard:** CDS Attendance register, Active Projects tracker, Group Announcements, Dues collection status, Reports, and Event Gallery.
+
+### Flow 5: LGA Inspector / Official Experience
+Administrative oversight portal:
+- **LGA Dashboard:** Today's Clearance overview, Biometric/Clearance Attendance log, LGA Statistics, Official Messages, and Reports.
+
+---
+
+## 3. Visionary Landing Page (`/`)
+- Communicates the KopaWee vision, modular "LEGO" platform breakdown, 4-year rollout timeline, and interactive role-based preview modal.
+
+---
 
 ## Acceptance Criteria
-1. Navigation bar allows seamless tab navigation between Landing Page, Companion, Marketplace, Accommodation, Safety, Workplace, and Community.
-2. All interactive UI states (filters, modals, tabs, form inputs, checklists) function smoothly without console errors.
-3. Responsive design works flawlessly on both desktop viewports and mobile screens.
+1. First-time onboarding flow includes the "Who Are You?" role selection step that immediately customizes the visible navigation and dashboard.
+2. The navbar role switcher allows seamless switching between all 5 role experiences (Prospective, Serving, PPA Rep, CDS Exec, LGA Inspector).
+3. Each mini-product (Marketplace, Safety, Community, Accommodation, PPA Portal, CDS Hub, LGA Portal) renders its specialized, standalone interface.
+4. Mobile and desktop viewports are fully responsive with high-contrast emerald visual aesthetics.
