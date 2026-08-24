@@ -1,16 +1,16 @@
 # Pathway Implementation Plan: KopaWee Frontend MVP
 
 ## Phase 1: Modular Design System & Onboarding ("LEGO Foundation")
-- [ ] Task: Set up global CSS tokens, dark/light theme variables, and fonts in `src/app/globals.css`
-- [ ] Task: Build Splash Screen & First-Time Onboarding Modal with "Who Are You?" 5-Role Selector in `src/shared/components/OnboardingModal.tsx`
-- [ ] Task: Build Modular Navbar & Global Role Switcher in `src/shared/components/Navbar.tsx`
-- [ ] Task: Build Shared UI Primitives (Cards, Badges, Tabs, Modals, Inputs, Status Badges)
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Set up global CSS tokens, dark/light theme variables, and fonts in `src/app/globals.css`
+- [x] Task: Build Splash Screen & First-Time Onboarding Modal with "Who Are You?" 5-Role Selector in `src/shared/components/OnboardingModal.tsx`
+- [x] Task: Build Modular Navbar & Global Role Switcher in `src/shared/components/Navbar.tsx`
+- [x] Task: Build Shared UI Primitives (Cards, Badges, Tabs, Modals, Inputs, Status Badges)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: Visionary Landing Page (`/`)
-- [ ] Task: Implement Hero Section with animated tagline, live metrics, and dual CTA buttons in `src/app/page.tsx`
-- [ ] Task: Build Interactive Modular Architecture Showcase component (showing Lego-like mini-products)
-- [ ] Task: Build Rollout Timeline Infographic & User Lifecycle Flowchart components
+- [x] Task: Implement Hero Section with animated tagline, live metrics, and dual CTA buttons in `src/app/page.tsx`
+- [~] Task: Build Interactive Modular Architecture Showcase component (showing Lego-like mini-products)
+- [~] Task: Build Rollout Timeline Infographic & User Lifecycle Flowchart components
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Prospective Corps Member Flow (`/dashboard/prospective`)

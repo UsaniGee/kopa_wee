@@ -1,0 +1,42 @@
+---
+description: AXON spec-driven development protocol — routes natural language and slash-style requests to the correct AXON skill.
+alwaysApply: true
+---
+
+# AXON for Cursor
+
+This project uses [AXON](https://github.com/atopwebtechnologies/axon) (Atop eXecution Orchestration Network) for spec-driven development.
+
+## Project context
+
+Always read `axon/index.md` first when starting AXON work. It links to product definition, guidelines, tech stack, workflow, code style guides, and active pathways.
+
+## Available commands
+
+Map user intent to the matching skill in `.cursor/skills/`:
+
+| User says | Skill to read and follow |
+| --- | --- |
+| Initialize AXON / axon-initialize | `axon-initialize` |
+| Craft a pathway / axon-craft | `axon-craft` |
+| Immerse in pathway / axon-immerse | `axon-immerse` |
+| Design frontend / axon-compose | `axon-compose` |
+| Investigate progress / axon-investigate | `axon-investigate` |
+| Inspect completed work / axon-inspect | `axon-inspect` |
+| Revert pathway or task / axon-revert | `axon-revert` |
+
+## Workflow
+
+```text
+Context → Craft → Immerse (↔ Compose) → Investigate → Inspect → Revert
+```
+
+- `axon-compose` activates automatically during `axon-immerse` when frontend work is detected.
+- Pathway artifacts live in `axon/pathways/<pathway_id>/` (spec.md, plan.md, metadata.json).
+- Follow `axon/workflow.md` and applicable files in `axon/code_styleguides/`.
+
+## Cursor-specific notes
+
+- Use the AskQuestion tool for structured single- or multiple-choice prompts when an AXON skill requests user input.
+- Ask questions one at a time in text chat unless a native modal tool is available.
+- After installing or updating AXON skills, suggest the user restart the Cursor agent session so new skills are picked up.

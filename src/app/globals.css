@@ -2,22 +2,44 @@
 
 @layer base {
   :root {
-    --bg-main: #f8fafc;
+    /* NYSC brand — green & white */
+    --nysc-green: #008751;
+    --nysc-green-light: #059669;
+    --nysc-green-dark: #006b40;
+    --color-background: #ffffff;
+    --color-surface: #f0fdf4;
+    --color-text-primary: #0f172a;
+    --color-text-muted: #475569;
+    --color-accent: #008751;
+    --color-border: rgba(0, 135, 81, 0.2);
+
+    --bg-main: #ffffff;
     --fg-main: #0f172a;
-    --emerald-primary: #059669;
-    --emerald-glow: rgba(5, 150, 105, 0.15);
-    --card-bg: rgba(255, 255, 255, 0.85);
-    --card-border: rgba(226, 232, 240, 0.8);
+    --emerald-primary: #008751;
+    --emerald-glow: rgba(0, 135, 81, 0.15);
+    --card-bg: rgba(255, 255, 255, 0.92);
+    --card-border: rgba(0, 135, 81, 0.12);
   }
 
   .dark {
+    --color-background: #06090e;
+    --color-surface: #0a1a12;
+    --color-text-primary: #f8fafc;
+    --color-text-muted: #94a3b8;
+    --color-accent: #10b981;
+    --color-border: rgba(16, 185, 129, 0.25);
+
     --bg-main: #06090e;
     --fg-main: #f8fafc;
     --emerald-primary: #10b981;
     --emerald-glow: rgba(16, 185, 129, 0.2);
-    --card-bg: rgba(15, 23, 42, 0.75);
-    --card-border: rgba(51, 65, 85, 0.6);
+    --card-bg: rgba(10, 26, 18, 0.85);
+    --card-border: rgba(16, 185, 129, 0.2);
   }
+}
+
+html {
+  color-scheme: light only;
 }
 
 body {
@@ -25,6 +47,24 @@ body {
   color: var(--fg-main);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+}
+
+/* Force light theme even when OS prefers dark */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #ffffff;
+    --color-surface: #f0fdf4;
+    --color-text-primary: #0f172a;
+    --color-text-muted: #475569;
+    --color-accent: #008751;
+    --color-border: rgba(0, 135, 81, 0.2);
+    --bg-main: #ffffff;
+    --fg-main: #0f172a;
+    --emerald-primary: #008751;
+    --emerald-glow: rgba(0, 135, 81, 0.15);
+    --card-bg: rgba(255, 255, 255, 0.92);
+    --card-border: rgba(0, 135, 81, 0.12);
+  }
 }
 
 /* Glassmorphism Utilities */
@@ -56,7 +96,7 @@ body {
 
 /* Custom Gradients & Text */
 .gradient-text-emerald {
-  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+  background: linear-gradient(135deg, #008751 0%, #059669 50%, #10b981 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -72,6 +112,93 @@ body {
   background-size: 24px 24px;
 }
 
+/* Hero Carousel */
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-slide-active {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 1;
+}
+
+.hero-slide-inactive {
+  opacity: 0;
+  transform: scale(1.06);
+  z-index: 0;
+}
+
+.hero-content-enter {
+  animation: heroFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-content-enter-delay-1 {
+  animation-delay: 0.08s;
+}
+.hero-content-enter-delay-2 {
+  animation-delay: 0.16s;
+}
+.hero-content-enter-delay-3 {
+  animation-delay: 0.24s;
+}
+.hero-content-enter-delay-4 {
+  animation-delay: 0.32s;
+}
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-progress-bar {
+  animation: heroProgress 6s linear forwards;
+  transform-origin: left;
+}
+
+@keyframes heroProgress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Story journey connector */
+.story-connector {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(16, 185, 129, 0.4) 20%,
+    rgba(16, 185, 129, 0.4) 80%,
+    transparent 100%
+  );
+  height: 2px;
+}
+
+/* Service image card hover */
+.service-image-card {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.service-image-card:hover img {
+  transform: scale(1.05);
+}
+
+.service-image-card img {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
@@ -80,9 +207,41 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.3);
-  border-radius: 4px;
+  background: rgba(0, 135, 81, 0.3);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.6);
+  background: rgba(0, 135, 81, 0.6);
 }
+
+/* Tumbling Text Roll Animation (Rally Padel style) */
+.text-roll-wrapper {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  height: 1.25em;
+  line-height: 1.25em;
+}
+
+.text-roll-inner {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .text-roll-inner,
+  a:hover .text-roll-inner,
+  button:hover .text-roll-inner {
+    transform: translateY(-50%);
+  }
+}
+
+.text-roll-text {
+  display: block;
+  height: 1.25em;
+  line-height: 1.25em;
+  white-space: nowrap;
+}
+
+
