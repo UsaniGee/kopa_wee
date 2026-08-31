@@ -74,8 +74,42 @@ export default function CampEssentialsChecklist() {
   const [newItemName, setNewItemName] = useState("");
   const [newItemCategory, setNewItemCategory] = useState<CampItem["category"]>("essentials");
 
+  useEffect(() => {
+    const userId = localStorage.getItem("kopawee_user_id");
+    if (!userId) return;
+
+    fetch(`/api/checklist?userId=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          const packedSet = new Set(data.data);
+          setItems((prev) =>
+            prev.map((item) => ({ ...item, packed: packedSet.has(item.id) }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const syncChecklistToDatabase = (updatedItems: CampItem[]) => {
+    const userId = localStorage.getItem("kopawee_user_id");
+    if (!userId) return;
+
+    const packedIds = updatedItems.filter((i) => i.packed).map((i) => i.id);
+
+    fetch("/api/checklist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, completedItems: packedIds }),
+    }).catch(() => {});
+  };
+
   const toggleItem = (id: string) => {
-    setItems(prev => prev.map(item => item.id === id ? { ...item, packed: !item.packed } : item));
+    setItems((prev) => {
+      const next = prev.map((item) => (item.id === id ? { ...item, packed: !item.packed } : item));
+      syncChecklistToDatabase(next);
+      return next;
+    });
   };
 
   const addItem = (e: React.FormEvent) => {
@@ -87,9 +121,13 @@ export default function CampEssentialsChecklist() {
       category: newItemCategory,
       qty: "1 item",
       recommended: false,
-      packed: false
+      packed: false,
     };
-    setItems(prev => [newItem, ...prev]);
+    setItems((prev) => {
+      const next = [newItem, ...prev];
+      syncChecklistToDatabase(next);
+      return next;
+    });
     setNewItemName("");
   };
 

@@ -98,18 +98,107 @@ const SAMPLE_ROOMMATES: Roommate[] = [
 export default function AccommodationPage() {
   const { currentRole } = useRole();
   const [activeTab, setActiveTab] = useState<"lodges" | "roommates">("lodges");
-  const [distanceKmFilter, setDistanceKmFilter] = useState<number>(10);
-  const [selectedLGA, setSelectedLGA] = useState<string>("all");
-
+  const [lodges, setLodges] = useState<Lodge[]>([]);
+  const [roommates, setRoommates] = useState<Roommate[]>(SAMPLE_ROOMMATES);
   const [addModalOpen, setAddModalOpen] = useState(false);
+
+  // Filters
+  const [distanceKmFilter, setDistanceKmFilter] = useState<number>(10);
+  const [badgeFilter, setBadgeFilter] = useState<string>("all");
+  const [lgaFilter, setLgaFilter] = useState<string>("all");
+
+  // Form State
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [location, setLocation] = useState("");
+  const [lga, setLga] = useState("Ikeja");
+  const [contactPhone, setContactPhone] = useState("");
+  const [posting, setPosting] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/accommodation")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          const apiLodges: Lodge[] = data.data.map((item: any) => ({
+            id: item.id,
+            name: item.title,
+            price: item.price,
+            location: item.location,
+            lga: item.lga,
+            distanceKm: 1.5,
+            badgeType: "verified",
+            features: ["Verified Host", "Corper Suitable"],
+            split: item.splitInfo || "Contact Host",
+            image: item.images[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80",
+            forRoles: ["pcm", "serving", "alumni"],
+          }));
+          setLodges(apiLodges);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handlePostListing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !price || !contactPhone) return;
+
+    setPosting(true);
+    const userId = localStorage.getItem("kopawee_user_id") || "cl_guest_corps";
+
+    try {
+      const res = await fetch("/api/accommodation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownerId: userId,
+          title,
+          description: "Verified Corper Lodge near PPA",
+          location: location || `${lga} LGA, Lagos`,
+          state: "Lagos",
+          lga,
+          price,
+          contactPhone,
+          splitInfo: "Available for Rent / Roommate split",
+          images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80"],
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const newLodge: Lodge = {
+          id: data.data.id,
+          name: title,
+          price,
+          location: location || `${lga} LGA, Lagos`,
+          lga,
+          distanceKm: 1.2,
+          badgeType: "verified",
+          features: ["Freshly Listed"],
+          split: "Contact Host",
+          image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80",
+          forRoles: ["pcm", "serving", "alumni"],
+        };
+        setLodges((prev) => [newLodge, ...prev]);
+        setAddModalOpen(false);
+        setTitle("");
+        setPrice("");
+        setContactPhone("");
+      }
+    } catch (err) {
+      console.error("Failed to post lodge", err);
+    } finally {
+      setPosting(false);
+    }
+  };
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportedItemName, setReportedItemName] = useState("");
   const [reportReason, setReportReason] = useState("");
   const [reportSubmitted, setReportSubmitted] = useState(false);
 
-  const filteredLodges = SAMPLE_LODGES.filter(lodge => {
+  const filteredLodges = lodges.filter(lodge => {
     const matchesDistance = lodge.distanceKm <= distanceKmFilter;
-    const matchesLGA = selectedLGA === "all" || lodge.lga.toLowerCase() === selectedLGA.toLowerCase();
+    const matchesLGA = lgaFilter === "all" || lodge.lga.toLowerCase() === lgaFilter.toLowerCase();
     return matchesDistance && matchesLGA;
   });
 
@@ -201,34 +290,55 @@ export default function AccommodationPage() {
 
       {/* Lodges Grid */}
       {activeTab === "lodges" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {filteredLodges.map((lodge) => (
-            <div key={lodge.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
-              <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
-                <img src={lodge.image} alt={lodge.name} className="w-full h-full object-cover" />
-                <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold uppercase px-2.5 py-1">
-                  {lodge.lga} LGA · {lodge.distanceKm}km from PPA
-                </span>
-              </div>
-
-              <div className="space-y-1.5">
-                <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">{lodge.name}</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400">{lodge.location}</p>
-                <div className="text-sm font-bold font-mono text-emerald-700 dark:text-emerald-400 pt-1">{lodge.price}</div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
-                <span className="text-slate-600 dark:text-slate-400">{lodge.split}</span>
-                <button 
-                  onClick={() => handleFlagItem(lodge.name)}
-                  className="text-red-600 hover:text-red-700 flex items-center gap-1 font-semibold cursor-pointer"
-                >
-                  <Flag className="w-3.5 h-3.5" /> Report
-                </button>
-              </div>
+        filteredLodges.length === 0 ? (
+          <div className="p-12 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-center space-y-4">
+            <Home className="w-8 h-8 text-emerald-700 dark:text-emerald-400 mx-auto" />
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">
+                No Corper Lodges Found
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Be the first corper to list a lodge or housing opportunity in this location!
+              </p>
             </div>
-          ))}
-        </div>
+            <button
+              onClick={() => setAddModalOpen(true)}
+              className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>List First Lodge</span>
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {filteredLodges.map((lodge) => (
+              <div key={lodge.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+                <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
+                  <img src={lodge.image} alt={lodge.name} className="w-full h-full object-cover" />
+                  <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold uppercase px-2.5 py-1">
+                    {lodge.lga} LGA · {lodge.distanceKm}km from PPA
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">{lodge.name}</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">{lodge.location}</p>
+                  <div className="text-sm font-bold font-mono text-emerald-700 dark:text-emerald-400 pt-1">{lodge.price}</div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
+                  <span className="text-slate-600 dark:text-slate-400">{lodge.split}</span>
+                  <button 
+                    onClick={() => handleFlagItem(lodge.name)}
+                    className="text-red-600 hover:text-red-700 flex items-center gap-1 font-semibold cursor-pointer"
+                  >
+                    <Flag className="w-3.5 h-3.5" /> Report
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       )}
 
       {/* Roommates Grid */}

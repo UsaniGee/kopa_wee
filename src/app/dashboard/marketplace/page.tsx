@@ -53,17 +53,107 @@ const NIGERIAN_STATES = ["All States", "Lagos", "Kaduna", "FCT - Abuja", "Oyo", 
 
 export default function MarketplacePage() {
   const { currentRole } = useRole();
+  const [listings, setListings] = useState<Listing[]>([]);
   const [selectedState, setSelectedState] = useState("All States");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [contactedListing, setContactedListing] = useState<string | null>(null);
+
+  // Modal Form State
+  const [itemTitle, setItemTitle] = useState("");
+  const [itemCategory, setItemCategory] = useState("Pre-Camp Gear");
+  const [itemPrice, setItemPrice] = useState("");
+  const [itemLocation, setItemLocation] = useState("");
+  const [itemDescription, setItemDescription] = useState("");
+  const [posting, setPosting] = useState(false);
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportedListingTitle, setReportedListingTitle] = useState("");
   const [reportReason, setReportReason] = useState("");
   const [reportSubmitted, setReportSubmitted] = useState(false);
 
-  const filteredListings = SAMPLE_LISTINGS.filter((item) => {
+  React.useEffect(() => {
+    fetch("/api/marketplace")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          const apiListings: Listing[] = data.data.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            price: parseInt(item.price.replace(/[^0-9]/g, ""), 10) || 5000,
+            state: item.state || "Lagos",
+            location: `${item.lga} LGA, ${item.state}`,
+            distanceKm: 1.5,
+            seller: item.seller?.name || "Verified Corper",
+            roleBadge: "Direct Sale",
+            badgeType: "verified",
+            category: item.category,
+            condition: "Good Condition",
+            imageBg: "bg-emerald-800",
+            imageUrl: item.images[0] || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80",
+            forRoles: ["pcm", "serving", "alumni"],
+          }));
+          setListings(apiListings);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handlePostItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!itemTitle || !itemPrice) return;
+
+    setPosting(true);
+    const userId = localStorage.getItem("kopawee_user_id") || "cl_guest_corps";
+
+    try {
+      const res = await fetch("/api/marketplace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sellerId: userId,
+          title: itemTitle,
+          category: itemCategory,
+          price: `₦${itemPrice}`,
+          description: itemDescription || "Corper Item for sale",
+          state: selectedState === "All States" ? "Lagos" : selectedState,
+          lga: "Ikeja",
+          images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80"],
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const newItem: Listing = {
+          id: data.data.id,
+          title: itemTitle,
+          price: parseInt(itemPrice, 10) || 5000,
+          state: selectedState === "All States" ? "Lagos" : selectedState,
+          location: itemLocation || "Ikeja LGA, Lagos",
+          distanceKm: 1.0,
+          seller: "You",
+          roleBadge: "Fresh Listing",
+          badgeType: "verified",
+          category: itemCategory,
+          condition: "Listed Just Now",
+          imageBg: "bg-emerald-700",
+          imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80",
+          forRoles: ["pcm", "serving", "alumni"],
+        };
+        setListings((prev) => [newItem, ...prev]);
+        setShowModal(false);
+        setItemTitle("");
+        setItemPrice("");
+        setItemDescription("");
+      }
+    } catch (err) {
+      console.error("Failed to post item", err);
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  const filteredListings = listings.filter((item) => {
     const matchesState = selectedState === "All States" || item.state === selectedState;
     const matchesCat = selectedCategory === "All" || item.category === selectedCategory;
     return matchesState && matchesCat;
@@ -141,15 +231,35 @@ export default function MarketplacePage() {
       </div>
 
       {/* Marketplace Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredListings.map((item) => (
-          <div key={item.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
-            <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
-              <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-              <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold uppercase px-2.5 py-1">
-                {item.roleBadge}
-              </span>
-            </div>
+      {filteredListings.length === 0 ? (
+        <div className="p-12 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-center space-y-4">
+          <ShoppingBag className="w-8 h-8 text-emerald-700 dark:text-emerald-400 mx-auto" />
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">
+              No Items Listed in {selectedCategory} Yet
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              Have camp gear, electronics, or household items to sell or swap? Post them now!
+            </p>
+          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-2 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Post First Item for Sale</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredListings.map((item) => (
+            <div key={item.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+              <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
+                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold uppercase px-2.5 py-1">
+                  {item.roleBadge}
+                </span>
+              </div>
 
             <div className="space-y-1.5">
               <h3 className="text-base font-bold text-[#121815] dark:text-white font-display line-clamp-1">{item.title}</h3>
@@ -177,6 +287,7 @@ export default function MarketplacePage() {
           </div>
         ))}
       </div>
+      )}
 
     </div>
   );

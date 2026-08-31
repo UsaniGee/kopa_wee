@@ -93,15 +93,40 @@ function OnboardingContent() {
     if (step > 1) setStep(s => s - 1);
   };
 
-  const finishOnboarding = () => {
+  const finishOnboarding = async () => {
     let assignedRole: "pcm" | "serving" | "alumni" = "serving";
+    let dbRole: "PCM" | "SERVING_CORPER" | "CDS_EXEC" | "EMPLOYER" | "LGA_INSPECTOR" | "ALUMNI" = "SERVING_CORPER";
 
     if (formData.nyscStatus === "prospective_corps_member") {
       assignedRole = "pcm";
+      dbRole = "PCM";
     } else if (formData.nyscStatus === "serving_corps_member") {
       assignedRole = "serving";
+      dbRole = "SERVING_CORPER";
     } else if (formData.nyscStatus === "alumni") {
       assignedRole = "alumni";
+      dbRole = "ALUMNI";
+    }
+
+    const userId = localStorage.getItem("kopawee_user_id");
+
+    if (userId) {
+      try {
+        await fetch("/api/users/role", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            role: dbRole,
+            deployedState: formData.deploymentState || formData.serviceState,
+            lga: formData.ppaLGA,
+            stateCode: "LA/26A/1234",
+            ppaName: formData.ppaName,
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to sync onboarding to database", err);
+      }
     }
 
     setRole(assignedRole);

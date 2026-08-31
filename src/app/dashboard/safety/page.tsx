@@ -47,6 +47,28 @@ export default function SafetyPage() {
   const [destinationState, setDestinationState] = useState("Kaduna NYSC Camp");
   const [pingInterval, setPingInterval] = useState("2 Hours");
 
+  const handleTriggerSos = async () => {
+    const userId = localStorage.getItem("kopawee_user_id") || "cl_guest_corps";
+    setSosActive(true);
+
+    try {
+      await fetch("/api/safety/sos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          latitude: 6.5244,
+          longitude: 3.3792,
+          state: "Lagos",
+          lga: "Ikeja",
+          message: "EMERGENCY SOS: Corper needs immediate assistance!",
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to post SOS alert", err);
+    }
+  };
+
   const handleAddContact = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newContactName.trim() || !newContactPhone.trim()) return;
@@ -90,7 +112,7 @@ export default function SafetyPage() {
         </div>
 
         <button
-          onClick={() => setSosActive(!sosActive)}
+          onClick={handleTriggerSos}
           className={`px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-2 cursor-pointer ${
             sosActive
               ? "bg-red-700 text-white border border-red-500 animate-pulse"

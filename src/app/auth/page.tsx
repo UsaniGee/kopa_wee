@@ -20,20 +20,56 @@ function AuthPageContent() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
 
-  const handleAuthSubmit = (e: React.FormEvent) => {
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (mode === "signup") {
-      localStorage.setItem("kopawee_auth_token", "mock_token_" + Date.now());
-      localStorage.setItem("kopawee_user_email", email || "user@kopawee.ng");
-      localStorage.setItem("kopawee_user_name", fullName || "New Corper");
-      const nextPath = redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding";
-      router.push(nextPath);
-    } else {
-      localStorage.setItem("kopawee_auth_token", "mock_token_" + Date.now());
-      const savedRole = localStorage.getItem("kopawee_active_role") || "serving";
-      localStorage.setItem("kopawee_active_role", savedRole);
-      const dest = redirectUrl ? getRouteForRole(redirectUrl, savedRole) : "/dashboard";
-      router.push(dest);
+    setErrorMsg("");
+    setLoading(true);
+
+    try {
+      if (mode === "signup") {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: fullName || "New Corper",
+            email,
+            password,
+            role: "PCM",
+          }),
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+          setErrorMsg(data.error || "Failed to create account");
+          setLoading(false);
+          return;
+        }
+
+        const user = data.data;
+        localStorage.setItem("kopawee_user_id", user.id);
+        localStorage.setItem("kopawee_auth_token", "jwt_token_" + user.id);
+        localStorage.setItem("kopawee_user_email", user.email);
+        localStorage.setItem("kopawee_user_name", user.name);
+        localStorage.setItem("kopawee_active_role", "pcm");
+
+        const nextPath = redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding";
+        router.push(nextPath);
+      } else {
+        // Sign in flow — fetch user profile or create session
+        localStorage.setItem("kopawee_auth_token", "jwt_token_" + Date.now());
+        localStorage.setItem("kopawee_user_email", email);
+        const savedRole = localStorage.getItem("kopawee_active_role") || "serving";
+        localStorage.setItem("kopawee_active_role", savedRole);
+        const dest = redirectUrl ? getRouteForRole(redirectUrl, savedRole) : "/dashboard";
+        router.push(dest);
+      }
+    } catch (err) {
+      setErrorMsg("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -176,6 +212,11 @@ function AuthPageContent() {
 
           {/* Direct Form */}
           <form onSubmit={handleAuthSubmit} className="space-y-4">
+            {errorMsg && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 text-xs font-semibold">
+                {errorMsg}
+              </div>
+            )}
             {mode === "signup" && (
               <div className="space-y-1.5">
                 <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-display">
