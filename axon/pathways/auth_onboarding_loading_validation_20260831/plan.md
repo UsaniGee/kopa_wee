@@ -6,28 +6,29 @@ Execution roadmap for enforcing disabled inactive states and animated loading sp
 
 ## Phase 1: Refactor Auth Page (`src/app/auth/page.tsx`) Validation & Loaders
 
-- [ ] Task: Add Form Validation & Loading Spinner to Auth Submit Buttons
-  - [ ] Calculate `isAuthValid` based on mode (`signup` vs `signin`)
-  - [ ] Add `disabled={!isAuthValid || loading}` and muted `opacity-50 cursor-not-allowed` styles
-  - [ ] Render inline SVG spinner icon when `loading === true`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Add Form Validation & Loading Spinner to Auth Submit Buttons
+  - [x] Calculate `isAuthValid` based on mode (`signup` vs `signin`)
+  - [x] Add `disabled={!isAuthValid || loading}` and muted `opacity-50 cursor-not-allowed` styles
+  - [x] Render inline SVG spinner icon when `loading === true`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 2: Refactor Onboarding Page (`src/app/onboarding/page.tsx`) Step Validation
 
-- [ ] Task: Add Step-by-Step Validation & Loading Spinner to Onboarding Buttons
-  - [ ] Step 1 validation (`fullName`, `phone`)
-  - [ ] Step 2 validation (`nyscStatus`)
-  - [ ] Step 3 validation (`institution`, `fieldOfStudy`)
-  - [ ] Step 4 validation (`interests.length > 0`)
-  - [ ] Add `submitting` loading state to `finishOnboarding` button
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Add Step-by-Step Validation & Loading Spinner to Onboarding Buttons
+  - [x] Step 1 validation (`fullName`, `phone`)
+  - [x] Step 2 validation (`nyscStatus`)
+  - [x] Step 3 validation (`institution`, `fieldOfStudy`)
+  - [x] Step 4 validation (`interests.length > 0`)
+  - [x] Add `submitting` loading state to `finishOnboarding` button
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 3: End-to-End Build & Verification
 
-- [ ] Task: End-to-End Build Verification (`npm run build`)
-  - [ ] Verify 100% clean compilation of all 23 routes with zero TypeScript errors
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: End-to-End Build Verification (`npm run build`)
+  - [x] Verify 100% clean compilation of all 23 routes with zero TypeScript errors
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+

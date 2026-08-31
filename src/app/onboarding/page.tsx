@@ -86,6 +86,7 @@ function OnboardingContent() {
 
   const [fieldOfStudyOptions, setFieldOfStudyOptions] = useState<string[]>(FIELDS_OF_STUDY);
   const [customFieldOfStudy, setCustomFieldOfStudy] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetch("/api/options?category=field_of_study")
@@ -98,7 +99,27 @@ function OnboardingContent() {
       .catch(() => {});
   }, []);
 
+  const isStepValid = (() => {
+    if (step === 1) {
+      return Boolean(formData.fullName.trim() && formData.phone.trim());
+    }
+    if (step === 2) {
+      return Boolean(formData.nyscStatus);
+    }
+    if (step === 3) {
+      const fieldValid = formData.fieldOfStudy === "other"
+        ? Boolean(customFieldOfStudy.trim())
+        : Boolean(formData.fieldOfStudy.trim());
+      return Boolean(formData.institution.trim() && fieldValid);
+    }
+    if (step === 4) {
+      return formData.interests.length > 0;
+    }
+    return true;
+  })();
+
   const handleNext = () => {
+    if (!isStepValid || submitting) return;
     if (step < 4) setStep(s => s + 1);
     else finishOnboarding();
   };
@@ -108,6 +129,7 @@ function OnboardingContent() {
   };
 
   const finishOnboarding = async () => {
+    setSubmitting(true);
     let assignedRole: "pcm" | "serving" | "alumni" = "serving";
     let dbRole: "PCM" | "SERVING_CORPER" | "CDS_EXEC" | "EMPLOYER" | "LGA_INSPECTOR" | "ALUMNI" = "SERVING_CORPER";
 
@@ -441,10 +463,24 @@ function OnboardingContent() {
             <button
               type="button"
               onClick={handleNext}
-              className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-2 cursor-pointer font-display"
+              disabled={!isStepValid || submitting}
+              className={`px-8 py-3.5 text-white text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-2 font-display ${
+                isStepValid && !submitting
+                  ? "bg-emerald-600 hover:bg-emerald-700 cursor-pointer shadow-md shadow-emerald-900/20"
+                  : "bg-emerald-600/50 opacity-50 cursor-not-allowed"
+              }`}
             >
-              <span>{step === 4 ? "Complete Setup & Launch Dashboard" : "Continue"}</span>
-              <ArrowRight className="w-4 h-4" />
+              {submitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>SAVING PROFILE...</span>
+                </>
+              ) : (
+                <>
+                  <span>{step === 4 ? "Complete Setup & Launch Dashboard" : "Continue"}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
 

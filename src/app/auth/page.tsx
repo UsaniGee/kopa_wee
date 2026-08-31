@@ -293,13 +293,35 @@ function AuthPageContent() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group cursor-pointer mt-2"
-            >
-              <span>{mode === "signup" ? "CREATE FREE ACCOUNT" : "SIGN IN TO DASHBOARD"}</span>
-              <FiArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </button>
+            {(() => {
+              const isAuthValid = mode === "signup"
+                ? Boolean(fullName.trim() && email.trim() && password.trim())
+                : Boolean(email.trim() && password.trim());
+
+              return (
+                <button
+                  type="submit"
+                  disabled={!isAuthValid || loading}
+                  className={`w-full py-4 text-white font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 font-display ${
+                    isAuthValid && !loading
+                      ? "bg-emerald-600 hover:bg-emerald-700 cursor-pointer shadow-md shadow-emerald-900/20"
+                      : "bg-emerald-600/50 opacity-50 cursor-not-allowed"
+                  }`}
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>{mode === "signup" ? "CREATING ACCOUNT..." : "AUTHENTICATING..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{mode === "signup" ? "CREATE FREE ACCOUNT" : "SIGN IN TO DASHBOARD"}</span>
+                      <FiArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </>
+                  )}
+                </button>
+              );
+            })()}
           </form>
         </div>
 
