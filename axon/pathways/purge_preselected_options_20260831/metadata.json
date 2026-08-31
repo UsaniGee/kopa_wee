@@ -1,0 +1,8 @@
+{
+  "id": "purge_preselected_options_20260831",
+  "type": "Feature",
+  "status": "new",
+  "createdAt": "2026-08-31T17:28:00Z",
+  "updatedAt": "2026-08-31T17:28:00Z",
+  "description": "Purge all pre-selected/checked default items across the project, including setting packed: false for 100% of camp items and adding disabled placeholders to all select inputs."
+}
