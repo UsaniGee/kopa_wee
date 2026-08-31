@@ -1,0 +1,8 @@
+{
+  "id": "google_oauth_auth_20260831",
+  "type": "Feature",
+  "status": "new",
+  "createdAt": "2026-08-31T17:06:00Z",
+  "updatedAt": "2026-08-31T17:06:00Z",
+  "description": "Configure NextAuth v5 Google OAuth Provider, build /api/auth/[...nextauth] catch-all route, update Continue with Google button, and sync Google user accounts into Neon PostgreSQL."
+}
