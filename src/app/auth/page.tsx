@@ -89,16 +89,23 @@ function AuthPageContent() {
     }
   };
 
-  const handleGoogleAuth = () => {
-    localStorage.setItem("kopawee_auth_token", "google_token_" + Date.now());
-    if (mode === "signup") {
-      const nextPath = redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding";
-      router.push(nextPath);
-    } else {
-      const savedRole = localStorage.getItem("kopawee_active_role") || "serving";
-      localStorage.setItem("kopawee_active_role", savedRole);
-      const dest = redirectUrl ? getRouteForRole(redirectUrl, savedRole) : "/dashboard";
-      router.push(dest);
+  const handleGoogleAuth = async () => {
+    try {
+      setLoading(true);
+      // Synchronize session token and trigger standard NextAuth Google OAuth
+      const callbackUrl = mode === "signup"
+        ? (redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding")
+        : (redirectUrl ? getRouteForRole(redirectUrl, "serving") : "/dashboard");
+
+      localStorage.setItem("kopawee_auth_token", "google_oauth_token_" + Date.now());
+      localStorage.setItem("kopawee_user_name", "Google Corper");
+      localStorage.setItem("kopawee_active_role", "pcm");
+
+      // Redirect to NextAuth Google Provider endpoint
+      window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+    } catch (err) {
+      setErrorMsg("Google authentication failed. Please try again.");
+      setLoading(false);
     }
   };
 
