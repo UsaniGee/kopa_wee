@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRole } from "@/shared/context/RoleContext";
@@ -64,7 +64,7 @@ function OnboardingContent() {
     stream: "Stream I",
     institution: "",
     institutionState: "Lagos",
-    fieldOfStudy: "Computer Science / Software Engineering",
+    fieldOfStudy: "",
     knowsDeploymentState: false,
     deploymentState: "",
     hasCallUpLetter: false,
@@ -83,6 +83,20 @@ function OnboardingContent() {
     alumniState: "Lagos",
     industry: "Information Technology",
   });
+
+  const [fieldOfStudyOptions, setFieldOfStudyOptions] = useState<string[]>(FIELDS_OF_STUDY);
+  const [customFieldOfStudy, setCustomFieldOfStudy] = useState("");
+
+  useEffect(() => {
+    fetch("/api/options?category=field_of_study")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setFieldOfStudyOptions(data.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleNext = () => {
     if (step < 4) setStep(s => s + 1);
@@ -108,6 +122,30 @@ function OnboardingContent() {
       dbRole = "ALUMNI";
     }
 
+    let finalFieldOfStudy = formData.fieldOfStudy;
+
+    // If user chose "other", post the new course to the backend dynamic options table
+    if (formData.fieldOfStudy === "other" && customFieldOfStudy.trim()) {
+      finalFieldOfStudy = customFieldOfStudy.trim();
+      try {
+        await fetch("/api/options", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            category: "field_of_study",
+            value: finalFieldOfStudy,
+          }),
+        });
+      } catch (e) {
+        console.error("Failed to save custom field of study", e);
+      }
+    }
+
+    const updatedFormData = {
+      ...formData,
+      fieldOfStudy: finalFieldOfStudy,
+    };
+
     const userId = localStorage.getItem("kopawee_user_id");
 
     if (userId) {
@@ -118,10 +156,10 @@ function OnboardingContent() {
           body: JSON.stringify({
             userId,
             role: dbRole,
-            deployedState: formData.deploymentState || formData.serviceState,
-            lga: formData.ppaLGA,
+            deployedState: updatedFormData.deploymentState || updatedFormData.serviceState,
+            lga: updatedFormData.ppaLGA,
             stateCode: "LA/26A/1234",
-            ppaName: formData.ppaName,
+            ppaName: updatedFormData.ppaName,
           }),
         });
       } catch (err) {
@@ -130,7 +168,7 @@ function OnboardingContent() {
     }
 
     setRole(assignedRole);
-    localStorage.setItem("kopawee_user_profile", JSON.stringify(formData));
+    localStorage.setItem("kopawee_user_profile", JSON.stringify(updatedFormData));
     localStorage.setItem("kopawee_active_role", assignedRole);
     
     const dest = redirectUrl ? getRouteForRole(redirectUrl, assignedRole) : "/dashboard";
@@ -313,10 +351,30 @@ function OnboardingContent() {
                     onChange={(e) => setFormData({ ...formData, fieldOfStudy: e.target.value })}
                     className="w-full px-4 py-3 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs focus:outline-none focus:border-emerald-600"
                   >
-                    {FIELDS_OF_STUDY.map(f => (
+                    <option value="" disabled>Select Field of Study...</option>
+                    {fieldOfStudyOptions.map((f) => (
                       <option key={f} value={f}>{f}</option>
                     ))}
+                    <option value="other">Other (Specify)</option>
                   </select>
+
+                  {formData.fieldOfStudy === "other" && (
+                    <div className="pt-2 space-y-1 animate-fadeIn">
+                      <label className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest font-mono">
+                        Specify Custom Field of Study
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Cyber Security & Digital Forensics"
+                        value={customFieldOfStudy}
+                        onChange={(e) => setCustomFieldOfStudy(e.target.value)}
+                        className="w-full px-4 py-3 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-emerald-600 dark:border-emerald-500 text-[#121815] dark:text-white text-xs focus:outline-none"
+                      />
+                      <p className="text-[10px] text-slate-500">
+                        ✨ Your custom field will be saved to our backend database and available for future corpers!
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

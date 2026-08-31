@@ -156,3 +156,15 @@ model SOSAlert {
 
   @@index([state, status])
 }
+
+model FormOption {
+  id        String   @id @default(cuid())
+  category  String   // e.g. "field_of_study", "nysc_camp", "ppa_type"
+  value     String
+  label     String
+  createdAt DateTime @default(now())
+
+  @@unique([category, value])
+  @@index([category])
+}
+
