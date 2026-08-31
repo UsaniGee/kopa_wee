@@ -17,3 +17,4 @@
 - [x] **Pathway: Purge Mock Data & Dynamic Live User Flow** *Link: [index.md](./pathways/purge_dummy_data_20260831/index.md)*
 - [x] **Pathway: Fresh Auth & Onboarding Clean Slate** *Link: [index.md](./pathways/fresh_auth_clean_slate_20260831/index.md)*
 - [x] **Pathway: Google OAuth 2.0 Authentication Integration** *Link: [index.md](./pathways/google_oauth_auth_20260831/index.md)*
+- [ ] **Pathway: Dynamic Smart Form Options & Self-Learning Backend** *Link: [index.md](./pathways/dynamic_smart_options_20260831/index.md)*
