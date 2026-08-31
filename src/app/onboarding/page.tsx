@@ -68,7 +68,7 @@ function OnboardingContent() {
     knowsDeploymentState: false,
     deploymentState: "",
     hasCallUpLetter: false,
-    interests: ["Camp packing checklist", "Travel planning", "NYSC timeline", "AI assistant"],
+    interests: [] as string[],
 
     serviceState: "Lagos",
     serviceStage: "orientation_camp",

@@ -29,19 +29,19 @@ export interface CampItem {
 
 const DEFAULT_CAMP_ITEMS: CampItem[] = [
   // Documents
-  { id: "doc_1", name: "NYSC Call-Up Letter", category: "documents", qty: "3 colored copies", recommended: true, notes: "Do not laminate original call-up letter.", packed: true },
-  { id: "doc_2", name: "Green Card Form", category: "documents", qty: "3 colored copies", recommended: true, notes: "Printed directly from official NYSC portal.", packed: true },
+  { id: "doc_1", name: "NYSC Call-Up Letter", category: "documents", qty: "3 colored copies", recommended: true, notes: "Do not laminate original call-up letter.", packed: false },
+  { id: "doc_2", name: "Green Card Form", category: "documents", qty: "3 colored copies", recommended: true, notes: "Printed directly from official NYSC portal.", packed: false },
   { id: "doc_3", name: "Medical Fitness Certificate", category: "documents", qty: "Original + 2 copies", recommended: true, notes: "Issued by government or military hospital.", packed: false },
-  { id: "doc_4", name: "Degree / HND Certificate or Statement of Result", category: "documents", qty: "Original + 4 copies", recommended: true, notes: "Must be signed by university registrar.", packed: true },
+  { id: "doc_4", name: "Degree / HND Certificate or Statement of Result", category: "documents", qty: "Original + 4 copies", recommended: true, notes: "Must be signed by university registrar.", packed: false },
   { id: "doc_5", name: "Passport Photographs", category: "documents", qty: "8 – 12 copies", recommended: true, notes: "White background, recent photo.", packed: false },
-  { id: "doc_6", name: "Clear Document File Folder", category: "documents", qty: "1 jacket file", recommended: true, notes: "Keeps documents safe during registration line.", packed: true },
+  { id: "doc_6", name: "Clear Document File Folder", category: "documents", qty: "1 jacket file", recommended: true, notes: "Keeps documents safe during registration line.", packed: false },
 
   // White Camp Wear
   { id: "wear_1", name: "Plain White Round-Neck T-Shirts", category: "wear", qty: "2 – 4 extra pairs", recommended: true, notes: "NYSC issues 2, but extra white tees are essential.", packed: false },
   { id: "wear_2", name: "Plain White Shorts", category: "wear", qty: "2 – 4 extra pairs", recommended: true, notes: "No colored logos or pockets permitted on parade ground.", packed: false },
   { id: "wear_3", name: "Plain White Socks", category: "wear", qty: "3 – 6 pairs", recommended: true, notes: "All-white socks without colored stripes.", packed: false },
   { id: "wear_4", name: "Plain White Rubber Shoes / Tennis Shoes", category: "wear", qty: "1 – 2 pairs", recommended: true, notes: "Lightweight and easy to wash after morning drills.", packed: false },
-  { id: "wear_5", name: "Waist Pouch", category: "wear", qty: "1 pouch", recommended: true, notes: "Black or dark pouch to hold money, phone, and key.", packed: true },
+  { id: "wear_5", name: "Waist Pouch", category: "wear", qty: "1 pouch", recommended: true, notes: "Black or dark pouch to hold money, phone, and key.", packed: false },
 
   // Footwear & Disclaimer
   { 
@@ -62,9 +62,9 @@ const DEFAULT_CAMP_ITEMS: CampItem[] = [
   { id: "bed_3", name: "Light Blanket or Fleece", category: "bedding", qty: "1 blanket", recommended: true, notes: "For chilly early morning drills and cool nights.", packed: false },
 
   // Essentials
-  { id: "ess_1", name: "High-Capacity Power Bank", category: "essentials", qty: "10,000 – 30,000 mAh", recommended: true, notes: "Limited charging points in camp hostels.", packed: true },
+  { id: "ess_1", name: "High-Capacity Power Bank", category: "essentials", qty: "10,000 – 30,000 mAh", recommended: true, notes: "Limited charging points in camp hostels.", packed: false },
   { id: "ess_2", name: "Rechargeable Mini Fan / Torchlight", category: "essentials", qty: "1 piece", recommended: true, notes: "For night lights and warm hostel rooms.", packed: false },
-  { id: "ess_3", name: "Small Padlock & Keys", category: "essentials", qty: "2 padlocks", recommended: true, notes: "For your travelling bag and hostel locker.", packed: true },
+  { id: "ess_3", name: "Small Padlock & Keys", category: "essentials", qty: "2 padlocks", recommended: true, notes: "For your travelling bag and hostel locker.", packed: false },
 ];
 
 export default function CampEssentialsChecklist() {
