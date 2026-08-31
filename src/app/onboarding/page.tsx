@@ -53,16 +53,16 @@ function OnboardingContent() {
 
   // Form State
   const [formData, setFormData] = useState({
-    fullName: "Chidi Okonkwo",
-    displayName: "Corper Chidi",
-    email: "chidi.okonkwo@example.ng",
-    phone: "08012345678",
+    fullName: "",
+    displayName: "",
+    email: "",
+    phone: "",
     nyscStatus: "prospective_corps_member" as "prospective_corps_member" | "serving_corps_member" | "alumni",
 
     pcmStage: "registered",
     expectedBatch: "Batch A 2026",
     stream: "Stream I",
-    institution: "University of Lagos",
+    institution: "",
     institutionState: "Lagos",
     fieldOfStudy: "Computer Science / Software Engineering",
     knowsDeploymentState: false,
@@ -72,14 +72,14 @@ function OnboardingContent() {
 
     serviceState: "Lagos",
     serviceStage: "orientation_camp",
-    orientationCamp: "Iyana Ipaja Permanent Orientation Camp, Lagos",
-    ppaName: "Grace High School",
+    orientationCamp: "",
+    ppaName: "",
     ppaType: "School",
     ppaLGA: "Ikeja",
-    ppaArea: "Opebi",
+    ppaArea: "",
     lookingForAccommodation: true,
 
-    serviceYear: "2023",
+    serviceYear: "2026",
     alumniState: "Lagos",
     industry: "Information Technology",
   });

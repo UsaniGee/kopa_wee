@@ -58,12 +58,28 @@ function AuthPageContent() {
         const nextPath = redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding";
         router.push(nextPath);
       } else {
-        // Sign in flow — fetch user profile or create session
-        localStorage.setItem("kopawee_auth_token", "jwt_token_" + Date.now());
-        localStorage.setItem("kopawee_user_email", email);
-        const savedRole = localStorage.getItem("kopawee_active_role") || "serving";
-        localStorage.setItem("kopawee_active_role", savedRole);
-        const dest = redirectUrl ? getRouteForRole(redirectUrl, savedRole) : "/dashboard";
+        // Sign in flow — authenticate against Neon PostgreSQL API
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+          setErrorMsg(data.error || "Invalid email or password");
+          setLoading(false);
+          return;
+        }
+
+        const user = data.data;
+        localStorage.setItem("kopawee_user_id", user.id);
+        localStorage.setItem("kopawee_auth_token", "jwt_token_" + user.id);
+        localStorage.setItem("kopawee_user_email", user.email);
+        localStorage.setItem("kopawee_user_name", user.name);
+        localStorage.setItem("kopawee_active_role", user.activeRole || "serving");
+
+        const dest = redirectUrl ? getRouteForRole(redirectUrl, user.activeRole) : "/dashboard";
         router.push(dest);
       }
     } catch (err) {
