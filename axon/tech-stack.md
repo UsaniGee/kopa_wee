@@ -7,7 +7,7 @@
 
 ## Styling & Design System
 - **CSS Framework:** TailwindCSS v4 (`@tailwindcss/postcss`)
-- **Icons & Assets:** Lucide React / SVG Icons
+- **Icons & Assets:** React Icons (`react-icons/fi`, `react-icons/hi2`, `react-icons/tb`, `react-icons/lu`)
 - **Theme Support:** Dark & Light Mode via CSS variables and Tailwind classes
 
 ## Client-Side & Offline Data
@@ -15,6 +15,6 @@
 - **Offline Vault & Storage:** IndexedDB / LocalStorage for cached documents, SOS data, and local state
 
 ## Package Manager & Tooling
-- **Package Manager:** pnpm
+- **Package Manager:** pnpm / npm
 - **Linter & Code Quality:** ESLint 9 (`eslint-config-next`)
 - **Runtime Target:** Modern web browsers & mobile web PWA readiness

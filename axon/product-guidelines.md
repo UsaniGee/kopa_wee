@@ -6,35 +6,39 @@
 
 ## Design System & Visual Aesthetics
 
-### Aesthetic Style: Modern Flat Design (Zero Borders)
-- **Zero Structural Borders:** No outline border lines (`border-0` / no `border-*` classes). Content hierarchy and section separation are driven entirely by alternating background color bands, soft surface fills, and typography.
-- **Geometry:** Sharp square edges (`rounded-none`).
+### Aesthetic Style: Modern Soft-Edge & Bordered Design
+- **Intentional Structural Borders:** Use subtle border strokes (`border border-slate-200`, `border-emerald-500/20`, or `1px solid var(--card-border)`) on inputs, cards, containers, and dividers to ensure clear visual separation and structure.
+- **Base Geometry & Radius Standard:** Baseline `border-radius: 0.75rem` (`rounded-xl`) is enforced on native buttons, inputs, selects, textareas, and cards via `@layer base` in `src/app/globals.css`.
+- **Hierarchy of Corner Radii:**
+  - `rounded-xl` (`0.75rem`): Form controls, inputs, dropdown options, and compact card items.
+  - `rounded-2xl` / `rounded-3xl` (`1rem` - `1.5rem`): Hero containers, auth & onboarding cards, primary dashboard overview panels.
+  - `rounded-full`: Compact action pills, status badges, avatar rings, and step indicators.
 
-### Color Palette (Canonical — enforced across all components)
-| Role | Color | Tailwind Token | Notes |
-|------|-------|----------------|-------|
-| Primary accent | Emerald green | `emerald-500` (`#10b981`) | Buttons, active progress indicators, feature highlights |
-| Primary dark | Emerald dark | `emerald-600` (`#059669`) | Hover states on green elements |
-| Page Surface (Light) | White | `bg-white` | Primary content section background |
-| Alternating Surface | Soft Slate | `bg-slate-50` / `bg-slate-100` | Section background banding & card contrast fills |
-| Accent Surface | Soft Emerald | `bg-emerald-50` / `bg-emerald-100` | Selected card state & highlighted journey callouts |
-| Dark Surface | Deep Black | `bg-black` | Header scrolled state, hero CTA, footer, primary text |
-| Text Main | Black | `text-black` | Headings & primary body copy |
-| Text Muted | Slate-500 | `text-slate-500` | Subtitles & secondary labels |
+### Color Palette & CSS Tokens (`src/app/globals.css`)
+| Role | Color | CSS / Tailwind Token | Hex / Value | Notes |
+|------|-------|----------------------|-------------|-------|
+| Primary NYSC Accent | Active Green | `--nysc-green` / `emerald-500` | `#66bb6a` | Action buttons, progress bars, highlights |
+| Primary Light Green | Mint Light | `--nysc-green-light` / `emerald-100` | `#a5d6a7` | Selected state fills & soft callouts |
+| Primary Dark Green | Forest Green | `--nysc-green-dark` / `emerald-800` | `#1b5e20` | Headings & dark surface fills |
+| Page Surface (Light) | Pure White | `--color-background` / `bg-white` | `#ffffff` | Primary background |
+| Pale Mint Surface | Soft Mint | `--color-surface` / `slate-50` | `#e8f5e9` | Alternating section fills & card contrast |
+| Border Stroke Light | Subtle Green-Slate | `--color-border` / `border-slate-200` | `rgba(27, 94, 32, 0.2)` | Card, input, & table divider borders |
+| Card Border Glass | Translucent Green | `--card-border` | `rgba(27, 94, 32, 0.12)` | Glassmorphism card borders |
 
-### Component Hierarchy
-- **Primary Action Button:** `bg-emerald-500 hover:bg-emerald-600 text-white` — solid green fill with hover arrow translation.
-- **Secondary Action Button:** `bg-slate-100 text-black hover:bg-black hover:text-white` (on light surfaces) or `bg-white/20 text-white hover:bg-white hover:text-black` (on dark/hero surfaces) — flat solid contrast fills without outlines.
-- **Cards & Boxes:** Flat surface fills (`bg-slate-100`, `bg-emerald-100`, `bg-white` with soft shadow) — zero border lines.
-- **Form Inputs:** `bg-slate-100 text-black focus:bg-slate-200 focus:ring-2 focus:ring-emerald-500` — borderless flat inputs.
-- **Badges:** Soft solid fills (`bg-emerald-100 text-emerald-800`, `bg-slate-200 text-black`, `bg-black text-white`) — borderless.
+### Component Hierarchy & Styling Guidelines
+- **Form Inputs & Selects:** `bg-slate-100 border border-slate-200 text-black rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500` — clear border strokes with focus glow.
+- **Primary Action Buttons:** `bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-md` — sharp green fill with hover state.
+- **Secondary Buttons:** `bg-slate-100 hover:bg-slate-200 text-black border border-slate-200 rounded-xl` — soft mint/slate fill with subtle border outline.
+- **Cards & Panels:** Fills (`bg-white`, `bg-slate-50`, `bg-emerald-50`) with explicit border strokes (`border border-slate-200` or `1px solid var(--card-border)`) and `rounded-2xl` corners.
+- **Badges:** Soft solid fills (`bg-emerald-100 text-emerald-800`, `bg-slate-200 text-black`, `bg-black text-white`) with optional subtle border outlines.
 
 ### Navigation & Micro-Interactions
 - **Tumbling Text-Roll Hover:** Double-layer text-roll hover animation (`.text-roll-wrapper`) on all Navbar and Footer links.
 - **Diagonal Arrow Motion:** Action buttons feature right/upward arrow translations on hover (`group-hover:translate-x-1`).
+- **Role Switcher & Jump Flow:** Role selection automatically redirects users to the first tab of their active role view.
+- **Onboarding Progress:** 4-step progressive wizard with step-back navigation and stage-gated field visibility (eliminating decision fatigue).
 
 ### Accessibility Standards
-- High text-to-background contrast across light, slate, emerald, and dark surfaces.
+- High text-to-background contrast across light, mint, emerald, and dark surfaces.
 - Dialogs: `role="dialog"`, `aria-modal="true"`, `aria-label`.
-- Keyboard navigation: Escape key closes modals; Enter/Space activates custom role radio cards.
-- Body scroll locked while modals are open.
+- Keyboard navigation: Escape key closes modals; Enter/Space activates custom role cards.

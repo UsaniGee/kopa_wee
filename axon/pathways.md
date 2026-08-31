@@ -1,11 +1,16 @@
 # Pathways Registry
 
 ---
-- [~] **Pathway: KopaWee Frontend MVP** *Link: [index.md](./pathways/kopa_wee_frontend_mvp_20260812/index.md)*
+- [x] **Pathway: KopaWee Frontend MVP** *Link: [plan.md](./pathways/kopa_wee_frontend_mvp_20260812/plan.md)*
 - [x] **Pathway: Hero Layout Fix** *Link: [index.md](./pathways/hero_layout_fix_20260819/index.md)*
 - [x] **Pathway: Modal & Carousel Fix** *Link: [index.md](./pathways/modal_carousel_fix_20260821/index.md)*
 - [x] **Pathway: Rally Padel Inspired Design Refactor** *Link: [index.md](./pathways/rally_padel_refactor_20260821/index.md)*
 - [x] **Pathway: Flat Borderless Design Refactor** *Link: [index.md](./pathways/flat_design_refactor_20260821/index.md)*
 - [x] **Pathway: Role-Based Dashboards & App Modules** *Link: [index.md](./pathways/role_dashboards_20260821/index.md)*
-- [x] **Pathway: Progressive Onboarding, NYSC Journey Lifecycle & Camp Essentials** *Link: [index.md](./pathways/progressive_onboarding_lifecycle_20260821/index.md)*
-- [~] **Pathway: Flat Borderless Design Sweep (Full App Audit)** *Link: [plan.md](./pathways/flat_borderless_sweep_20260821/plan.md)*
+- [x] **Pathway: Progressive Onboarding, NYSC Journey Lifecycle & Camp Essentials** *Link: [plan.md](./pathways/progressive_onboarding_lifecycle_20260821/plan.md)*
+- [x] **Pathway: Flat Borderless Design Sweep (Full App Audit)** *Link: [plan.md](./pathways/flat_borderless_sweep_20260821/plan.md)*
+- [x] **Pathway: Modern Soft-Edge & Bordered Design System Alignment** *Link: [index.md](./pathways/soft_edge_bordered_design_20260827/index.md)*
+- [x] **Pathway: Comprehensive Codebase & Documentation Alignment Audit** *Link: [index.md](./pathways/comprehensive_alignment_audit_20260827/index.md)*
+- [x] **Pathway: Smart AI Engine, Location Recommendations & Core Platform Interactivity** *Link: [index.md](./pathways/smart_ai_location_engine_20260827/index.md)*
+- [~] **Pathway: Replace Lucide React with React Icons Dependency Migration** *Link: [index.md](./pathways/replace_lucide_with_react_icons_20260827/index.md)*
+- [ ] **Pathway: Backend API, Prisma PostgreSQL Database & NextAuth RBAC Infrastructure** *Link: [index.md](./pathways/backend_api_20260831/index.md)*
