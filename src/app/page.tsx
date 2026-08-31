@@ -5,18 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/shared/components/Navbar";
 import Footer from "@/shared/components/Footer";
-import RoleOnboardingModal from "@/shared/components/RoleOnboardingModal";
 import HeroCarousel from "@/shared/components/HeroCarousel";
 import { services } from "@/shared/data/services";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Zap,
-} from "lucide-react";
+import { FiArrowRight, FiCheckCircle } from "react-icons/fi";
+
+const ArrowRight = FiArrowRight;
+const CheckCircle2 = FiCheckCircle;
 
 export default function LandingPage() {
-  const [roleModalOpen, setRoleModalOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string>("serving");
   const [selectedService, setSelectedService] = useState<number>(0);
   const [navOverHero, setNavOverHero] = useState(true);
 
@@ -35,37 +31,33 @@ export default function LandingPage() {
   const currentService = services[selectedService];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-slate-900 selection:bg-[var(--nysc-green)] selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-slate-100 selection:bg-emerald-600 selection:text-white transition-colors duration-500">
       <Navbar
         overHero={navOverHero}
-        onOpenRoleModal={(role) => {
-          if (role) setSelectedRole(role);
-          setRoleModalOpen(true);
-        }}
+        onOpenRoleModal={() => {}}
       />
 
       <main className="flex-1">
-        {/* STORY CAROUSEL HERO */}
+        {/* HERO CAROUSEL */}
         <HeroCarousel
-          onOpenRoleModal={() => setRoleModalOpen(true)}
           onSlideChange={setSelectedService}
         />
 
-        {/* Proof strip — below hero, not inside first viewport */}
-        <section className="py-10 bg-slate-50">
-          <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* PROOF STRIP — MINIMALIST BORDERED GRID */}
+        <section className="py-12 bg-[#dcece1] dark:bg-[#121a16] border-y border-slate-300/60 dark:border-slate-800">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { value: "50,000+", label: "Corps Members" },
-              { value: "36", label: "States + FCT" },
-              { value: "8", label: "Mini-Products" },
-              { value: "100%", label: "Offline Ready" },
+              { value: "50,000+", label: "Active Corps Members" },
+              { value: "36", label: "States + FCT Covered" },
+              { value: "8", label: "Core Mini-Products" },
+              { value: "100%", label: "Offline Ready Vault" },
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="px-4 py-6 bg-white text-center shadow-sm"
+                className="px-6 py-8 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-left"
               >
-                <span className="block text-3xl font-black text-black">{stat.value}</span>
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+                <span className="block text-4xl font-bold font-display text-[#121815] dark:text-white tracking-tight">{stat.value}</span>
+                <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-[0.2em] mt-1 block">
                   {stat.label}
                 </span>
               </div>
@@ -73,72 +65,74 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* JOURNEY INTRO STRIP */}
-        <section className="py-16 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
-            <span className="text-xs font-black uppercase tracking-[0.25em] text-emerald-800 bg-emerald-100 px-3 py-1 inline-block">
-              • The Corper&apos;s Journey
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight">
+        {/* JOURNEY INTRO SECTION */}
+        <section className="py-24 bg-[#eaf5ed] dark:bg-[#0a0f0d]">
+          <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
+            <div className="inline-flex items-center gap-2 border-b border-emerald-600 pb-1">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-800 dark:text-emerald-300 font-display">
+                The Corper&apos;s Journey
+              </span>
+            </div>
+            <h2 className="text-4xl sm:text-6xl font-medium text-[#121815] dark:text-white tracking-tight leading-[1.05] font-display">
               From call-up letter to POP —{" "}
-              <span className="text-emerald-600">we walk every step with you</span>
+              <span className="text-emerald-700 dark:text-emerald-400 italic">we walk every step with you</span>
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              KopaWee isn&apos;t just another app. It&apos;s the story of your service year — camp,
-              travel, housing, clearance, marketplace, PPA, CDS, and beyond.
+            <p className="text-base sm:text-lg text-slate-700 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              KopaWee is a purposeful companion designed for every stage of your service year — camp, travel safety, housing, LGA clearance, marketplace, PPA logbook, and CDS.
             </p>
           </div>
         </section>
 
-        {/* SERVICES BREAKDOWN SECTION */}
+        {/* SERVICES / CHAPTERS BREAKDOWN SECTION */}
         <section
           id="services"
-          className="py-20 bg-slate-50"
+          className="relative bg-[#dcece1] dark:bg-[#121a16] py-24 sm:py-32 border-t border-slate-300/60 dark:border-slate-800"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center text-center space-y-4 mb-16">
-              <span className="text-xs font-black uppercase tracking-[0.25em] text-black bg-slate-200 px-3 py-1">
-                • 8 Chapters · 8 Mini-Products
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight">
-                Your Service Year, Chapter by Chapter
-              </h2>
-              <p className="text-base text-slate-600 max-w-2xl">
-                Each module is a chapter in your NYSC story — independent, but connected through one app.
-              </p>
+          <div className="mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16">
+            <div className="mb-16 grid gap-8 lg:grid-cols-12 lg:items-end">
+              <div className="lg:col-span-7 space-y-3">
+                <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-800 dark:text-emerald-300 font-display">
+                  8 Chapters · 8 Mini-Products
+                </span>
+                <h2 className="text-4xl sm:text-6xl font-medium tracking-tight text-[#121815] dark:text-white leading-[1.02] font-display">
+                  Your Service Year, Chapter by Chapter
+                </h2>
+              </div>
+              <div className="lg:col-span-5">
+                <p className="text-base leading-relaxed text-slate-700 dark:text-slate-300">
+                  Each module functions as an independent mini-product tailored strictly to your active role — providing complete clarity without clutter.
+                </p>
+              </div>
             </div>
 
-            {/* Story timeline on desktop */}
-            <div className="hidden lg:flex items-center justify-between mb-12 px-4 overflow-x-auto gap-1">
+            {/* Story timeline chapter selector */}
+            <div className="mb-12 flex items-center justify-between gap-3 overflow-x-auto pb-4 border-b border-slate-300/60 dark:border-slate-800">
               {services.map((svc, i) => {
                 const IconComp = svc.icon;
+                const isSelected = selectedService === i;
                 return (
                   <button
                     key={svc.id}
                     onClick={() => setSelectedService(i)}
-                    className={`flex flex-col items-center gap-3 min-w-[72px] group transition-all ${
-                      selectedService === i ? "opacity-100" : "opacity-40 hover:opacity-100"
+                    className={`flex items-center gap-3 px-5 py-3 border transition-all cursor-pointer whitespace-nowrap ${
+                      isSelected
+                        ? "bg-emerald-700 text-white border-emerald-700"
+                        : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800 hover:border-emerald-600"
                     }`}
                   >
-                    <div
-                      className={`w-10 h-10 flex items-center justify-center transition-all ${
-                        selectedService === i ? "bg-black text-white shadow-md" : "bg-slate-200 text-slate-600"
-                      }`}
-                    >
-                      <IconComp className="w-4 h-4" />
-                    </div>
-                    <span className={`text-[10px] font-bold text-center leading-tight ${selectedService === i ? "text-black" : "text-slate-400"}`}>
-                      Ch.{String(i + 1).padStart(2, "0")}
+                    <IconComp className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-wider font-display">
+                      Ch.{String(i + 1).padStart(2, "0")} — {svc.id}
                     </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Interactive Service Selector & Feature Preview */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Service Tabs */}
-              <div className="lg:col-span-5 flex flex-col gap-3">
+            {/* Interactive Feature Preview Grid */}
+            <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12">
+              {/* Left Column: Chapter List */}
+              <div className="flex flex-col gap-3 lg:col-span-5">
                 {services.map((svc, index) => {
                   const IconComp = svc.icon;
                   const isSelected = selectedService === index;
@@ -146,82 +140,70 @@ export default function LandingPage() {
                     <button
                       key={svc.id}
                       onClick={() => setSelectedService(index)}
-                      className={`w-full text-left p-4 transition-all flex items-start gap-4 ${
+                      className={`w-full text-left p-6 border transition-all flex items-start gap-4 cursor-pointer ${
                         isSelected
-                          ? "bg-emerald-100 text-black shadow-md"
-                          : "bg-white hover:bg-slate-100 text-black"
+                          ? "bg-[#eaf5ed] dark:bg-[#0a0f0d] border-emerald-600 dark:border-emerald-500 shadow-sm"
+                          : "bg-transparent border-slate-300/50 dark:border-slate-800/80 hover:border-slate-400"
                       }`}
                     >
-                      <div className={`p-3 text-white shrink-0 shadow-sm ${isSelected ? "bg-black" : "bg-slate-400"}`}>
+                      <div className={`p-3 text-white ${isSelected ? "bg-emerald-700" : "bg-slate-700 dark:bg-slate-800"}`}>
                         <IconComp className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-display">
                             {svc.storyChapter} · {svc.category}
                           </span>
                           {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
                         </div>
-                        <h3 className="text-sm font-black text-black">{svc.storyHeadline}</h3>
-                        <p className="text-xs text-slate-500 line-clamp-1">{svc.tagline}</p>
+                        <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">{svc.storyHeadline}</h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mt-1">{svc.tagline}</p>
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Right Column: Story Preview with Image */}
-              <div className="lg:col-span-7 space-y-4 sticky top-28">
-                {/* Story image banner */}
-                <div className="service-image-card relative h-52 sm:h-64 overflow-hidden shadow-2xl">
+              {/* Right Column: Active Chapter Detail Panel */}
+              <div className="space-y-6 lg:sticky lg:top-28 lg:col-span-7">
+                {/* Story Image */}
+                <div className="relative h-72 sm:h-96 overflow-hidden border border-slate-300/60 dark:border-slate-800 shadow-md">
                   <Image
                     src={currentService.image}
                     alt={currentService.imageAlt}
                     fill
                     unoptimized
-                    sizes="(max-width: 1024px) 100vw, 60vw"
-                    className="object-cover object-center"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-center filter brightness-[0.97]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#121815]/80 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 text-white">
+                    <span className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-emerald-300">
                       {currentService.storyChapter}
                     </span>
-                    <h3 className="text-xl sm:text-2xl font-black text-white mt-1 leading-tight">
+                    <h3 className="text-2xl sm:text-3xl font-medium text-white mt-1 font-display leading-tight">
                       {currentService.storyHeadline}
                     </h3>
                   </div>
                 </div>
 
-                {/* Detail card */}
-                <div className="p-6 sm:p-8 bg-white text-black space-y-6 shadow-md">
-                  <div className="flex items-center gap-3 pb-4 bg-slate-50 p-4">
-                    <div className="p-3 bg-black text-white">
-                      <currentService.icon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-black px-2 py-0.5 text-white bg-black uppercase tracking-wider">
-                        {currentService.category}
-                      </span>
-                      <h3 className="text-lg font-black text-black mt-1">{currentService.title}</h3>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-slate-700 leading-relaxed italic bg-emerald-50 p-4">
+                {/* Chapter Description & Capabilities */}
+                <div className="p-8 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 space-y-6">
+                  <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 italic border-l-2 border-emerald-600 pl-4 py-1">
                     &ldquo;{currentService.storyNarrative}&rdquo;
                   </p>
 
-                  <p className="text-sm text-slate-600 leading-relaxed">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                     {currentService.description}
                   </p>
 
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-black text-black uppercase tracking-wider">Key Capabilities</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-xs font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display">Key Capabilities</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {currentService.highlights.map((hl, i) => (
                         <div
                           key={i}
-                          className="flex items-center gap-2 text-xs text-slate-800 p-3 bg-slate-100 font-semibold"
+                          className="flex items-center gap-2.5 text-xs text-slate-800 dark:text-slate-200 p-3 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/40 dark:border-slate-800"
                         >
                           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>{hl}</span>
@@ -230,31 +212,14 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="pt-4">
-                    <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider mb-3">
-                      Live Experience Preview
-                    </h4>
-                    <div className="p-4 bg-slate-100 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-black uppercase tracking-wider">
-                          {currentService.previewContent.badge}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-mono">Live Demo State</span>
-                      </div>
-                      <div>
-                        <h5 className="font-bold text-sm text-black">{currentService.previewContent.title}</h5>
-                        <p className="text-xs text-slate-500">{currentService.previewContent.detail}</p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setSelectedRole("serving");
-                          setRoleModalOpen(true);
-                        }}
-                        className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs transition-colors flex items-center justify-center gap-2"
-                      >
-                        {currentService.previewContent.action} <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                  <div className="pt-4 border-t border-slate-300/60 dark:border-slate-800">
+                    <Link
+                      href="/auth?mode=signup"
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-[0.18em] transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span>{currentService.previewContent.action}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -262,150 +227,54 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* MODULAR "LEGO" ARCHITECTURE SECTION */}
-        <section id="architecture" className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* 4-YEAR ROLLOUT ROADMAP */}
+        <section id="roadmap" className="py-24 bg-[#dcece1] dark:bg-[#121a16] border-t border-slate-300/60 dark:border-slate-800">
+          <div className="max-w-[360 mx-auto px-6 sm:px-10 lg:px-16">
             <div className="flex flex-col items-center text-center space-y-4 mb-16">
-              <span className="text-xs font-black uppercase tracking-[0.25em] text-black bg-slate-100 px-3 py-1">
-                • System Architecture
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-800 dark:text-emerald-300 font-display">
+                Phased Strategy
               </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight">
-                Built Like LEGO Pieces
+              <h2 className="text-4xl sm:text-6xl font-medium text-[#121815] dark:text-white tracking-tight font-display">
+                The 4-Year Scaling Roadmap
               </h2>
-              <p className="text-base text-slate-600 max-w-2xl">
-                Instead of one giant monolithic app, KopaWee provides a unified core infrastructure that powers independent mini-products.
-              </p>
-            </div>
-
-            <div className="p-8 sm:p-12 bg-slate-50 space-y-12 shadow-md">
-              <div className="space-y-4 text-center">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
-                  Shared LEGO Infrastructure Foundation
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                  {["Authentication", "Notification Engine", "Location & GPS", "P2P Payments", "Messaging System", "Document Vault"].map(
-                    (infra, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 bg-white text-black text-xs font-black shadow-sm"
-                      >
-                        {infra}
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-center text-black">
-                <div className="w-0.5 h-10 bg-black" />
-              </div>
-
-              <div className="space-y-4 text-center">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
-                  Independent Mini-Product Modules
-                </span>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                  {[
-                    "Companion", "Safety", "Community", "Workplace", "Marketplace", "CDS Hub", "LGA Admin"
-                  ].map((mod, i) => (
-                    <div key={i} className="p-3 bg-emerald-500 text-white text-xs font-black shadow-sm">
-                      {mod}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="text-center pt-4">
-                <p className="text-xs text-slate-600 max-w-xl mx-auto font-medium">
-                  &ldquo;Nothing breaks because each module is independent. The user only sees what they need based on their active role.&rdquo;
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4-YEAR ROLLOUT ROADMAP SECTION */}
-        <section id="roadmap" className="py-20 bg-slate-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center text-center space-y-4 mb-16">
-              <span className="text-xs font-black uppercase tracking-[0.25em] text-black bg-slate-200 px-3 py-1">
-                • Scaling Strategy
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight">
-                The 4-Year Rollout Plan
-              </h2>
-              <p className="text-base text-slate-600 max-w-2xl">
-                A phased deployment strategy ensuring adoption, reliability, and eventual official integration.
-              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="p-6 bg-emerald-100 space-y-4 shadow-sm">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-emerald-800 block">Year 1 (MVP)</span>
-                <h3 className="text-lg font-black text-black">Companion + Safety + Marketplace</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Focus on 50,000 corps members. Smart clearance alerts, peer-to-peer marketplace, travel SOS, and housing finder.
-                </p>
-                <div className="pt-2 text-xs font-black text-black">
-                  Target: 50,000 Users
+              {[
+                { year: "Year 1 (MVP)", title: "Companion + Safety + Marketplace", text: "50,000 corps members across 36 states with clearance reminders and P2P gear trade.", target: "50,000 Corps Members" },
+                { year: "Year 2", title: "Workplace Module", text: "PPA employers join to streamline digital clock-in attendance and clearance leave approvals.", target: "2,500 PPAs Registered" },
+                { year: "Year 3", title: "CDS Community Module", text: "Community Development Service groups onboard for barcode attendance and dues collection.", target: "Nationwide CDS Adoption" },
+                { year: "Year 4", title: "Official Integration", text: "Direct API synchronization with NYSC Directorate HQ for automated biometric verification.", target: "Directorate Partnership" },
+              ].map((item, idx) => (
+                <div key={idx} className="p-8 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 space-y-4">
+                  <span className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400 block">{item.year}</span>
+                  <h3 className="text-lg font-bold text-[#121815] dark:text-white font-display">{item.title}</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{item.text}</p>
+                  <div className="pt-3 border-t border-slate-300/40 dark:border-slate-800 text-xs font-semibold text-[#121815] dark:text-white">
+                    {item.target}
+                  </div>
                 </div>
-              </div>
-
-              <div className="p-6 bg-white space-y-4 shadow-sm">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-black block">Year 2</span>
-                <h3 className="text-lg font-black text-black">Workplace Module</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  PPAs (Employers) join the platform to manage corps member attendance, leave applications, and monthly reviews.
-                </p>
-                <div className="pt-2 text-xs font-bold text-slate-500">
-                  Target: 2,500 PPAs
-                </div>
-              </div>
-
-              <div className="p-6 bg-white space-y-4 shadow-sm">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-black block">Year 3</span>
-                <h3 className="text-lg font-black text-black">CDS Community Module</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Community Development Service groups onboard for attendance registers, dues tracking, and project management.
-                </p>
-                <div className="pt-2 text-xs font-bold text-slate-500">
-                  Nationwide CDS Expansion
-                </div>
-              </div>
-
-              <div className="p-6 bg-white space-y-4 shadow-sm">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-black block">Year 4</span>
-                <h3 className="text-lg font-black text-black">Official NYSC Integration</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Direct API integrations with NYSC Directorate HQ for automated biometric verification and clearance synchronization.
-                </p>
-                <div className="pt-2 text-xs font-bold text-slate-500">
-                  Government Partnership
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* CORPER VALUE & SAVINGS CALCULATOR */}
-        <section id="calculator" className="py-20 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="p-8 sm:p-12 bg-slate-100 text-black space-y-8 shadow-md">
+        {/* CORPER VALUE CALCULATOR */}
+        <section id="calculator" className="py-24 bg-[#eaf5ed] dark:bg-[#0a0f0d]">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="p-8 sm:p-12 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-8">
               <div className="text-center space-y-2">
-                <span className="text-xs font-black uppercase tracking-[0.25em] text-emerald-800 bg-emerald-100 px-3 py-1 inline-block">
-                  • Interactive Impact Quiz
+                <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-800 dark:text-emerald-300 font-display">
+                  Interactive Impact Quiz
                 </span>
-                <h3 className="text-2xl sm:text-4xl font-black text-black">Estimate Your Service Year Savings</h3>
-                <p className="text-xs sm:text-sm text-slate-600">
-                  See how KopaWee saves you time, money on housing/furniture, and clearance stress.
-                </p>
+                <h3 className="text-3xl sm:text-4xl font-medium text-[#121815] dark:text-white font-display">Estimate Your Service Year Impact</h3>
               </div>
 
               <div className="space-y-6 max-w-xl mx-auto">
                 <div>
                   <div className="flex justify-between text-xs font-bold mb-2">
-                    <span className="text-slate-600">Monthly Allowance (Allawee)</span>
-                    <span className="text-black font-black">₦{monthlyAllowance.toLocaleString()}</span>
+                    <span className="text-slate-600 dark:text-slate-400">Monthly Allawee (₦)</span>
+                    <span className="text-[#121815] dark:text-white font-mono font-bold">₦{monthlyAllowance.toLocaleString()}</span>
                   </div>
                   <input
                     type="range"
@@ -414,14 +283,14 @@ export default function LandingPage() {
                     step="1000"
                     value={monthlyAllowance}
                     onChange={(e) => setMonthlyAllowance(Number(e.target.value))}
-                    className="w-full accent-emerald-500"
+                    className="w-full accent-emerald-600 cursor-pointer"
                   />
                 </div>
 
                 <div>
                   <div className="flex justify-between text-xs font-bold mb-2">
-                    <span className="text-slate-600">Service Duration</span>
-                    <span className="text-black font-black">{monthsInService} Months</span>
+                    <span className="text-slate-600 dark:text-slate-400">Service Duration</span>
+                    <span className="text-[#121815] dark:text-white font-mono font-bold">{monthsInService} Months</span>
                   </div>
                   <input
                     type="range"
@@ -429,25 +298,25 @@ export default function LandingPage() {
                     max="12"
                     value={monthsInService}
                     onChange={(e) => setMonthsInService(Number(e.target.value))}
-                    className="w-full accent-emerald-500"
+                    className="w-full accent-emerald-600 cursor-pointer"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                <div className="bg-white p-4 text-center shadow-sm">
-                  <span className="block text-xs font-bold text-slate-500">Est. Furniture Savings (P2P Market)</span>
-                  <span className="text-xl font-black text-black mt-1 block">
+                <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] p-6 text-center border border-slate-300/60 dark:border-slate-800">
+                  <span className="block text-xs font-semibold text-slate-500">Est. Gear Savings</span>
+                  <span className="text-2xl font-bold font-display text-[#121815] dark:text-white mt-1 block">
                     ₦{Math.round(monthlyAllowance * 0.45).toLocaleString()}
                   </span>
                 </div>
-                <div className="bg-white p-4 text-center shadow-sm">
-                  <span className="block text-xs font-bold text-slate-500">Hours Saved (Clearance & Transport)</span>
-                  <span className="text-xl font-black text-black mt-1 block">{monthsInService * 6} Hours</span>
+                <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] p-6 text-center border border-slate-300/60 dark:border-slate-800">
+                  <span className="block text-xs font-semibold text-slate-500">Clearance Hours Saved</span>
+                  <span className="text-2xl font-bold font-display text-[#121815] dark:text-white mt-1 block">{monthsInService * 6} Hours</span>
                 </div>
-                <div className="bg-white p-4 text-center shadow-sm">
-                  <span className="block text-xs font-bold text-slate-500">Travel & Emergency Safety</span>
-                  <span className="text-xl font-black text-emerald-600 mt-1 block">100% Peace of Mind</span>
+                <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] p-6 text-center border border-slate-300/60 dark:border-slate-800">
+                  <span className="block text-xs font-semibold text-slate-500">Highway Travel Safety</span>
+                  <span className="text-2xl font-bold font-display text-emerald-600 mt-1 block">100% Active</span>
                 </div>
               </div>
             </div>
@@ -455,42 +324,35 @@ export default function LandingPage() {
         </section>
 
         {/* BOTTOM HERO CTA */}
-        <section className="py-20 bg-black text-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
-              Ready to Write Your Service Year Story?
+        <section className="py-24 bg-[#121815] text-white">
+          <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
+            <h2 className="text-4xl sm:text-6xl font-medium tracking-tight font-display">
+              Ready to Navigate Your Service Year With Calm Precision?
             </h2>
-            <p className="text-base text-slate-400 max-w-xl mx-auto">
-              Join thousands of prospective, serving, and alumni corps members using Nigeria&apos;s premier active companion super-app.
+            <p className="text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
+              Join thousands of Nigerian corps members using KopaWee as their proactive companion.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link
                 href="/auth?mode=signup"
-                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2 group"
+                className="w-full sm:w-auto px-10 py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-3 group"
               >
-                <Zap className="w-4 h-4 fill-white" />
-                <span>Sign Up Free</span>
+                <span>GET STARTED FREE</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/auth?mode=signin"
-                className="w-full sm:w-auto px-8 py-4 bg-white/20 hover:bg-white hover:text-black text-white font-bold text-sm transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-4.5 border border-white/30 hover:border-white text-white font-bold text-xs uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-2"
               >
-                <span>Sign In</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>SIGN IN</span>
               </Link>
             </div>
           </div>
         </section>
-      </main>      <Footer />
+      </main>
 
-      <RoleOnboardingModal
-        isOpen={roleModalOpen}
-        onClose={() => setRoleModalOpen(false)}
-        defaultRole={selectedRole}
-      />
+      <Footer />
     </div>
   );
 }
-

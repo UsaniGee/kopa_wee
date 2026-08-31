@@ -5,15 +5,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import DashboardNavbar from "@/shared/components/DashboardNavbar";
 import { RoleProvider, useRole } from "@/shared/context/RoleContext";
-import { 
-  LayoutDashboard, 
-  CalendarCheck, 
-  ShoppingBag, 
-  Home, 
-  ShieldAlert, 
-  Briefcase, 
-  Users 
-} from "lucide-react";
+import { FiGrid, FiCalendar, FiShoppingBag, FiHome, FiAlertOctagon, FiBriefcase, FiUsers } from "react-icons/fi";
+
+const LayoutDashboard = FiGrid;
+const CalendarCheck = FiCalendar;
+const ShoppingBag = FiShoppingBag;
+const Home = FiHome;
+const ShieldAlert = FiAlertOctagon;
+const Briefcase = FiBriefcase;
+const Users = FiUsers;
 
 export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon: React.ElementType }[]> = {
   pcm: [
@@ -75,17 +75,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-slate-100 flex flex-col font-sans transition-colors duration-500">
       {/* Top Navbar */}
       <DashboardNavbar 
         currentRole={currentRole} 
         onRoleChange={handleRoleChange} 
       />
 
-      {/* Module sub-navigation bar (strictly filtered by role) */}
-      <div className="bg-white sticky top-16 z-30 overflow-x-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-1 py-2 overflow-x-auto no-scrollbar">
+      {/* Module Sub-Navigation Bar */}
+      <div className="bg-[#dcece1] dark:bg-[#121a16] border-b border-slate-300/60 dark:border-slate-800 sticky top-16 z-30 overflow-x-auto">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+          <nav className="flex items-center gap-2 py-3 overflow-x-auto no-scrollbar">
             {activeNavItems.map((item) => {
               const isActive = pathname === item.href;
               const IconComp = item.icon;
@@ -93,13 +93,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-3 py-2 text-xs font-bold whitespace-nowrap transition-all touch-manipulation ${
+                  className={`flex items-center gap-2.5 px-4 py-2 text-xs font-bold font-display uppercase tracking-wider whitespace-nowrap transition-all border ${
                     isActive
-                      ? "bg-black text-white"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      ? "bg-emerald-700 text-white border-emerald-700 shadow-xs"
+                      : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800 hover:border-emerald-600"
                   }`}
                 >
-                  <IconComp className={`w-3.5 h-3.5 ${isActive ? "text-emerald-400" : "text-slate-500"}`} />
+                  <IconComp className={`w-3.5 h-3.5 ${isActive ? "text-emerald-300" : "text-slate-500 dark:text-slate-400"}`} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -109,12 +109,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 sm:px-10 lg:px-16 py-10">
         {children}
       </main>
 
-      {/* Mobile Sticky Bottom Navigation Bar (strictly filtered by role) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black text-white z-40 px-2 py-1.5 flex items-center justify-around">
+      {/* Mobile Sticky Bottom Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#121815] text-white z-40 px-3 py-2 flex items-center justify-around border-t border-slate-800">
         {activeNavItems.slice(0, 5).map((item) => {
           const isActive = pathname === item.href;
           const IconComp = item.icon;
@@ -122,12 +122,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold touch-manipulation ${
-                isActive ? "text-emerald-400 font-black" : "text-slate-400"
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold font-display tracking-wider ${
+                isActive ? "text-emerald-400 font-extrabold" : "text-slate-400"
               }`}
             >
-              <IconComp className="w-4 h-4" />
-              <span className="truncate max-w-[72px] text-[9px]">{item.label.split(" ")[0]}</span>
+              <IconComp className="w-4 h-4 mb-0.5" />
+              <span className="truncate max-w-[72px] text-[9px] uppercase">{item.label.split(" ")[0]}</span>
             </Link>
           );
         })}

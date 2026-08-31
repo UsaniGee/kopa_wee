@@ -1,14 +1,14 @@
-import {
-  Bell,
-  ShoppingBag,
-  Home,
-  ShieldAlert,
-  Briefcase,
-  Users,
-  Bot,
-  Compass,
-  type LucideIcon,
-} from "lucide-react";
+import { 
+  FiBell, 
+  FiShoppingBag, 
+  FiHome, 
+  FiShield, 
+  FiBriefcase, 
+  FiUsers, 
+  FiCompass, 
+  FiCpu 
+} from "react-icons/fi";
+import type { IconType } from "react-icons";
 
 export interface ServicePreviewContent {
   badge: string;
@@ -22,7 +22,7 @@ export interface Service {
   title: string;
   tagline: string;
   category: string;
-  icon: LucideIcon;
+  icon: IconType;
   color: string;
   accentBg: string;
   description: string;
@@ -42,7 +42,7 @@ export const services: Service[] = [
     title: "Pre-Camp & Orientation Camp Guide",
     tagline: "Offline Vault & Camp Survival Kit",
     category: "Companion Module",
-    icon: Compass,
+    icon: FiCompass,
     color: "from-emerald-600 to-emerald-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
@@ -71,7 +71,7 @@ export const services: Service[] = [
     title: "Travel Safety & Emergency SOS Tracker",
     tagline: "Real-Time Highway Trip Check-Ins & Alerts",
     category: "Safety Module",
-    icon: ShieldAlert,
+    icon: FiShield,
     color: "from-emerald-600 to-emerald-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
@@ -100,7 +100,7 @@ export const services: Service[] = [
     title: "Accommodation & Roommate Matching",
     tagline: "Corper Lodges & Compatibility Finder",
     category: "Housing Module",
-    icon: Home,
+    icon: FiHome,
     color: "from-emerald-600 to-emerald-800",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
@@ -129,7 +129,7 @@ export const services: Service[] = [
     title: "Smart LGA Clearance & Admin Assistant",
     tagline: "Proactive Notifications over Passive Portals",
     category: "Companion Module",
-    icon: Bell,
+    icon: FiBell,
     color: "from-emerald-500 to-teal-600",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
@@ -158,7 +158,7 @@ export const services: Service[] = [
     title: "Peer-to-Peer Corper Marketplace",
     tagline: "Buy, Sell & Swap Household Gear Directly",
     category: "Marketplace Module",
-    icon: ShoppingBag,
+    icon: FiShoppingBag,
     color: "from-emerald-500 to-emerald-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
@@ -187,7 +187,7 @@ export const services: Service[] = [
     title: "Workplace & PPA Management Portal",
     tagline: "Clock-In, Attendance & Leave Requests",
     category: "Workplace Module",
-    icon: Briefcase,
+    icon: FiBriefcase,
     color: "from-emerald-600 to-teal-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
@@ -216,7 +216,7 @@ export const services: Service[] = [
     title: "CDS Community & Group Hub",
     tagline: "Meeting Manager & Attendance Register",
     category: "Community Module",
-    icon: Users,
+    icon: FiUsers,
     color: "from-emerald-500 to-emerald-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
@@ -245,7 +245,7 @@ export const services: Service[] = [
     title: "AI Knowledge & Regulatory Assistant",
     tagline: "Instant Answers on NYSC Guidelines",
     category: "AI Module",
-    icon: Bot,
+    icon: FiCpu,
     color: "from-emerald-700 to-emerald-900",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:

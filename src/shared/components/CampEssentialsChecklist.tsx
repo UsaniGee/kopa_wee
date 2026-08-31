@@ -1,21 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  CheckSquare, 
-  Square, 
-  AlertTriangle, 
-  Plus, 
-  FileText, 
-  Shirt, 
-  Footprints, 
-  Bed, 
-  Sparkles, 
-  ShieldCheck, 
-  Search, 
-  Filter,
-  Info
-} from "lucide-react";
+import { FiCheckSquare, FiSquare, FiAlertTriangle, FiPlus, FiFileText, FiTag, FiMapPin, FiBox, FiShield, FiSearch, FiFilter, FiInfo } from "react-icons/fi";
+
+const CheckSquare = FiCheckSquare;
+const Square = FiSquare;
+const AlertTriangle = FiAlertTriangle;
+const Plus = FiPlus;
+const FileText = FiFileText;
+const Shirt = FiTag;
+const Footprints = FiMapPin;
+const Bed = FiBox;
+const ShieldCheck = FiShield;
+const Search = FiSearch;
+const Filter = FiFilter;
+const Info = FiInfo;
 
 export interface CampItem {
   id: string;
@@ -57,242 +56,165 @@ const DEFAULT_CAMP_ITEMS: CampItem[] = [
   },
   { id: "foot_2", name: "Bathroom Slippers", category: "footwear", qty: "1 pair", recommended: true, notes: "Essential for bathroom and hostel floors.", packed: false },
 
-  // Bedding
-  { id: "bed_1", name: "Bed Sheet & Pillowcase", category: "bedding", qty: "1 – 2 sets", recommended: true, notes: "Standard single mattress size.", packed: false },
-  { id: "bed_2", name: "Light Blanket or Wrapper", category: "bedding", qty: "1 item", recommended: true, notes: "For cool camp nights.", packed: false },
-  { id: "bed_3", name: "Mosquito Net", category: "bedding", qty: "1 net + rope", recommended: true, notes: "Protect against malaria in hostel.", packed: false },
+  // Bedding & Comfort
+  { id: "bed_1", name: "Bedsheet & Pillowcase", category: "bedding", qty: "1 – 2 sets", recommended: true, notes: "Single bed size for camp bunk mattress.", packed: false },
+  { id: "bed_2", name: "Mosquito Net & Strings", category: "bedding", qty: "1 net + rope", recommended: true, notes: "Mandatory protection against mosquitoes in hostel.", packed: false },
+  { id: "bed_3", name: "Light Blanket or Fleece", category: "bedding", qty: "1 blanket", recommended: true, notes: "For chilly early morning drills and cool nights.", packed: false },
 
-  // Toiletries & Hygiene
-  { id: "toil_1", name: "Toothbrush & Toothpaste", category: "toiletries", qty: "1 set", recommended: true, packed: false },
-  { id: "toil_2", name: "Bath Soap, Sponge & Soap Box", category: "toiletries", qty: "1 set", recommended: true, packed: false },
-  { id: "toil_3", name: "Towel & Body Lotion", category: "toiletries", qty: "1 set", recommended: true, packed: false },
-  { id: "toil_4", name: "Hand Sanitizer & Disinfectant", category: "toiletries", qty: "1 small bottle", recommended: true, packed: false },
-
-  // Security & Essentials
-  { id: "sec_1", name: "Small Padlocks & Keys", category: "essentials", qty: "2 padlocks", recommended: true, notes: "Lock your travelling bag and box at all times.", packed: false },
-  { id: "sec_2", name: "Power Bank & Phone Charger", category: "essentials", qty: "10,000mAh+", recommended: true, notes: "Charging points can be crowded in camp market.", packed: false },
-  { id: "sec_3", name: "Rechargeable Torchlight", category: "essentials", qty: "1 light", recommended: true, notes: "Essential for 4:00 AM morning parade prep.", packed: false },
-  { id: "sec_4", name: "Small Accessible Cash (₦500 / ₦1,000 notes)", category: "essentials", qty: "₦10,000 – ₦20,000", recommended: true, notes: "For Mammy market food, laundry, and photo copy.", packed: false },
-
-  // Laundry
-  { id: "laun_1", name: "Detergent & Laundry Soap", category: "laundry", qty: "1 pack", recommended: true, packed: false },
-  { id: "laun_2", name: "Pegs & Small Clothesline Rope", category: "laundry", qty: "1 pack pegs", recommended: true, packed: false },
+  // Essentials
+  { id: "ess_1", name: "High-Capacity Power Bank", category: "essentials", qty: "10,000 – 30,000 mAh", recommended: true, notes: "Limited charging points in camp hostels.", packed: true },
+  { id: "ess_2", name: "Rechargeable Mini Fan / Torchlight", category: "essentials", qty: "1 piece", recommended: true, notes: "For night lights and warm hostel rooms.", packed: false },
+  { id: "ess_3", name: "Small Padlock & Keys", category: "essentials", qty: "2 padlocks", recommended: true, notes: "For your travelling bag and hostel locker.", packed: true },
 ];
 
 export default function CampEssentialsChecklist() {
   const [items, setItems] = useState<CampItem[]>(DEFAULT_CAMP_ITEMS);
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [newItemName, setNewItemName] = useState("");
   const [newItemCategory, setNewItemCategory] = useState<CampItem["category"]>("essentials");
 
-  useEffect(() => {
-    const saved = localStorage.getItem("kopawee_camp_checklist");
-    if (saved) {
-      try {
-        setItems(JSON.parse(saved));
-      } catch (e) {}
-    }
-  }, []);
-
-  const togglePacked = (id: string) => {
-    const updated = items.map(item => item.id === id ? { ...item, packed: !item.packed } : item);
-    setItems(updated);
-    localStorage.setItem("kopawee_camp_checklist", JSON.stringify(updated));
+  const toggleItem = (id: string) => {
+    setItems(prev => prev.map(item => item.id === id ? { ...item, packed: !item.packed } : item));
   };
 
-  const handleAddItem = (e: React.FormEvent) => {
+  const addItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
     const newItem: CampItem = {
-      id: `custom_${Date.now()}`,
+      id: "custom_" + Date.now(),
       name: newItemName.trim(),
       category: newItemCategory,
       qty: "1 item",
       recommended: false,
-      packed: false,
+      packed: false
     };
-    const updated = [...items, newItem];
-    setItems(updated);
-    localStorage.setItem("kopawee_camp_checklist", JSON.stringify(updated));
+    setItems(prev => [newItem, ...prev]);
     setNewItemName("");
   };
 
   const filteredItems = items.filter(item => {
-    const matchesCategory = activeCategory === "all" || item.category === activeCategory;
+    const matchesCat = selectedCategory === "all" || item.category === selectedCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (item.notes && item.notes.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
+    return matchesCat && matchesSearch;
   });
 
-  const packedCount = items.filter(i => i.packed).length;
-  const progressPct = Math.round((packedCount / items.length) * 100);
+  const totalPacked = items.filter(i => i.packed).length;
+  const packedPercentage = Math.round((totalPacked / items.length) * 100);
 
   return (
-    <div className="space-y-6 bg-white p-6 shadow-sm border-t-4 border-emerald-500">
+    <div className="space-y-6 font-sans">
+      
       {/* Header & Progress */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5">
-              Interactive Checklist
+      <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block">
+              ORIENTATION SURVIVAL KIT
             </span>
-            <span className="text-xs text-slate-500 font-bold">2026 Official Camp Recommendations</span>
+            <h2 className="text-2xl sm:text-3xl font-medium text-[#121815] dark:text-white font-display mt-1">
+              Camp Mandatory Packing Checklist
+            </h2>
           </div>
-          <h2 className="text-xl font-black text-black mt-1">NYSC Orientation Camp Essentials Guide</h2>
+          <div className="text-right">
+            <span className="text-3xl font-bold font-display text-emerald-700 dark:text-emerald-400">{packedPercentage}%</span>
+            <span className="text-xs text-slate-500 uppercase tracking-wider block">Packed ({totalPacked}/{items.length})</span>
+          </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="w-full md:w-64 bg-slate-50 p-3 space-y-1.5 border border-slate-200">
-          <div className="flex items-center justify-between text-xs font-bold text-black">
-            <span>Packing Progress</span>
-            <span className="text-emerald-700">{packedCount} / {items.length} ({progressPct}%)</span>
-          </div>
-          <div className="w-full bg-slate-200 h-2.5">
-            <div className="bg-emerald-500 h-2.5 transition-all" style={{ width: `${progressPct}%` }} />
-          </div>
+        <div className="w-full bg-slate-300 dark:bg-slate-800 h-2">
+          <div 
+            className="bg-emerald-600 h-2 transition-all duration-500" 
+            style={{ width: `${packedPercentage}%` }} 
+          />
+        </div>
+
+        {/* Disclaimer Warning */}
+        <div className="p-4 bg-[#eaf5ed] dark:bg-[#0a0f0d] border-l-2 border-emerald-600 flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300">
+          <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong>Official Disclaimer:</strong> White Crocs and slippers are permitted for hostel and bathroom use only. Parade grounds strictly require plain white tennis or rubber parade shoes without colored stripes.
+          </p>
         </div>
       </div>
 
-      {/* Official NYSC Document Notice */}
-      <div className="p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-900 text-xs space-y-1">
-        <div className="font-bold flex items-center gap-1.5 text-amber-950">
-          <Info className="w-4 h-4 text-amber-600 shrink-0" />
-          <span>Official NYSC Document Verification Requirement</span>
-        </div>
-        <p className="leading-relaxed text-[11px]">
-          Always verify your exact document requirements on the official NYSC portal (<a href="https://www.nysc.gov.ng" target="_blank" rel="noreferrer" className="underline font-bold">nysc.gov.ng</a>) prior to departure. Foreign-trained graduates and medical professionals require specific additional licensing documentation.
-        </p>
-      </div>
-
-      {/* Controls: Search & Category Filters */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Category Pills */}
-        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto no-scrollbar pb-1">
-          {[
-            { id: "all", label: "All Items" },
-            { id: "documents", label: "Documents" },
-            { id: "wear", label: "White Wear" },
-            { id: "footwear", label: "Footwear" },
-            { id: "bedding", label: "Bedding" },
-            { id: "toiletries", label: "Toiletries" },
-            { id: "essentials", label: "Essentials" },
-          ].map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1 text-xs font-bold whitespace-nowrap transition-all ${
-                activeCategory === cat.id ? "bg-black text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Input */}
-        <div className="relative w-full sm:w-64">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+      {/* Filter & Search Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative w-full sm:w-72">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Filter checklist..."
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 text-black border border-slate-200 focus:outline-none focus:border-black"
+            placeholder="Search documents, white tees..."
+            className="w-full pl-10 pr-4 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-xs text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
           />
+        </div>
+
+        {/* Category Filters */}
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto no-scrollbar">
+          {["all", "documents", "wear", "footwear", "bedding", "essentials"].map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-2 text-[11px] font-bold uppercase tracking-wider whitespace-nowrap cursor-pointer transition-colors border ${
+                selectedCategory === cat
+                  ? "bg-emerald-700 text-white border-emerald-700"
+                  : "bg-[#dcece1] dark:bg-[#121a16] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800 hover:border-slate-400"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Checklist Grid */}
-      <div className="divide-y divide-slate-100 space-y-1">
+      {/* Items List */}
+      <div className="space-y-3">
         {filteredItems.map((item) => (
-          <div 
+          <div
             key={item.id}
-            className={`p-3 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-3 ${
-              item.packed ? "bg-emerald-50/60 text-slate-600" : "bg-white hover:bg-slate-50"
+            onClick={() => toggleItem(item.id)}
+            className={`p-4 border transition-all cursor-pointer flex items-start gap-4 ${
+              item.packed
+                ? "bg-[#dcece1]/60 dark:bg-[#121a16]/60 border-slate-300/40 dark:border-slate-800/80 opacity-75"
+                : "bg-[#dcece1] dark:bg-[#121a16] border-slate-300/60 dark:border-slate-800 hover:border-emerald-600"
             }`}
           >
-            <div className="flex items-start gap-3">
-              <button 
-                type="button"
-                onClick={() => togglePacked(item.id)}
-                className="mt-0.5 text-black hover:text-emerald-600 shrink-0"
-              >
-                {item.packed ? (
-                  <CheckSquare className="w-5 h-5 text-emerald-600" />
-                ) : (
-                  <Square className="w-5 h-5 text-slate-400" />
-                )}
-              </button>
-
-              <div className="space-y-0.5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={`text-xs font-bold ${item.packed ? "line-through text-slate-500" : "text-black"}`}>
-                    {item.name}
-                  </span>
-                  <span className="text-[9px] px-1.5 py-0.2 bg-slate-100 text-slate-600 font-mono">
-                    {item.qty}
-                  </span>
-                  {item.recommended && (
-                    <span className="text-[9px] px-1.5 py-0.2 bg-emerald-100 text-emerald-800 font-bold">
-                      Recommended
-                    </span>
-                  )}
-                </div>
-
-                {item.notes && (
-                  <p className="text-[11px] text-slate-500 leading-tight">{item.notes}</p>
-                )}
-
-                {/* Important Footwear / Crocs Disclaimer */}
-                {item.disclaimer && (
-                  <div className="mt-1 p-2 bg-amber-50 text-amber-900 text-[10px] font-medium border-l-2 border-amber-500 flex items-start gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                    <span>{item.disclaimer}</span>
-                  </div>
-                )}
-              </div>
+            <div className="mt-0.5">
+              {item.packed ? (
+                <CheckSquare className="w-5 h-5 text-emerald-600" />
+              ) : (
+                <Square className="w-5 h-5 text-slate-400" />
+              )}
             </div>
 
-            <button
-              onClick={() => togglePacked(item.id)}
-              className={`px-3 py-1 text-[10px] font-bold shrink-0 ${
-                item.packed ? "bg-emerald-200 text-emerald-900" : "bg-slate-100 text-slate-800 hover:bg-slate-200"
-              }`}
-            >
-              {item.packed ? "Packed ✓" : "Mark Packed"}
-            </button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <span className={`text-sm font-bold font-display ${item.packed ? "line-through text-slate-500" : "text-[#121815] dark:text-white"}`}>
+                  {item.name}
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+                  {item.qty}
+                </span>
+              </div>
+
+              {item.notes && (
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{item.notes}</p>
+              )}
+
+              {item.disclaimer && (
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1 font-semibold flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{item.disclaimer}</span>
+                </p>
+              )}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Add Custom Personal Item */}
-      <form onSubmit={handleAddItem} className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-2">
-        <input
-          type="text"
-          value={newItemName}
-          onChange={(e) => setNewItemName(e.target.value)}
-          placeholder="Add your own custom personal item..."
-          className="flex-1 px-3 py-2 text-xs bg-slate-50 border border-slate-200 text-black focus:outline-none focus:border-black"
-        />
-        <select
-          value={newItemCategory}
-          onChange={(e) => setNewItemCategory(e.target.value as any)}
-          className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 text-black focus:outline-none"
-        >
-          <option value="essentials">Essentials</option>
-          <option value="documents">Documents</option>
-          <option value="wear">White Wear</option>
-          <option value="toiletries">Toiletries</option>
-          <option value="bedding">Bedding</option>
-        </select>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-black hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1 shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" /> Add Item
-        </button>
-      </form>
     </div>
   );
 }

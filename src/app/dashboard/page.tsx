@@ -3,39 +3,38 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRole } from "@/shared/context/RoleContext";
-import { 
-  Calendar, 
-  ShieldCheck, 
-  ShoppingBag, 
-  Home, 
-  ShieldAlert, 
-  Briefcase, 
-  Users, 
-  ArrowRight,
-  Zap,
-  CheckCircle2,
-  Clock,
-  MapPin,
-  TrendingUp,
-  FileText,
-  Sparkles,
-  Bot,
-  Luggage,
-  Compass,
-  CheckSquare,
-  AlertCircle,
-  Building2,
-  UserCheck,
-  UserX,
-  Plus,
-  Send,
-  Award
-} from "lucide-react";
+import { FiCalendar, FiShield, FiShoppingBag, FiHome, FiAlertOctagon, FiBriefcase, FiUsers, FiArrowRight, FiCheckCircle, FiClock, FiMapPin, FiTrendingUp, FiFileText, FiCpu, FiPackage, FiCompass, FiCheckSquare, FiAlertCircle, FiBox, FiUserCheck, FiUserX, FiPlus, FiSend, FiAward } from "react-icons/fi";
+import { HiSparkles } from "react-icons/hi2";
+
+const Calendar = FiCalendar;
+const ShieldCheck = FiShield;
+const ShoppingBag = FiShoppingBag;
+const Home = FiHome;
+const ShieldAlert = FiAlertOctagon;
+const Briefcase = FiBriefcase;
+const Users = FiUsers;
+const ArrowRight = FiArrowRight;
+const CheckCircle2 = FiCheckCircle;
+const Clock = FiClock;
+const MapPin = FiMapPin;
+const TrendingUp = FiTrendingUp;
+const FileText = FiFileText;
+const Sparkles = HiSparkles;
+const Bot = FiCpu;
+const Luggage = FiPackage;
+const Compass = FiCompass;
+const CheckSquare = FiCheckSquare;
+const AlertCircle = FiAlertCircle;
+const Building2 = FiBox;
+const UserCheck = FiUserCheck;
+const UserX = FiUserX;
+const Plus = FiPlus;
+const Send = FiSend;
+const Award = FiAward;
 
 export default function DashboardOverviewPage() {
   const { currentRole, setRole } = useRole();
 
-  // Local interactive states for mini-actions
   const [clearanceDone, setClearanceDone] = useState(false);
   const [checklist, setChecklist] = useState([
     { id: 1, text: "Call-up Letter (3 colored copies)", checked: true },
@@ -75,82 +74,80 @@ export default function DashboardOverviewPage() {
   if (currentRole === "pcm") {
     const completedItems = checklist.filter(c => c.checked).length;
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 font-sans">
         {/* Banner */}
-        <div className="p-6 sm:p-8 bg-black text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
+        <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
           <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500 text-white font-black text-xs uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
               <Luggage className="w-3.5 h-3.5" />
-              Role: Prospective Corps Member (PCM)
+              <span>ROLE: PROSPECTIVE CORPS MEMBER (PCM)</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Get Ready for Mobilization & Orientation Camp! 🇳🇬
+            <h1 className="text-3xl font-medium text-white tracking-tight font-display">
+              Mobilization & Orientation Camp Preparation
             </h1>
             <p className="text-xs text-slate-300">
-              Welcome aboard, Graduate! Your stream's call-up letter release is approaching. Prepare your camp kit and documents below.
+              Stream call-up release approaching. Manage mandatory documents and camp kit.
             </p>
           </div>
 
           <button
             onClick={() => setRole("serving")}
-            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black transition-all flex items-center gap-2 shrink-0 cursor-pointer touch-manipulation"
+            className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 shrink-0 cursor-pointer"
           >
             <span>Update Status ➔ Serving Corper</span>
           </button>
         </div>
 
-        {/* Top Grid: Countdown & Progress */}
+        {/* Metric Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Camp Countdown */}
-          <div className="p-6 bg-white shadow-sm space-y-3">
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase tracking-wider">Camp Orientation Countdown</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest font-display">Orientation Countdown</span>
               <Clock className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-3xl font-black text-black">14 Days Left</div>
-            <p className="text-xs text-slate-500">KADUNA NYSC Permanent Camp, Black Gold Way, Mando.</p>
+            <div className="text-3xl font-bold font-display text-[#121815] dark:text-white">14 Days Left</div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">KADUNA NYSC Permanent Camp, Mando.</p>
           </div>
 
-          {/* Packing Checklist Summary */}
-          <div className="p-6 bg-white shadow-sm space-y-3">
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase tracking-wider">Packing Checklist</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest font-display">Packing Checklist</span>
               <CheckSquare className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-3xl font-black text-black">{completedItems} of {checklist.length} Ready</div>
-            <div className="w-full bg-slate-100 h-2">
+            <div className="text-3xl font-bold font-display text-[#121815] dark:text-white">{completedItems} of {checklist.length} Ready</div>
+            <div className="w-full bg-slate-300 dark:bg-slate-800 h-1.5">
               <div 
-                className="bg-emerald-500 h-2 transition-all"
+                className="bg-emerald-600 h-1.5 transition-all"
                 style={{ width: `${(completedItems / checklist.length) * 100}%` }}
               />
             </div>
           </div>
 
-          {/* Travel Route Planner */}
-          <div className="p-6 bg-white shadow-sm space-y-3">
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase tracking-wider">State & Route Planner</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest font-display">Route Planner</span>
               <Compass className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-base font-black text-black">Lagos ➔ Kaduna State</div>
-            <p className="text-xs text-slate-500">Direct corper bus convoys leave Jibowu Park Aug 28, 6:00 AM.</p>
+            <div className="text-base font-bold font-display text-[#121815] dark:text-white">Lagos ➔ Kaduna State</div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Corper convoy leaves Jibowu Park Aug 28, 6:00 AM.</p>
           </div>
         </div>
 
-        {/* Middle Interactive Grid */}
+        {/* Interactive Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Interactive Packing Checklist */}
-          <div className="p-6 bg-white shadow-sm space-y-4">
-            <h2 className="text-base font-black text-black uppercase tracking-wider flex items-center gap-2">
-              <CheckSquare className="w-4 h-4 text-emerald-600" /> Camp Mandatory Document & Gear Checklist
+          <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+            <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
+              <CheckSquare className="w-4 h-4 text-emerald-600" /> Camp Mandatory Gear Checklist
             </h2>
             <div className="space-y-2">
               {checklist.map((item) => (
                 <label 
                   key={item.id}
                   onClick={() => toggleChecklist(item.id)}
-                  className={`flex items-center gap-3 p-3 text-xs font-bold transition-all cursor-pointer ${
-                    item.checked ? "bg-emerald-50 text-emerald-900 line-through" : "bg-slate-50 text-slate-800 hover:bg-slate-100"
+                  className={`flex items-center gap-3 p-3.5 text-xs font-semibold transition-all cursor-pointer border ${
+                    item.checked 
+                      ? "bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 border-emerald-600/40 line-through" 
+                      : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-800 dark:text-slate-200 border-slate-300/60 dark:border-slate-800"
                   }`}
                 >
                   <input 
@@ -165,15 +162,14 @@ export default function DashboardOverviewPage() {
             </div>
           </div>
 
-          {/* NYSC AI Assistant Mini-Product */}
-          <div className="p-6 bg-white shadow-sm space-y-4 flex flex-col justify-between">
+          <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2 text-emerald-600 font-black text-xs uppercase tracking-wider mb-2">
-                <Bot className="w-4 h-4" /> KopaWee AI Assistant
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-xs uppercase tracking-widest font-display mb-2">
+                <Bot className="w-4 h-4" /> KopaWee AI Regulatory Assistant
               </div>
-              <h2 className="text-base font-black text-black">Have Questions About Mobilization or Relocation?</h2>
-              <p className="text-xs text-slate-500 mt-1">
-                Ask anything regarding green card errors, camp requirements, marital relocation, or medical fitness.
+              <h2 className="text-base font-bold text-[#121815] dark:text-white font-display">Questions on Mobilization or Relocation?</h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                Instant answers trained on official NYSC Bye-laws.
               </p>
             </div>
 
@@ -183,59 +179,40 @@ export default function DashboardOverviewPage() {
                   type="text"
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
-                  placeholder="e.g. Can I relocate on medical grounds?"
-                  className="flex-1 px-3 py-2 text-xs bg-slate-100 border-none text-black focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  placeholder="e.g. Relocation on medical grounds?"
+                  className="flex-1 px-4 py-3 text-xs bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
                 />
-                <button type="submit" className="px-4 py-2 bg-black text-white text-xs font-bold hover:bg-slate-800">
+                <button type="submit" className="px-5 py-3 bg-[#121815] text-white text-xs font-bold uppercase tracking-wider hover:bg-emerald-700 transition-colors">
                   Ask AI
                 </button>
               </div>
 
               {aiAnswer && (
-                <div className="p-3 bg-emerald-50 text-emerald-900 text-xs leading-relaxed font-medium">
+                <div className="p-4 bg-[#eaf5ed] dark:bg-[#0a0f0d] border-l-2 border-emerald-600 text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                   <strong>AI Response:</strong> {aiAnswer}
                 </div>
               )}
             </form>
-
-            <div className="flex items-center gap-2 text-[11px] text-slate-500 pt-2">
-              <span className="font-bold">Quick suggestions:</span>
-              <button 
-                onClick={() => { setAiPrompt("How do I process relocation?"); setAiAnswer("To apply for relocation, submit your medical certificate or marital proof via the NYSC Portal during camp orientation. Approval takes 7–14 days after camp."); }}
-                className="underline hover:text-emerald-600"
-              >
-                Relocation process?
-              </button>
-            </div>
           </div>
         </div>
 
-        {/* PCM Mini-Products Launchpad */}
+        {/* PCM Modules Launchpad */}
         <div className="space-y-4">
-          <h2 className="text-base font-black text-black uppercase tracking-wider">
-            PCM Dedicated Modules
+          <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-display">
+            PCM Modules
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link href="/dashboard/companion" className="p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-3">
-              <div className="p-3 bg-black text-white w-fit"><Luggage className="w-5 h-5" /></div>
-              <h3 className="text-sm font-black text-black">Camp Orientation Guide</h3>
-              <p className="text-xs text-slate-500">Platoon activities, morning drill routine, camp market tips, and SAED classes.</p>
-              <span className="text-xs font-bold text-emerald-600 block">Open Guide ➔</span>
-            </Link>
-
-            <Link href="/dashboard/marketplace" className="p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-3">
-              <div className="p-3 bg-black text-white w-fit"><ShoppingBag className="w-5 h-5" /></div>
-              <h3 className="text-sm font-black text-black">Pre-Camp Gear Market</h3>
-              <p className="text-xs text-slate-500">Buy authentic white boots, waist bags, power banks, and mosquito nets from ex-corpers.</p>
-              <span className="text-xs font-bold text-emerald-600 block">Browse Gear ➔</span>
-            </Link>
-
-            <Link href="/dashboard/safety" className="p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-3">
-              <div className="p-3 bg-black text-white w-fit"><ShieldAlert className="w-5 h-5" /></div>
-              <h3 className="text-sm font-black text-black">Camp Journey Safety</h3>
-              <p className="text-xs text-slate-500">Highway travel status check-in, verified transport hubs, and emergency SOS contacts.</p>
-              <span className="text-xs font-bold text-emerald-600 block">Open Safety Tracker ➔</span>
-            </Link>
+            {[
+              { href: "/dashboard/companion", title: "Camp Guide", text: "Platoon activities, morning drill routine, and SAED classes.", action: "Open Guide ➔" },
+              { href: "/dashboard/marketplace", title: "Pre-Camp Market", text: "Buy white boots, waist bags, and power banks from ex-corpers.", action: "Browse Gear ➔" },
+              { href: "/dashboard/safety", title: "Journey Safety", text: "Highway status check-in and emergency SOS contacts.", action: "Open Tracker ➔" },
+            ].map((card, i) => (
+              <Link key={i} href={card.href} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 transition-all space-y-3">
+                <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">{card.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{card.text}</p>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block pt-1">{card.action}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
@@ -247,25 +224,25 @@ export default function DashboardOverviewPage() {
      ========================================================================= */
   if (currentRole === "serving") {
     return (
-      <div className="space-y-8">
-        <div className="p-6 sm:p-8 bg-black text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
+      <div className="space-y-8 font-sans">
+        <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500 text-white font-black text-xs uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Role: Serving Corps Member (Batch A 2024)
+              <span>ROLE: SERVING CORPS MEMBER (LA/24A/1042)</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Welcome back, Corper Chidi! 🇳🇬
+            <h1 className="text-3xl font-medium text-white tracking-tight font-display">
+              Welcome back, Corper Chidi
             </h1>
             <p className="text-xs text-slate-300">
-              Monthly LGA Clearance is in <strong className="text-white">4 days</strong>. Ikeja LGA Sub-office, Lagos State.
+              Monthly LGA Clearance in <strong className="text-white">4 days</strong> (Ikeja LGA Hub, Lagos State).
             </p>
           </div>
 
           <button
             onClick={() => setClearanceDone(!clearanceDone)}
-            className={`px-5 py-3 text-xs font-black transition-all flex items-center gap-2 ${
-              clearanceDone ? "bg-emerald-600 text-white" : "bg-emerald-500 hover:bg-emerald-600 text-white"
+            className={`px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
+              clearanceDone ? "bg-emerald-800 text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white"
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
@@ -274,134 +251,61 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* Metric Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase tracking-wider">Next Clearance</span>
-              <Clock className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="text-2xl font-black text-black">4 Days Left</div>
-            <div className="text-xs text-slate-500">Aug 25 · Ikeja LGA Hub</div>
-          </div>
-
-          <div className="p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase tracking-wider">Allawee Savings</span>
-              <TrendingUp className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="text-2xl font-black text-black">₦77,000</div>
-            <div className="text-xs text-emerald-700 font-bold">Saved via Corper Market</div>
-          </div>
-
-          <div className="p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase tracking-wider">CDS Attendance</span>
-              <Users className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="text-2xl font-black text-black">92% Rate</div>
-            <div className="text-xs text-slate-500">Education CDS Group</div>
-          </div>
-
-          <div className="p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase tracking-wider">Safety Status</span>
-              <ShieldAlert className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="text-2xl font-black text-emerald-600">Active & Safe</div>
-            <div className="text-xs text-slate-500">Last trip check-in: 2h ago</div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: "Next Clearance", val: "4 Days Left", sub: "Aug 25 · Ikeja Hub", icon: Clock },
+            { label: "Allawee Savings", val: "₦77,000", sub: "Saved via P2P Market", icon: TrendingUp },
+            { label: "CDS Attendance", val: "92% Rate", sub: "Education CDS Group", icon: Users },
+            { label: "Safety Status", val: "Active & Safe", sub: "Last check-in: 2h ago", icon: ShieldAlert },
+          ].map((m, idx) => {
+            const IconComp = m.icon;
+            return (
+              <div key={idx} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-widest font-display">{m.label}</span>
+                  <IconComp className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">{m.val}</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">{m.sub}</div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Modules Grid */}
         <div className="space-y-4">
-          <h2 className="text-base font-black text-black uppercase tracking-wider flex items-center gap-2">
-            <Zap className="w-4 h-4 text-emerald-600" /> Serving Corper Mini-Products
+          <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-display">
+            Active Mini-Product Modules
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Link href="/dashboard/companion" className="group p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="p-3 bg-black text-white"><Calendar className="w-5 h-5" /></div>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-emerald-100 text-emerald-800">Clearance</span>
-              </div>
-              <div>
-                <h3 className="text-base font-black text-black group-hover:text-emerald-600">Smart Clearance Assistant</h3>
-                <p className="text-xs text-slate-500 mt-1">LGA biometric reminders, document vault, and location sync.</p>
-              </div>
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-700 pt-2">
-                <span>Open Clearance ➔</span>
-              </div>
-            </Link>
-
-            <Link href="/dashboard/marketplace" className="group p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="p-3 bg-black text-white"><ShoppingBag className="w-5 h-5" /></div>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-slate-200 text-black">Marketplace</span>
-              </div>
-              <div>
-                <h3 className="text-base font-black text-black group-hover:text-emerald-600">Corper Peer Marketplace</h3>
-                <p className="text-xs text-slate-500 mt-1">Buy, sell, or swap mattresses, fans, gas cylinders, and POP items.</p>
-              </div>
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-700 pt-2">
-                <span>Explore Listings ➔</span>
-              </div>
-            </Link>
-
-            <Link href="/dashboard/accommodation" className="group p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="p-3 bg-black text-white"><Home className="w-5 h-5" /></div>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-slate-200 text-black">Housing</span>
-              </div>
-              <div>
-                <h3 className="text-base font-black text-black group-hover:text-emerald-600">Lodge & Roommate Matcher</h3>
-                <p className="text-xs text-slate-500 mt-1">Find lodges near your PPA and split rent with fellow corpers.</p>
-              </div>
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-700 pt-2">
-                <span>Find Roommates ➔</span>
-              </div>
-            </Link>
-
-            <Link href="/dashboard/safety" className="group p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="p-3 bg-black text-white"><ShieldAlert className="w-5 h-5" /></div>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-emerald-100 text-emerald-800">SOS</span>
-              </div>
-              <div>
-                <h3 className="text-base font-black text-black group-hover:text-emerald-600">Travel SOS Tracker</h3>
-                <p className="text-xs text-slate-500 mt-1">Active highway trip monitoring, location broadcast, and emergency contact ping.</p>
-              </div>
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-700 pt-2">
-                <span>Open Safety ➔</span>
-              </div>
-            </Link>
-
-            <Link href="/dashboard/workplace" className="group p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="p-3 bg-black text-white"><Briefcase className="w-5 h-5" /></div>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-slate-200 text-black">Workplace</span>
-              </div>
-              <div>
-                <h3 className="text-base font-black text-black group-hover:text-emerald-600">PPA Logbook</h3>
-                <p className="text-xs text-slate-500 mt-1">Log weekly work presence, submit leave applications, and view reviews.</p>
-              </div>
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-700 pt-2">
-                <span>Open Logbook ➔</span>
-              </div>
-            </Link>
-
-            <Link href="/dashboard/community" className="group p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="p-3 bg-black text-white"><Users className="w-5 h-5" /></div>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-slate-200 text-black">CDS</span>
-              </div>
-              <div>
-                <h3 className="text-base font-black text-black group-hover:text-emerald-600">CDS Group Manager</h3>
-                <p className="text-xs text-slate-500 mt-1">Meeting schedule, attendance register, and community projects.</p>
-              </div>
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-700 pt-2">
-                <span>View CDS ➔</span>
-              </div>
-            </Link>
+            {[
+              { href: "/dashboard/companion", tag: "Clearance", title: "Smart Clearance Assistant", desc: "LGA biometric reminders, document vault, and route sync.", icon: Calendar },
+              { href: "/dashboard/marketplace", tag: "Marketplace", title: "Corper Peer Marketplace", desc: "Buy, sell, or swap mattresses, fans, and gas cylinders.", icon: ShoppingBag },
+              { href: "/dashboard/accommodation", tag: "Housing", title: "Lodge & Roommate Matcher", desc: "Find corper lodges near PPA and split rent easily.", icon: Home },
+              { href: "/dashboard/safety", tag: "Safety", title: "Travel SOS Tracker", desc: "Active highway trip monitoring and emergency contact ping.", icon: ShieldAlert },
+              { href: "/dashboard/workplace", tag: "Workplace", title: "PPA Logbook", desc: "Log work presence, request leave, and track evaluations.", icon: Briefcase },
+              { href: "/dashboard/community", tag: "CDS", title: "CDS Group Manager", desc: "Meeting schedule, attendance register, and dues log.", icon: Users },
+            ].map((mod, idx) => {
+              const IconComp = mod.icon;
+              return (
+                <Link key={idx} href={mod.href} className="group p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 transition-all space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="p-3 bg-[#121815] text-white"><IconComp className="w-4 h-4" /></div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 border border-emerald-600/30">
+                      {mod.tag}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#121815] dark:text-white font-display group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                      {mod.title}
+                    </h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{mod.desc}</p>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block pt-1">Open Module ➔</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -409,103 +313,63 @@ export default function DashboardOverviewPage() {
   }
 
   /* =========================================================================
-     3. PPA REPRESENTATIVE (EMPLOYER) VIEW
+     3. PPA REPRESENTATIVE / EMPLOYER VIEW
      ========================================================================= */
   if (currentRole === "ppa") {
     return (
-      <div className="space-y-8">
-        <div className="p-6 sm:p-8 bg-black text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
+      <div className="space-y-8 font-sans">
+        <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500 text-white font-black text-xs uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
               <Building2 className="w-3.5 h-3.5" />
-              Role: PPA Representative / Employer Portal
+              <span>ROLE: PPA REPRESENTATIVE (EMPLOYER)</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Grace High School PPA Management Hub 🏫
+            <h1 className="text-3xl font-medium text-white tracking-tight font-display">
+              Grace High School PPA Hub 🏫
             </h1>
             <p className="text-xs text-slate-300">
-              Managing 8 Corps Members assigned to your organization for the 2024 Service Year.
+              Managing 8 Corps Members assigned for 2024 Service Year.
             </p>
           </div>
-          <button className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black transition-all flex items-center gap-2 shrink-0">
-            <Plus className="w-4 h-4" /> Add New Corper Slot
+          <button className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Add Corper Slot
           </button>
         </div>
 
-        {/* Employer Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase">Today's Attendance</span>
-              <UserCheck className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="text-2xl font-black text-black">7 / 8 Present</div>
-            <div className="text-xs text-emerald-700 font-bold">87.5% PPA Punctuality</div>
-          </div>
-
-          <div className="p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase">Pending Leaves</span>
-              <AlertCircle className="w-4 h-4 text-amber-500" />
-            </div>
-            <div className="text-2xl font-black text-black">{leaveRequests.filter(l => l.status === "pending").length} Requests</div>
-            <div className="text-xs text-slate-500">Requires your approval</div>
-          </div>
-
-          <div className="p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase">LGA Monthly Reports</span>
-              <FileText className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="text-2xl font-black text-black">August Ready</div>
-            <div className="text-xs text-slate-500">Signed & Submitted</div>
-          </div>
-
-          <div className="p-5 bg-white shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-black uppercase">PPA Rating</span>
-              <Award className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="text-2xl font-black text-black">4.9 / 5.0</div>
-            <div className="text-xs text-emerald-700 font-bold">Top NYSC Employer</div>
-          </div>
-        </div>
-
-        {/* Leave Applications Management */}
-        <div className="p-6 bg-white shadow-sm space-y-4">
-          <h2 className="text-base font-black text-black uppercase tracking-wider flex items-center gap-2">
+        <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+          <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-emerald-600" /> Corper Leave Applications
           </h2>
 
           <div className="space-y-3">
             {leaveRequests.map((req) => (
-              <div key={req.id} className="p-4 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div key={req.id} className="p-4 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <div className="font-black text-sm text-black flex items-center gap-2">
+                  <div className="font-bold text-sm text-[#121815] dark:text-white font-display flex items-center gap-2">
                     <span>{req.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-200 text-black font-mono">{req.role}</span>
+                    <span className="text-[10px] px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono">{req.role}</span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{req.reason}</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">{req.reason}</p>
                 </div>
 
                 {req.status === "pending" ? (
                   <div className="flex items-center gap-2 shrink-0">
                     <button 
                       onClick={() => handleLeaveAction(req.id, "approved")}
-                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black transition-all flex items-center gap-1"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors"
                     >
-                      <UserCheck className="w-3.5 h-3.5" /> Approve
+                      Approve
                     </button>
                     <button 
                       onClick={() => handleLeaveAction(req.id, "rejected")}
-                      className="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-black transition-all flex items-center gap-1"
+                      className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors"
                     >
-                      <UserX className="w-3.5 h-3.5" /> Reject
+                      Reject
                     </button>
                   </div>
                 ) : (
-                  <span className={`text-xs font-black uppercase tracking-wider px-3 py-1 ${
-                    req.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+                  <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 ${
+                    req.status === "approved" ? "bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 border border-emerald-600/40" : "bg-red-950/20 text-red-700 dark:text-red-300 border border-red-600/40"
                   }`}>
                     {req.status}
                   </span>
@@ -513,17 +377,6 @@ export default function DashboardOverviewPage() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Quick Link to Detailed Staff Portal */}
-        <div className="p-6 bg-black text-white flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-black">Manage Corper Logbooks & Clearance Letters</h3>
-            <p className="text-xs text-slate-400">Issue monthly clearance letters directly to LGA Inspectors.</p>
-          </div>
-          <Link href="/dashboard/workplace" className="px-4 py-2 bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600">
-            Open PPA Workplace Hub ➔
-          </Link>
         </div>
       </div>
     );
@@ -534,56 +387,42 @@ export default function DashboardOverviewPage() {
      ========================================================================= */
   if (currentRole === "cds_exec") {
     return (
-      <div className="space-y-8">
-        <div className="p-6 sm:p-8 bg-black text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
+      <div className="space-y-8 font-sans">
+        <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500 text-white font-black text-xs uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
               <Users className="w-3.5 h-3.5" />
-              Role: CDS Executive (President / Secretary)
+              <span>ROLE: CDS EXECUTIVE</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-3xl font-medium text-white tracking-tight font-display">
               Editorial & Publicity CDS Hub 📢
             </h1>
             <p className="text-xs text-slate-300">
-              Ikeja LGA Branch · 42 Registered Corps Members
+              Ikeja LGA Branch · 42 Registered Members
             </p>
           </div>
-          <Link href="/dashboard/community" className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black shrink-0">
-            Take Today's Attendance ➔
+          <Link href="/dashboard/community" className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider shrink-0">
+            Today&apos;s Attendance ➔
           </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">Total Dues Collected</span>
-            <div className="text-2xl font-black text-black">₦42,000</div>
-            <span className="text-xs text-emerald-700 font-bold">₦1,000 / Corper per month</span>
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
+            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">Total Dues Collected</span>
+            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">₦42,000</div>
+            <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">₦1,000 / Corper per month</span>
           </div>
 
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">Active Community Projects</span>
-            <div className="text-2xl font-black text-black">2 Projects</div>
-            <span className="text-xs text-slate-500">Solar Library & School Renovation</span>
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
+            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">Active Projects</span>
+            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">2 Projects</div>
+            <span className="text-xs text-slate-600 dark:text-slate-400">Solar Library & School Renovation</span>
           </div>
 
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">Next Meeting</span>
-            <div className="text-2xl font-black text-black">Thursday, 9:00 AM</div>
-            <span className="text-xs text-slate-500">Ikeja LGA Secretariat Hall</span>
-          </div>
-        </div>
-
-        <div className="p-6 bg-white shadow-sm space-y-4">
-          <h2 className="text-base font-black text-black uppercase tracking-wider">CDS Executive Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/dashboard/community" className="p-4 bg-slate-50 hover:bg-slate-100 space-y-2">
-              <div className="font-black text-sm text-black">Mark Weekly Attendance Register</div>
-              <p className="text-xs text-slate-500">Generate printable attendance PDF for the Local Government Inspector (LGI).</p>
-            </Link>
-            <Link href="/dashboard/community" className="p-4 bg-slate-50 hover:bg-slate-100 space-y-2">
-              <div className="font-black text-sm text-black">Broadcast CDS Announcement</div>
-              <p className="text-xs text-slate-500">Send instant push alert to all 42 group members regarding project dues.</p>
-            </Link>
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
+            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">Next Meeting</span>
+            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">Thursday, 9:00 AM</div>
+            <span className="text-xs text-slate-600 dark:text-slate-400">Ikeja LGA Secretariat Hall</span>
           </div>
         </div>
       </div>
@@ -595,42 +434,42 @@ export default function DashboardOverviewPage() {
      ========================================================================= */
   if (currentRole === "nysc_official") {
     return (
-      <div className="space-y-8">
-        <div className="p-6 sm:p-8 bg-black text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
+      <div className="space-y-8 font-sans">
+        <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500 text-white font-black text-xs uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Role: NYSC Local Government Inspector (LGI)
+              <span>ROLE: NYSC LGA INSPECTOR (LGI)</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Ikeja LGA Official Biometric Command Center 🏛️
+            <h1 className="text-3xl font-medium text-white tracking-tight font-display">
+              Ikeja LGA Biometric Command Center 🏛️
             </h1>
             <p className="text-xs text-slate-300">
-              Lagos State Directorate · Monitoring 1,600 Active Corps Members
+              Lagos Directorate · Monitoring 1,600 Active Corps Members
             </p>
           </div>
-          <Link href="/dashboard/companion" className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black shrink-0">
+          <Link href="/dashboard/companion" className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider shrink-0">
             Open Biometric Scanner ➔
           </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">August Biometrics Verified</span>
-            <div className="text-2xl font-black text-black">1,420 / 1,600</div>
-            <span className="text-xs text-emerald-700 font-bold">88.7% Clearance Completion</span>
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
+            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">August Biometrics Verified</span>
+            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">1,420 / 1,600</div>
+            <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">88.7% Clearance Completion</span>
           </div>
 
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">PPA Employer Reports</span>
-            <div className="text-2xl font-black text-black">148 Approved</div>
-            <span className="text-xs text-slate-500">12 Pending Query</span>
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
+            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">PPA Employer Reports</span>
+            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">148 Approved</div>
+            <span className="text-xs text-slate-600 dark:text-slate-400">12 Pending Query</span>
           </div>
 
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">Biometric Terminal</span>
-            <div className="text-2xl font-black text-emerald-600">Online & Syncing</div>
-            <span className="text-xs text-slate-500">HQ Server Ping: 12ms</span>
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
+            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">Biometric Terminal</span>
+            <div className="text-2xl font-bold font-display text-emerald-600">Online & Syncing</div>
+            <span className="text-xs text-slate-600 dark:text-slate-400">HQ Server Ping: 12ms</span>
           </div>
         </div>
       </div>
@@ -641,38 +480,36 @@ export default function DashboardOverviewPage() {
      6. EX-CORPS MEMBER (ALUMNI) VIEW
      ========================================================================= */
   return (
-    <div className="space-y-8">
-      <div className="p-6 sm:p-8 bg-black text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
+    <div className="space-y-8 font-sans">
+      <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
         <div className="space-y-2 max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500 text-white font-black text-xs uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
             <Award className="w-3.5 h-3.5" />
-            Role: Ex-Corps Member (POP Alumni)
+            <span>ROLE: EX-CORPS MEMBER (POP ALUMNI)</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Welcome to the KopaWee Alumni Launchpad! 🎓
+          <h1 className="text-3xl font-medium text-white tracking-tight font-display">
+            KopaWee Alumni Launchpad 🎓
           </h1>
           <p className="text-xs text-slate-300">
-            Sell your relocation household items, explore post-service job openings, and connect with fellow alumni.
+            Sell relocation household items and explore post-service career opportunities.
           </p>
         </div>
-        <Link href="/dashboard/marketplace" className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black shrink-0">
-          Post POP Item for Sale ➔
+        <Link href="/dashboard/marketplace" className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider shrink-0">
+          Post POP Item ➔
         </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link href="/dashboard/marketplace" className="p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-3">
-          <div className="p-3 bg-black text-white w-fit"><ShoppingBag className="w-5 h-5" /></div>
-          <h3 className="text-base font-black text-black">POP Household Deals Market</h3>
-          <p className="text-xs text-slate-500">Directly hand off mattresses, gas cylinders, and appliances to incoming corpers.</p>
-          <span className="text-xs font-bold text-emerald-600 block">Open POP Market ➔</span>
+        <Link href="/dashboard/marketplace" className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 transition-all space-y-3">
+          <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">POP Household Deals Market</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400">Directly hand off mattresses, gas cylinders, and appliances to incoming corpers.</p>
+          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block pt-1">Open POP Market ➔</span>
         </Link>
 
-        <Link href="/dashboard/workplace" className="p-6 bg-white shadow-sm hover:shadow-md transition-all space-y-3">
-          <div className="p-3 bg-black text-white w-fit"><Briefcase className="w-5 h-5" /></div>
-          <h3 className="text-base font-black text-black">Post-NYSC Career & Gigs</h3>
-          <p className="text-xs text-slate-500">NiYA Job Bank integration, CV builder, remote tech gigs, and employer referrals.</p>
-          <span className="text-xs font-bold text-emerald-600 block">Explore Jobs ➔</span>
+        <Link href="/dashboard/workplace" className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 transition-all space-y-3">
+          <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">Post-NYSC Career & Gigs</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400">NiYA Job Bank integration, CV builder, remote tech gigs, and employer referrals.</p>
+          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block pt-1">Explore Jobs ➔</span>
         </Link>
       </div>
     </div>

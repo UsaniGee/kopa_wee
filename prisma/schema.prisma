@@ -1,0 +1,158 @@
+// Prisma Schema for KopaWee (NYSC Companion App)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PCM
+  SERVING_CORPER
+  CDS_EXEC
+  EMPLOYER
+  LGA_INSPECTOR
+  ALUMNI
+}
+
+enum ListingStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+}
+
+enum LogbookStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SOSStatus {
+  ACTIVE
+  RESOLVED
+}
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  passwordHash   String
+  phone          String?
+  role           Role     @default(PCM)
+  stateOfOrigin  String?
+  deployedState  String?
+  lga            String?
+  ppaName        String?
+  callUpNo       String?
+  stateCode      String?  @unique
+  avatarUrl      String?
+  isVerified     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relationships
+  checklist           CampChecklist?
+  accommodations      AccommodationListing[]
+  marketplaceItems    MarketplaceItem[]
+  logbookEntries      PPALogbookEntry[]      @relation("CorperLogbooks")
+  approvedLogbooks    PPALogbookEntry[]      @relation("EmployerApprovals")
+  sosAlerts           SOSAlert[]
+
+  @@index([role])
+  @@index([deployedState])
+}
+
+model CampChecklist {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completedItems Json     @default("[]")
+  updatedAt      DateTime @updatedAt
+}
+
+model AccommodationListing {
+  id            String        @id @default(cuid())
+  title         String
+  description   String
+  location      String
+  state         String
+  lga           String
+  price         String
+  splitInfo     String?
+  contactPhone  String
+  images        String[]
+  status        ListingStatus @default(AVAILABLE)
+  ownerId       String
+  owner         User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([state, lga])
+}
+
+model MarketplaceItem {
+  id          String        @id @default(cuid())
+  title       String
+  category    String
+  price       String
+  description String
+  state       String
+  lga         String
+  images      String[]
+  status      ListingStatus @default(AVAILABLE)
+  sellerId    String
+  seller      User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([state, category])
+}
+
+model PPALogbookEntry {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation("CorperLogbooks", fields: [userId], references: [id], onDelete: Cascade)
+  date        String
+  summary     String
+  hoursWorked Int           @default(8)
+  status      LogbookStatus @default(PENDING)
+  employerId  String?
+  employer    User?         @relation("EmployerApprovals", fields: [employerId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId, date])
+}
+
+model CDSEvent {
+  id          String   @id @default(cuid())
+  title       String
+  cdsGroup    String
+  state       String
+  lga         String
+  date        String
+  location    String
+  description String
+  attendees   Json     @default("[]")
+  createdAt   DateTime @default(now())
+
+  @@index([cdsGroup, state])
+}
+
+model SOSAlert {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude    Float
+  longitude   Float
+  state       String
+  lga         String
+  message     String
+  status      SOSStatus @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+
+  @@index([state, status])
+}

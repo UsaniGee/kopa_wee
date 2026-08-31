@@ -2,11 +2,35 @@
 
 import React, { useState } from "react";
 import { useRole } from "@/shared/context/RoleContext";
-import { Users, CheckCircle2, DollarSign, Calendar, MapPin, Download, AlertCircle, Luggage, ShieldCheck } from "lucide-react";
+import { FiUsers, FiCheckCircle, FiDollarSign, FiCalendar, FiMapPin, FiDownload, FiAlertCircle, FiPackage, FiShield, FiUserCheck, FiUserX, FiClock } from "react-icons/fi";
+const Users = FiUsers, CheckCircle2 = FiCheckCircle, DollarSign = FiDollarSign, Calendar = FiCalendar, MapPin = FiMapPin, Download = FiDownload, AlertCircle = FiAlertCircle, Luggage = FiPackage, ShieldCheck = FiShield, UserCheck = FiUserCheck, UserX = FiUserX, Clock = FiClock;
+
+interface MemberAttendance {
+  id: string;
+  name: string;
+  ppa: string;
+  status: "present" | "absent" | "late";
+  duesPaid: boolean;
+}
 
 export default function CommunityPage() {
   const { currentRole } = useRole();
   const [duesPaid, setDuesPaid] = useState(true);
+
+  const [members, setMembers] = useState<MemberAttendance[]>([
+    { id: "m1", name: "Corper Tunde Bakare", ppa: "Lagos State Secretariat", status: "present", duesPaid: true },
+    { id: "m2", name: "Corper Aisha Mohammed", ppa: "Ikeja Junior High School", status: "present", duesPaid: true },
+    { id: "m3", name: "Corper Emeka Nwosu", ppa: "First Bank Ikeja", status: "absent", duesPaid: false },
+    { id: "m4", name: "Corper Blessing Okon", ppa: "Lagos State Ministry of Health", status: "late", duesPaid: true },
+  ]);
+
+  const handleMarkStatus = (id: string, status: "present" | "absent" | "late") => {
+    setMembers(prev => prev.map(m => m.id === id ? { ...m, status } : m));
+  };
+
+  const handleToggleDues = (id: string) => {
+    setMembers(prev => prev.map(m => m.id === id ? { ...m, duesPaid: !m.duesPaid } : m));
+  };
 
   const duesHistory = [
     { month: "August 2026", amount: "₦1,000", status: "Paid", ref: "CDS-AUG-4819" },
@@ -14,152 +38,78 @@ export default function CommunityPage() {
     { month: "June 2026", amount: "₦1,000", status: "Paid", ref: "CDS-JUN-1092" },
   ];
 
-  // =========================================================================
-  // PCM VIEW (NO CDS YET)
-  // =========================================================================
   if (currentRole === "pcm") {
     return (
-      <div className="space-y-8">
-        <div className="p-8 bg-white shadow-sm border-l-4 border-amber-500 space-y-4">
-          <div className="flex items-center gap-3 text-amber-900 font-black text-sm uppercase tracking-wider">
-            <Luggage className="w-5 h-5 text-amber-600" />
-            PCM Stage: CDS Group Locked
+      <div className="space-y-8 font-sans">
+        <div className="p-8 bg-[#121815] text-white border border-slate-800 space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
+            <Luggage className="w-3.5 h-3.5" /> PCM Portal
           </div>
-          <h1 className="text-2xl font-black text-black">Community Development Service (CDS)</h1>
-          <p className="text-xs text-slate-600 max-w-xl leading-relaxed">
-            Community Development Service (CDS) group assignments occur after orientation camp when you report to your Local Government Inspector (LGI). Features unlock automatically when you transition to <strong>Serving Corps Member</strong>.
-          </p>
+          <h1 className="text-3xl font-medium text-white tracking-tight font-display">CDS Group Locked</h1>
+          <p className="text-xs text-slate-300">CDS group assignments occur after orientation camp posting.</p>
         </div>
       </div>
     );
   }
 
-  // =========================================================================
-  // CDS EXECUTIVE VIEW
-  // =========================================================================
-  if (currentRole === "cds_exec") {
-    return (
-      <div className="space-y-8">
-        <div className="p-6 bg-black text-white space-y-2">
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-slate-900 px-3 py-1 inline-block">
-            • CDS Executive Hub
-          </span>
-          <h1 className="text-2xl font-black text-white">Editorial & Publicity CDS Executive Portal</h1>
-          <p className="text-xs text-slate-400">Manage 42 registered group members, track dues payments, and output attendance registers.</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">August Dues Collection</span>
-            <div className="text-2xl font-black text-black">₦42,000</div>
-            <span className="text-xs text-emerald-700 font-bold">100% Collection Rate</span>
-          </div>
-
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">Active Projects</span>
-            <div className="text-2xl font-black text-black">2 Projects</div>
-            <span className="text-xs text-slate-500">Computer Lab & Solar Light</span>
-          </div>
-
-          <div className="p-6 bg-white shadow-sm space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-500">LGI Attendance PDF</span>
-            <div className="text-2xl font-black text-emerald-600">Ready to Print</div>
-            <span className="text-xs text-slate-500">Signed by CDS Sec.</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // =========================================================================
-  // SERVING CORPS MEMBER VIEW
-  // =========================================================================
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white shadow-sm">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 inline-block mb-2">
-            • Serving Corper Module
-          </span>
-          <h1 className="text-2xl font-black text-black">CDS Community Group Manager</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Friday CDS group meeting attendance, monthly dues ledger, and community project collaboration.
+    <div className="space-y-8 font-sans">
+      
+      {/* Header Banner */}
+      <div className="p-8 bg-[#121815] text-white border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2 max-w-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
+            <Users className="w-3.5 h-3.5" />
+            <span>CDS GROUP MANAGEMENT</span>
+          </div>
+          <h1 className="text-3xl font-medium text-white tracking-tight font-display">
+            Education & Publicity CDS Group
+          </h1>
+          <p className="text-xs text-slate-300">
+            Ikeja LGA Secretariat · Every Thursday 09:00 AM · 42 Active Members.
           </p>
         </div>
 
-        <button
-          onClick={() => setDuesPaid(!duesPaid)}
-          className={`px-5 py-3 text-xs font-black transition-all flex items-center gap-2 shrink-0 ${
-            duesPaid ? "bg-emerald-600 text-white" : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-md"
-          }`}
-        >
-          <DollarSign className="w-4 h-4" />
-          <span>{duesPaid ? "August Dues Paid (₦1,000)" : "Pay August CDS Dues"}</span>
+        <button className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer shrink-0">
+          <Download className="w-4 h-4" />
+          <span>Download Attendance PDF</span>
         </button>
       </div>
 
-      {/* Group Info Card */}
-      <div className="p-6 bg-black text-white shadow-md space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">Assigned CDS Group</span>
-            <h2 className="text-xl font-black">Education & ICT CDS Development Group</h2>
-            <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-              <MapPin className="w-3.5 h-3.5 text-emerald-400" /> Ikeja High School Hall, Oba Akran, Lagos
-            </p>
-          </div>
+      {/* Attendance Register Table */}
+      <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+        <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
+          <Clock className="w-4 h-4 text-emerald-600" /> Weekly Attendance Register
+        </h2>
 
-          <div className="p-3 bg-slate-900 text-right space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase block">Next Meeting</span>
-            <span className="text-sm font-black text-white block">Friday, 08:30 AM</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="p-4 bg-slate-900 space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">CDS President</span>
-            <span className="font-bold text-white block">Corper Temitope B.</span>
-          </div>
-          <div className="p-4 bg-slate-900 space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">Group Members</span>
-            <span className="font-bold text-emerald-400 block">48 Active Corps Members</span>
-          </div>
-          <div className="p-4 bg-slate-900 space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">Community Project</span>
-            <span className="font-bold text-white block">Ikeja Library Computer Lab Renovation</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Dues History Ledger */}
-      <div className="p-6 bg-white shadow-sm space-y-6">
-        <h2 className="text-base font-black text-black">Monthly CDS Dues Payment Receipts</h2>
-
-        <div className="divide-y divide-slate-100">
-          {duesHistory.map((d, i) => (
-            <div key={i} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-3">
-                <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
-                <div>
-                  <span className="font-bold text-black">{d.month}</span>
-                  <span className="text-[10px] text-slate-400 block">Ref: {d.ref}</span>
-                </div>
+        <div className="space-y-2">
+          {members.map((m) => (
+            <div key={m.id} className="p-4 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+              <div>
+                <div className="font-bold text-[#121815] dark:text-white font-display">{m.name}</div>
+                <div className="text-slate-500">{m.ppa}</div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <span className="font-black text-black">{d.amount}</span>
-                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                  {d.status}
-                </span>
-                <button className="p-1 text-slate-400 hover:text-black" title="Download Receipt">
-                  <Download className="w-3.5 h-3.5" />
-                </button>
+              <div className="flex items-center gap-2">
+                {(["present", "late", "absent"] as const).map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => handleMarkStatus(m.id, st)}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                      m.status === st
+                        ? "bg-emerald-700 text-white border-emerald-700"
+                        : "bg-[#dcece1] dark:bg-[#121a16] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800"
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
               </div>
             </div>
           ))}
         </div>
       </div>
+
     </div>
   );
 }

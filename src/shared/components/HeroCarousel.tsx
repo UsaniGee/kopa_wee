@@ -3,43 +3,60 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play, Zap } from "lucide-react";
+import { 
+  FiArrowRight, 
+  FiArrowDown, 
+  FiChevronLeft,
+  FiChevronRight,
+  FiPlay, 
+  FiPause 
+} from "react-icons/fi";
 import { services, type Service } from "@/shared/data/services";
 
 interface HeroCarouselProps {
-  onOpenRoleModal: () => void;
   onSlideChange?: (index: number) => void;
 }
 
-const AUTOPLAY_MS = 6000;
+const AUTOPLAY_MS = 6500;
 
 function heroSupportLine(service: Service): string {
   const first = service.storyNarrative.split(/(?<=[.!?])\s+/)[0];
   return first ?? service.tagline;
 }
 
-export default function HeroCarousel({ onOpenRoleModal, onSlideChange }: HeroCarouselProps) {
+export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const isTransitioning = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef<number | null>(null);
   const isTouchDevice = useRef(false);
 
   const goTo = useCallback(
     (index: number) => {
-      if (isTransitioning) return;
-      setIsTransitioning(true);
-      const next = ((index % services.length) + services.length) % services.length;
-      setActiveIndex(next);
-      onSlideChange?.(next);
-      setTimeout(() => setIsTransitioning(false), 700);
+      if (isTransitioning.current) return;
+      isTransitioning.current = true;
+
+      setActiveIndex((prev) => {
+        const nextIdx = ((index % services.length) + services.length) % services.length;
+        onSlideChange?.(nextIdx);
+        return nextIdx;
+      });
+
+      setTimeout(() => {
+        isTransitioning.current = false;
+      }, 600);
     },
-    [isTransitioning, onSlideChange]
+    [onSlideChange]
   );
 
-  const next = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
-  const prev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
+  const next = useCallback(() => {
+    goTo(activeIndex + 1);
+  }, [activeIndex, goTo]);
+
+  const prev = useCallback(() => {
+    goTo(activeIndex - 1);
+  }, [activeIndex, goTo]);
 
   // Touch swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -56,7 +73,6 @@ export default function HeroCarousel({ onOpenRoleModal, onSlideChange }: HeroCar
     touchStartX.current = null;
   };
 
-  // Only pause on hover for non-touch devices
   const handleMouseEnter = () => {
     if (!isTouchDevice.current) setIsPaused(true);
   };
@@ -66,156 +82,198 @@ export default function HeroCarousel({ onOpenRoleModal, onSlideChange }: HeroCar
 
   useEffect(() => {
     if (isPaused) return;
-    timerRef.current = setInterval(next, AUTOPLAY_MS);
+
+    timerRef.current = setInterval(() => {
+      setActiveIndex((current) => {
+        const nextIdx = (current + 1) % services.length;
+        onSlideChange?.(nextIdx);
+        return nextIdx;
+      });
+    }, AUTOPLAY_MS);
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isPaused, next, activeIndex]);
+  }, [isPaused, onSlideChange]);
 
   const slide = services[activeIndex];
 
+  const scrollToNextSection = () => {
+    const el = document.querySelector("#services");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+    }
+  };
+
   return (
     <section
-      className="relative min-h-svh overflow-hidden bg-white border-b border-[var(--color-border)]"
+      className="relative min-h-screen w-full flex flex-col justify-between bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-slate-100 transition-colors duration-500 overflow-hidden"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      aria-label="KopaWee service story carousel"
-      aria-roledescription="carousel"
+      aria-label="KopaWee Hero"
     >
-      {/* Full background layout */}
-      <div className="relative w-full min-h-svh flex items-center pt-24 pb-16">
-        {/* Background Images */}
-        {services.map((svc, i) => (
-          <div
-            key={svc.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${i === activeIndex ? "opacity-100 z-0" : "opacity-0 -z-10"}`}
-            aria-hidden={i !== activeIndex}
-          >
-            <Image
-              src={svc.image}
-              alt={svc.imageAlt}
-              fill
-              priority={i <= 1}
-              unoptimized
-              sizes="100vw"
-              className="object-cover object-center"
-            />
-            {/* Greenish gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--nysc-green-dark)]/90 via-[var(--nysc-green)]/70 to-black/40" />
-          </div>
-        ))}
+      {/* Top Navigation Padding Spacer */}
+      <div className="pt-24 sm:pt-28 lg:pt-32" />
 
-        {/* Copy panel — Text on top */}
-        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 flex flex-col justify-center text-center md:text-left text-white max-w-5xl mx-auto md:mx-0 lg:ml-12">
-          <div className="max-w-2xl space-y-6 mx-auto md:mx-0">
-            <div key={`brand-${activeIndex}`} className="hero-content-enter space-y-1">
-              <p className="text-3xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
-                KopaWee<span className="text-emerald-300">+</span>
+      {/* Main Full-Screen Asymmetrical Grid */}
+      <div className=" mx-auto px-6 sm:px-10 lg:px-16 w-full flex-1 flex flex-col justify-center py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-10 lg:gap-12">
+          
+          {/* Left Column: Airy Typography & Direct Action Buttons */}
+          <div className="lg:col-span-6 z-20 relative flex flex-col justify-center text-left">
+            <div key={`scandi-hero-left-${activeIndex}`} className="hero-content-enter">
+              
+              {/* Minimalist Metadata Overline */}
+              <div className="flex items-center gap-3 mb-3">
+                <span className="h-px w-8 bg-emerald-600 dark:bg-emerald-400" />
+                <p className="text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase text-emerald-800 dark:text-emerald-300 font-display">
+                  {slide.storyChapter} · {slide.category}
+                </p>
+              </div>
+
+              {/* High-Impact Confident Display Title */}
+              <h1 className="text-5xl sm:text-7xl lg:text-8xl xl:text-[7.2rem] font-medium text-[#121815] dark:text-white tracking-tight leading-[0.94] font-display lg:-mr-24 relative z-30 pointer-events-none drop-shadow-xs">
+                {slide.id === "camp" ? "KopaWee" : slide.title.split("&")[0].trim()}
+              </h1>
+
+              {/* Purposeful Body Copy (Lagom - Form follows function) */}
+              <p className="text-base sm:text-lg lg:text-xl text-slate-700 dark:text-slate-300 font-normal leading-relaxed mt-6 sm:mt-8 mb-8 sm:mb-10 max-w-lg">
+                {heroSupportLine(slide)}
               </p>
-              <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-emerald-100 drop-shadow-sm">
-                NYSC Companion
-              </p>
-            </div>
 
-            <h1
-              key={`headline-${activeIndex}`}
-              className="hero-content-enter hero-content-enter-delay-1 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08] drop-shadow-lg"
-            >
-              {slide.storyHeadline}
-            </h1>
+              {/* Direct Action Buttons (No Popups/Modals) */}
+              <div className="flex flex-wrap items-center gap-4 pt-1">
+                {/* Primary CTA: GET STARTED -> Sign Up directly */}
+                <Link
+                  href="/auth?mode=signup"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm tracking-[0.18em] uppercase px-8 sm:px-10 py-4 sm:py-4.5 flex items-center justify-center gap-3 transition-all duration-300 shadow-md hover:shadow-lg group rounded-none"
+                >
+                  <span>GET STARTED</span>
+                  <FiArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </Link>
 
-            <p
-              key={`support-${activeIndex}`}
-              className="hero-content-enter hero-content-enter-delay-2 text-base sm:text-xl text-emerald-50 leading-relaxed drop-shadow-md max-w-xl mx-auto md:mx-0"
-            >
-              {heroSupportLine(slide)}
-            </p>
+                {/* Secondary CTA: EXPLORE FEATURES -> Smooth scroll */}
+                <button
+                  onClick={scrollToNextSection}
+                  className="border border-[#121815]/30 dark:border-white/30 hover:border-emerald-600 dark:hover:border-emerald-400 text-[#121815] dark:text-white hover:text-emerald-700 font-semibold text-xs sm:text-sm tracking-[0.15em] uppercase px-7 sm:px-8 py-4 sm:py-4.5 flex items-center justify-center gap-2.5 transition-all duration-300 rounded-none cursor-pointer"
+                >
+                  <span>EXPLORE FEATURES</span>
+                  <FiArrowDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
-            <div
-              key={`cta-${activeIndex}`}
-              className="hero-content-enter hero-content-enter-delay-3 flex flex-col sm:flex-row items-center md:items-start gap-4 pt-4 justify-center md:justify-start"
-            >
-              <Link
-                href="/auth?mode=signup"
-                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2 group"
-              >
-                <Zap className="w-4 h-4 fill-white" />
-                <span>Sign Up Free</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href="/auth?mode=signin"
-                className="w-full sm:w-auto px-8 py-4 bg-white/20 hover:bg-white hover:text-black text-white font-bold text-sm transition-all flex items-center justify-center gap-2 backdrop-blur-sm"
-              >
-                <span>Sign In</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
             </div>
           </div>
+
+          {/* Right Column: Full Bleed Framed Imagery */}
+          <div className="lg:col-span-6 relative z-10 w-full mt-4 lg:mt-0">
+            <div className="relative w-full max-w-xl lg:max-w-none mx-auto">
+              
+              {/* Border Lines Frame */}
+              <div className="absolute -inset-3 sm:-inset-4 border border-emerald-900/15 dark:border-emerald-500/20 z-0 pointer-events-none" />
+
+              {/* Image Pane */}
+              <div key={`scandi-hero-img-${activeIndex}`} className="relative z-10 w-full aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] overflow-hidden bg-slate-200 dark:bg-slate-900 shadow-xl transition-all duration-700">
+                {services.map((svc, i) => (
+                  <div
+                    key={svc.id}
+                    className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                      i === activeIndex
+                        ? "opacity-100 scale-100 z-10"
+                        : "opacity-0 scale-105 z-0"
+                    }`}
+                  >
+                    <Image
+                      src={svc.image}
+                      alt={svc.imageAlt}
+                      fill
+                      priority={i <= 1}
+                      unoptimized
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-cover object-center filter brightness-[0.98] contrast-[1.02]"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Minimalist Slide Navigation Buttons */}
+              <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1 bg-[#eaf5ed]/90 dark:bg-[#0a0f0d]/90 backdrop-blur-md p-1 border border-slate-300 dark:border-slate-800">
+                <button
+                  onClick={prev}
+                  aria-label="Previous service"
+                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-white transition-colors cursor-pointer"
+                >
+                  <FiChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-mono font-bold px-2 text-slate-700 dark:text-slate-300">
+                  0{activeIndex + 1} / 0{services.length}
+                </span>
+                <button
+                  onClick={next}
+                  aria-label="Next service"
+                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-white transition-colors cursor-pointer"
+                >
+                  <FiChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Carousel controls */}
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 flex-wrap justify-center">
-              {services.map((svc, i) => (
-                <button
-                  key={svc.id}
-                  onClick={() => goTo(i)}
-                  aria-label={`Go to ${svc.title}`}
-                  aria-current={i === activeIndex ? "true" : undefined}
-                  className="p-1 transition-all"
-                >
-                  <span
-                    className={`block h-2 transition-all ${
-                      i === activeIndex
-                        ? "bg-emerald-500 w-8"
-                        : "bg-slate-200 hover:bg-slate-400 w-2"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
+      {/* Bottom Bar: Minimalist Functional Footer */}
+      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 w-full py-6 flex flex-row items-center justify-between border-t border-slate-300/70 dark:border-emerald-900/30 text-xs text-slate-600 dark:text-slate-400">
+        
+        {/* Left: Scroll indicator */}
+        <button
+          onClick={scrollToNextSection}
+          className="flex items-center gap-3 group cursor-pointer text-left"
+        >
+          <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-700 transition-colors">
+            Scroll to explore
+          </span>
+          <FiArrowDown className="w-3.5 h-3.5 text-emerald-600 group-hover:translate-y-0.5 transition-transform" />
+        </button>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-black uppercase tracking-[0.2em] hidden sm:inline">
-                {slide.storyChapter}
-              </span>
-              <button
-                onClick={() => setIsPaused((p) => !p)}
-                aria-label={isPaused ? "Resume autoplay" : "Pause autoplay"}
-                className="p-2 bg-slate-100 hover:bg-slate-200 text-black transition-colors"
-              >
-                {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-              </button>
-              <button
-                onClick={prev}
-                aria-label="Previous slide"
-                className="p-2 bg-slate-100 hover:bg-slate-200 text-black transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={next}
-                aria-label="Next slide"
-                className="p-2 bg-slate-100 hover:bg-slate-200 text-black transition-colors"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-3 h-1 bg-slate-100 overflow-hidden">
-            <div
-              key={`progress-${activeIndex}-${isPaused}`}
-              className={`h-full bg-emerald-500 ${isPaused ? "" : "hero-progress-bar"}`}
-            />
-          </div>
+        {/* Center: Slide Indicators */}
+        <div className="hidden md:flex items-center gap-2">
+          {services.map((svc, i) => (
+            <button
+              key={svc.id}
+              onClick={() => goTo(i)}
+              aria-label={`Go to ${svc.title}`}
+              className="p-1 transition-all"
+            >
+              <span
+                className={`block h-1 transition-all ${
+                  i === activeIndex
+                    ? "bg-emerald-600 w-8"
+                    : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 w-2"
+                }`}
+              />
+            </button>
+          ))}
+          <button
+            onClick={() => setIsPaused((p) => !p)}
+            aria-label={isPaused ? "Resume autoplay" : "Pause autoplay"}
+            className="ml-3 text-[10px] uppercase font-bold tracking-widest text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+          >
+            {isPaused ? "Play" : "Pause"}
+          </button>
         </div>
+
+        {/* Right: Functional Platform Tag */}
+        <div className="flex items-center gap-2 font-mono text-[11px]">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>NYSC COMPANION · ACTIVE</span>
+        </div>
+
       </div>
     </section>
   );

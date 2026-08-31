@@ -2,131 +2,184 @@
 
 import React, { useState } from "react";
 import { useRole } from "@/shared/context/RoleContext";
-import { ShieldAlert, MapPin, PhoneCall, AlertTriangle, CheckCircle2, Radio, UserCheck, Luggage } from "lucide-react";
+import { FiAlertOctagon, FiMapPin, FiPhone, FiAlertTriangle, FiCheckCircle, FiRadio, FiUserCheck, FiPackage, FiPlus, FiTrash2, FiLock, FiClock, FiX, FiShield } from "react-icons/fi";
+
+const ShieldAlert = FiAlertOctagon;
+const MapPin = FiMapPin;
+const Phone = FiPhone;
+const AlertTriangle = FiAlertTriangle;
+const CheckCircle2 = FiCheckCircle;
+const Radio = FiRadio;
+const UserCheck = FiUserCheck;
+const Luggage = FiPackage;
+const Plus = FiPlus;
+const Trash2 = FiTrash2;
+const Lock = FiLock;
+const Clock = FiClock;
+const X = FiX;
+const ShieldCheck = FiShield;
+
+interface TrustedContact {
+  id: string;
+  name: string;
+  relationship: string;
+  phone: string;
+}
 
 export default function SafetyPage() {
   const { currentRole } = useRole();
   const [sosActive, setSosActive] = useState(false);
   const [tripActive, setTripActive] = useState(true);
+  
+  const [contacts, setContacts] = useState<TrustedContact[]>([
+    { id: "1", name: "Mr. & Mrs. Okeke", relationship: "Parents", phone: "+234 803 123 4567" },
+    { id: "2", name: "Corper President Ikeja", relationship: "Local Corper Rep", phone: "+234 812 987 6543" },
+    { id: "3", name: "NYSC HQ Emergency Response", relationship: "NYSC Official", phone: "0700-CALL-NYSC" },
+  ]);
+
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [newContactName, setNewContactName] = useState("");
+  const [newContactRel, setNewContactRel] = useState("");
+  const [newContactPhone, setNewContactPhone] = useState("");
+
+  const [tripModalOpen, setTripModalOpen] = useState(false);
+  const [originState, setOriginState] = useState("Lagos State");
+  const [destinationState, setDestinationState] = useState("Kaduna NYSC Camp");
+  const [pingInterval, setPingInterval] = useState("2 Hours");
+
+  const handleAddContact = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newContactName.trim() || !newContactPhone.trim()) return;
+    if (contacts.length >= 5) {
+      alert("Maximum 5 trusted safety contacts allowed.");
+      return;
+    }
+    const newEntry: TrustedContact = {
+      id: "contact_" + Date.now(),
+      name: newContactName.trim(),
+      relationship: newContactRel.trim() || "Contact",
+      phone: newContactPhone.trim(),
+    };
+    setContacts(prev => [...prev, newEntry]);
+    setNewContactName("");
+    setNewContactRel("");
+    setNewContactPhone("");
+    setAddModalOpen(false);
+  };
+
+  const handleDeleteContact = (id: string) => {
+    setContacts(prev => prev.filter(c => c.id !== id));
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white shadow-sm">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 inline-block mb-2">
-            • {currentRole === "pcm" ? "PCM Travel Safety" : "Emergency Safety Module"}
-          </span>
-          <h1 className="text-2xl font-black text-black">
-            {currentRole === "pcm" ? "Camp Highway Journey & Route Safety" : "Emergency & Highway Travel SOS Safety"}
+    <div className="space-y-8 font-sans">
+      
+      {/* Header Banner */}
+      <div className="p-8 bg-[#121815] text-white border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2 max-w-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>TRAVEL & SOS SAFETY TRACKER</span>
+          </div>
+          <h1 className="text-3xl font-medium text-white tracking-tight font-display">
+            Highway Convoys & Emergency Broadcast
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            {currentRole === "pcm" 
-              ? "Proactive travel safety check-ins for PCMs journeying to orientation camp."
-              : "Proactive status check-ins during long-distance highway trips between home state, camp, & PPA."}
+          <p className="text-xs text-slate-300">
+            Real-time travel check-in and encrypted SOS alerts sent to your designated trusted contacts.
           </p>
         </div>
 
         <button
           onClick={() => setSosActive(!sosActive)}
-          className={`px-6 py-3.5 text-xs font-black transition-all flex items-center gap-2 shrink-0 ${
-            sosActive ? "bg-red-600 text-white animate-pulse" : "bg-red-600 hover:bg-red-700 text-white shadow-lg"
+          className={`px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-2 cursor-pointer ${
+            sosActive
+              ? "bg-red-700 text-white border border-red-500 animate-pulse"
+              : "bg-red-600 hover:bg-red-700 text-white"
           }`}
         >
-          <AlertTriangle className="w-4 h-4" />
-          <span>{sosActive ? "SOS Alert Broadcasting..." : "Emergency SOS Trigger"}</span>
+          <Radio className="w-4 h-4" />
+          <span>{sosActive ? "SOS EMERGENCY BROADCASTING" : "TRIGGER SOS BROADCAST"}</span>
         </button>
       </div>
 
-      {/* SOS Active Banner */}
+      {/* SOS Active Alert Box */}
       {sosActive && (
-        <div className="p-6 bg-red-50 text-red-900 border-2 border-red-600 space-y-3">
-          <div className="flex items-center gap-2 font-black text-lg text-red-700">
-            <Radio className="w-5 h-5 animate-spin" /> Live Emergency Broadcast Initiated
+        <div className="p-6 bg-red-950/40 border border-red-600/50 text-white space-y-3">
+          <div className="flex items-center gap-2 text-red-400 font-bold font-display text-sm">
+            <AlertTriangle className="w-5 h-5" />
+            <span>EMERGENCY SOS ACTIVE</span>
           </div>
-          <p className="text-xs">
-            Your live GPS location (<strong className="font-bold">Lagos-Ibadan Expressway, Km 42</strong>) has been broadcast to your emergency contacts and local NYSC representatives.
+          <p className="text-xs text-slate-300">
+            GPS Location pinged to {contacts.length} trusted contacts and NYSC Security Desk.
           </p>
-          <button
-            onClick={() => setSosActive(false)}
-            className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white text-xs font-bold"
-          >
-            Cancel False Alarm
-          </button>
         </div>
       )}
 
-      {/* Active Trip Tracker Card */}
-      <div className="p-6 bg-black text-white space-y-6 shadow-md">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Radio className="w-5 h-5 text-emerald-400 animate-pulse" />
-            <div>
-              <h2 className="text-base font-black">
-                {currentRole === "pcm" ? "PCM Orientation Camp Journey Tracker" : "Active Trip Monitor"}
-              </h2>
-              <span className="text-xs text-slate-400">Interstate Highway Journey Status</span>
-            </div>
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Highway Travel Monitoring */}
+        <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-emerald-600" /> Active Highway Convoy Tracker
+            </h2>
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-emerald-700 text-white uppercase">
+              {tripActive ? "Active Trip" : "Idle"}
+            </span>
+          </div>
+
+          <div className="p-5 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 space-y-2 text-xs">
+            <div><strong>Route:</strong> {originState} ➔ {destinationState}</div>
+            <div><strong>Check-in Interval:</strong> Every {pingInterval}</div>
+            <div className="text-emerald-700 dark:text-emerald-400 font-semibold">Status: Convoy on schedule (Last ping 12m ago)</div>
           </div>
 
           <button
-            onClick={() => setTripActive(!tripActive)}
-            className="px-3 py-1.5 bg-slate-800 text-xs font-bold text-emerald-400 hover:bg-slate-700"
+            onClick={() => setTripModalOpen(true)}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
-            {tripActive ? "End Trip Monitor" : "Start New Trip"}
+            Configure Trip & Check-ins ➔
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
-          <div className="p-4 bg-slate-900 space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">Route</span>
-            <span className="text-sm font-black text-white block">
-              {currentRole === "pcm" ? "Lagos (Home) → Kaduna NYSC Camp" : "Abuja (FCT) → Lagos (Ikeja)"}
-            </span>
+        {/* Trusted Contacts Vault */}
+        <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
+              <Phone className="w-4 h-4 text-emerald-600" /> Emergency Trusted Contacts ({contacts.length}/5)
+            </h2>
+
+            {contacts.length < 5 && (
+              <button
+                onClick={() => setAddModalOpen(true)}
+                className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider hover:underline"
+              >
+                + Add Contact
+              </button>
+            )}
           </div>
-          <div className="p-4 bg-slate-900 space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">Last Check-In</span>
-            <span className="text-sm font-black text-emerald-400 block">Lokoja Junction (1h 40m ago)</span>
-          </div>
-          <div className="p-4 bg-slate-900 space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">Est. Arrival</span>
-            <span className="text-sm font-black text-white block">Today, 5:30 PM</span>
-          </div>
-          <div className="p-4 bg-slate-900 space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 uppercase">Auto ping Interval</span>
-            <span className="text-sm font-black text-white block">Every 2 Hours</span>
+
+          <div className="space-y-2">
+            {contacts.map((c) => (
+              <div key={c.id} className="p-3.5 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 flex items-center justify-between text-xs">
+                <div>
+                  <div className="font-bold text-[#121815] dark:text-white font-display">{c.name}</div>
+                  <div className="text-slate-500">{c.relationship} · {c.phone}</div>
+                </div>
+                <button
+                  onClick={() => handleDeleteContact(c.id)}
+                  className="text-slate-400 hover:text-red-600 cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
           </div>
         </div>
+
       </div>
 
-      {/* Designated Emergency Responders */}
-      <div className="p-6 bg-white shadow-sm space-y-6">
-        <h2 className="text-base font-black text-black flex items-center gap-2">
-          <UserCheck className="w-4 h-4 text-emerald-600" /> Designated Emergency Responders
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-slate-50 space-y-2">
-            <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-100 px-2 py-0.5">Primary Contact</span>
-            <h3 className="text-sm font-bold text-black">Mr. & Mrs. Okeke (Parents)</h3>
-            <p className="text-xs text-slate-500">+234 803 123 4567</p>
-          </div>
-          <div className="p-4 bg-slate-50 space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-700 bg-slate-200 px-2 py-0.5">
-              {currentRole === "pcm" ? "Camp Security Desk" : "LGA Corper Rep"}
-            </span>
-            <h3 className="text-sm font-bold text-black">
-              {currentRole === "pcm" ? "Kaduna Camp Security Officer" : "Corper President (Ikeja LGA)"}
-            </h3>
-            <p className="text-xs text-slate-500">+234 812 987 6543</p>
-          </div>
-          <div className="p-4 bg-slate-50 space-y-2">
-            <span className="text-[10px] font-black uppercase text-slate-700 bg-slate-200 px-2 py-0.5">NYSC Distress Helpline</span>
-            <h3 className="text-sm font-bold text-black">NYSC HQ Emergency Response</h3>
-            <p className="text-xs text-slate-500">0700-CALL-NYSC</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

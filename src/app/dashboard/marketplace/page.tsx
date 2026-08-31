@@ -1,21 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRole } from "@/shared/context/RoleContext";
-import { 
-  ShoppingBag, 
-  Plus, 
-  Filter, 
-  MapPin, 
-  Tag, 
-  MessageSquare, 
-  CheckCircle2,
-  X,
-  Luggage,
-  Award,
-  Compass,
-  Navigation
-} from "lucide-react";
+import { FiShoppingBag, FiPlus, FiFilter, FiMapPin, FiTag, FiMessageSquare, FiCheckCircle, FiX, FiPackage, FiAward, FiCompass, FiNavigation, FiAlertTriangle, FiFlag } from "react-icons/fi";
+import { HiSparkles } from "react-icons/hi2";
+
+const ShoppingBag = FiShoppingBag;
+const Plus = FiPlus;
+const Filter = FiFilter;
+const MapPin = FiMapPin;
+const Tag = FiTag;
+const MessageSquare = FiMessageSquare;
+const CheckCircle2 = FiCheckCircle;
+const X = FiX;
+const Luggage = FiPackage;
+const Award = FiAward;
+const Compass = FiCompass;
+const Navigation = FiNavigation;
+const Sparkles = HiSparkles;
+const AlertTriangle = FiAlertTriangle;
+const Flag = FiFlag;
+const Wand2 = HiSparkles;
 
 interface Listing {
   id: string;
@@ -23,34 +28,25 @@ interface Listing {
   price: number;
   state: string;
   location: string;
+  distanceKm: number;
   seller: string;
   roleBadge: string;
+  badgeType: "verified" | "unverified" | "corps_member" | "business";
   category: string;
   condition: string;
   imageBg: string;
+  imageUrl: string;
   forRoles: ("pcm" | "serving" | "alumni")[];
 }
 
 const SAMPLE_LISTINGS: Listing[] = [
-  // Lagos State PCM & Corper Listings
-  { id: "pcm_1", title: "Plain White Rubber Shoes (Size 42 - Camp Approved)", price: 4500, state: "Lagos", location: "Ikeja LGA, Lagos", seller: "Corper Blessing", roleBadge: "Camp Essential", category: "Pre-Camp Gear", condition: "Brand New", imageBg: "bg-emerald-700", forRoles: ["pcm"] },
-  { id: "pcm_2", title: "Original Anker 20,000mAh Power Bank", price: 16000, state: "Lagos", location: "Yaba, Lagos", seller: "Ex-Corper Victor", roleBadge: "Camp Essential", category: "Electronics", condition: "Like New", imageBg: "bg-slate-800", forRoles: ["pcm", "serving"] },
-  { id: "pcm_3", title: "Black Leather Waist Pouch + Combination Padlocks", price: 3500, state: "Lagos", location: "Surulere, Lagos", seller: "Corper Grace", roleBadge: "Camp Kit", category: "Pre-Camp Gear", condition: "New", imageBg: "bg-black", forRoles: ["pcm"] },
-  
-  // Kaduna State PCM Listings
-  { id: "pcm_kad_1", title: "White Canvas Boots (Size 43) + Plain White Tees", price: 6000, state: "Kaduna", location: "Mando NYSC Camp Area, Kaduna", seller: "Corper Aisha (POP)", roleBadge: "Camp Kit", category: "Pre-Camp Gear", condition: "Brand New", imageBg: "bg-emerald-900", forRoles: ["pcm"] },
-  { id: "pcm_kad_2", title: "Heavy Cardigan & Thermal Socks Set (For Kaduna Camp Nights)", price: 4000, state: "Kaduna", location: "Sabon Tasha, Kaduna", seller: "Corper Ibrahim", roleBadge: "Weather Kit", category: "Pre-Camp Gear", condition: "Like New", imageBg: "bg-slate-900", forRoles: ["pcm"] },
-
-  // Abuja FCT Listings
-  { id: "pcm_abj_1", title: "Mosquito Net + Rechargeable Torchlight", price: 5500, state: "FCT - Abuja", location: "Kubwa Camp Road, Abuja", seller: "Corper Usman", roleBadge: "Camp Kit", category: "Pre-Camp Gear", condition: "New", imageBg: "bg-emerald-800", forRoles: ["pcm"] },
-
-  // Serving Corper Gear
-  { id: "srv_1", title: "Mouka Foam High-Density Mattress 4.5ft", price: 25000, state: "Lagos", location: "Ikeja LGA, Lagos", seller: "Corper Tunde (POP)", roleBadge: "POP Sale", category: "Furniture", condition: "Like New", imageBg: "bg-emerald-800", forRoles: ["serving"] },
-  { id: "srv_2", title: "OX 18-inch Standing Fan (3 Speeds)", price: 12000, state: "Lagos", location: "Yaba LGA, Lagos", seller: "Corper Grace", roleBadge: "Serving Corper", category: "Electronics", condition: "Good", imageBg: "bg-slate-800", forRoles: ["serving"] },
-  { id: "srv_3", title: "6kg Gas Cylinder + Double Burner Stove", price: 18500, state: "Lagos", location: "Surulere LGA, Lagos", seller: "Corper Amaka (POP)", roleBadge: "POP Sale", category: "Kitchenware", condition: "Excellent", imageBg: "bg-black", forRoles: ["serving"] },
-
-  // Alumni / POP Gear
-  { id: "alm_1", title: "Full Lodge Household Setup (Bed, Fan, Desk, Gas)", price: 65000, state: "Lagos", location: "Ikeja GRA, Lagos", seller: "Corper Kunle (POP)", roleBadge: "POP Bundle", category: "Full House", condition: "Complete Setup", imageBg: "bg-emerald-950", forRoles: ["alumni", "serving"] },
+  { id: "pcm_1", title: "Plain White Rubber Shoes (Size 42 - Camp Approved)", price: 4500, state: "Lagos", location: "Ikeja LGA, Lagos", distanceKm: 1.2, seller: "Corper Blessing", roleBadge: "Camp Essential", badgeType: "verified", category: "Pre-Camp Gear", condition: "Brand New", imageBg: "bg-emerald-700", imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85", forRoles: ["pcm"] },
+  { id: "pcm_2", title: "Original Anker 20,000mAh Power Bank", price: 16000, state: "Lagos", location: "Yaba, Lagos", distanceKm: 3.5, seller: "Ex-Corper Victor", roleBadge: "Camp Essential", badgeType: "unverified", category: "Electronics", condition: "Like New", imageBg: "bg-slate-800", imageUrl: "https://images.unsplash.com/photo-1609592424522-5c5c1a1f2d5d?auto=format&fit=crop&w=900&q=85", forRoles: ["pcm", "serving"] },
+  { id: "pcm_3", title: "Black Leather Waist Pouch + Padlocks", price: 3500, state: "Lagos", location: "Surulere, Lagos", distanceKm: 5.1, seller: "Corper Grace", roleBadge: "Camp Kit", badgeType: "corps_member", category: "Pre-Camp Gear", condition: "New", imageBg: "bg-black", imageUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=85", forRoles: ["pcm"] },
+  { id: "srv_1", title: "Mouka Foam High-Density Mattress 4.5ft", price: 25000, state: "Lagos", location: "Ikeja LGA, Lagos", distanceKm: 2.0, seller: "Corper Tunde (POP)", roleBadge: "POP Sale", badgeType: "verified", category: "Furniture", condition: "Like New", imageBg: "bg-emerald-800", imageUrl: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=85", forRoles: ["serving"] },
+  { id: "srv_2", title: "OX 18-inch Standing Fan (3 Speeds)", price: 12000, state: "Lagos", location: "Yaba LGA, Lagos", distanceKm: 4.2, seller: "Corper Grace", roleBadge: "Serving Corper", badgeType: "corps_member", category: "Electronics", condition: "Good", imageBg: "bg-slate-800", imageUrl: "https://images.unsplash.com/photo-1618944913480-50d1c4f0e1f4?auto=format&fit=crop&w=900&q=85", forRoles: ["serving"] },
+  { id: "srv_3", title: "6kg Gas Cylinder + Double Burner Stove", price: 18500, state: "Lagos", location: "Surulere LGA, Lagos", distanceKm: 6.0, seller: "Corper Amaka (POP)", roleBadge: "POP Sale", badgeType: "unverified", category: "Kitchenware", condition: "Excellent", imageBg: "bg-black", imageUrl: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=900&q=85", forRoles: ["serving"] },
+  { id: "alm_1", title: "Full Lodge Household Setup (Bed, Fan, Desk, Gas)", price: 65000, state: "Lagos", location: "Ikeja GRA, Lagos", distanceKm: 1.8, seller: "Corper Kunle (POP)", roleBadge: "POP Bundle", badgeType: "verified", category: "Full House", condition: "Complete Setup", imageBg: "bg-emerald-950", imageUrl: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=85", forRoles: ["alumni", "serving"] },
 ];
 
 const NIGERIAN_STATES = ["All States", "Lagos", "Kaduna", "FCT - Abuja", "Oyo", "Rivers", "Kano"];
@@ -61,219 +57,127 @@ export default function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [contactedListing, setContactedListing] = useState<string | null>(null);
-  const [detectingLocation, setDetectingLocation] = useState(false);
 
-  // Auto-load state from user profile if available
-  useEffect(() => {
-    const profile = localStorage.getItem("kopawee_user_profile");
-    if (profile) {
-      try {
-        const parsed = JSON.parse(profile);
-        if (parsed.deploymentState) setSelectedState(parsed.deploymentState);
-        else if (parsed.serviceState) setSelectedState(parsed.serviceState);
-      } catch (e) {}
-    }
-  }, []);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportedListingTitle, setReportedListingTitle] = useState("");
+  const [reportReason, setReportReason] = useState("");
+  const [reportSubmitted, setReportSubmitted] = useState(false);
 
-  const handleDetectLocation = () => {
-    setDetectingLocation(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setDetectingLocation(false);
-          // Default detected state simulation to Lagos / Kaduna
-          setSelectedState("Lagos");
-        },
-        (err) => {
-          setDetectingLocation(false);
-          setSelectedState("Lagos");
-        }
-      );
-    } else {
-      setDetectingLocation(false);
-    }
-  };
-
-  // Filter listings based on active role & selected location state
-  const roleListings = SAMPLE_LISTINGS.filter(l => {
-    const roleMatches = currentRole === "pcm" ? l.forRoles.includes("pcm") : 
-                        currentRole === "alumni" ? l.forRoles.includes("alumni") : l.forRoles.includes("serving");
-    const stateMatches = selectedState === "All States" || l.state === selectedState;
-    return roleMatches && stateMatches;
+  const filteredListings = SAMPLE_LISTINGS.filter((item) => {
+    const matchesState = selectedState === "All States" || item.state === selectedState;
+    const matchesCat = selectedCategory === "All" || item.category === selectedCategory;
+    return matchesState && matchesCat;
   });
 
-  const categories = ["All", ...Array.from(new Set(roleListings.map(l => l.category)))];
+  const handleFlagListing = (title: string) => {
+    setReportedListingTitle(title);
+    setReportReason("");
+    setReportSubmitted(false);
+    setReportModalOpen(true);
+  };
 
-  const filtered = selectedCategory === "All"
-    ? roleListings
-    : roleListings.filter(l => l.category === selectedCategory);
+  const handleSendReport = (e: React.FormEvent) => {
+    e.preventDefault();
+    setReportSubmitted(true);
+    setTimeout(() => {
+      setReportModalOpen(false);
+    }, 1500);
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white shadow-sm">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-700 bg-slate-200 px-3 py-1 inline-block mb-2">
-            • {currentRole === "pcm" ? "Pre-Camp Gear Market" : currentRole === "alumni" ? "POP Deals Market" : "Corper P2P Marketplace"}
-          </span>
-          <h1 className="text-2xl font-black text-black">
-            {currentRole === "pcm" ? "PCM Orientation Gear Marketplace" : currentRole === "alumni" ? "POP Household Hand-Off Deals" : "Peer-to-Peer Corper Marketplace"}
+    <div className="space-y-8 font-sans">
+      
+      {/* Header Banner */}
+      <div className="p-8 bg-[#121815] text-white border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="space-y-2 max-w-xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>P2P CORPER MARKETPLACE</span>
+          </div>
+          <h1 className="text-3xl font-medium text-white tracking-tight font-display">
+            Corper Household & Gear Marketplace
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            {currentRole === "pcm" 
-              ? "Buy authentic camp-approved white shoes, waist pouches, and power banks in your deployed state."
-              : "Buy, sell, or swap relocation items directly with incoming & passing-out corps members."}
+          <p className="text-xs text-slate-300">
+            Buy, sell, or swap camp kits, mattresses, gas cylinders, and POP household items.
           </p>
         </div>
 
         <button
           onClick={() => setShowModal(true)}
-          className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black transition-all flex items-center gap-2 shrink-0 shadow-md"
+          className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>{currentRole === "alumni" ? "Post POP Deal" : "Post Item Listing"}</span>
+          <span>Post Item for Sale</span>
         </button>
       </div>
 
-      {/* Location Filter & GPS Bar */}
-      <div className="p-4 bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
-        <div className="flex items-center gap-2">
-          <Navigation className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="text-xs font-bold">State Location Filter:</span>
-          <select
-            value={selectedState}
-            onChange={(e) => setSelectedState(e.target.value)}
-            className="px-3 py-1 bg-slate-800 text-emerald-400 font-black text-xs focus:outline-none"
-          >
-            {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+      {/* Filter Toolbar */}
+      <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          {["All", "Pre-Camp Gear", "Furniture", "Electronics", "Kitchenware", "Full House"].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider whitespace-nowrap cursor-pointer transition-colors border ${
+                selectedCategory === cat
+                  ? "bg-emerald-700 text-white border-emerald-700"
+                  : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800 hover:border-slate-400"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
-        <button
-          onClick={handleDetectLocation}
-          className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all flex items-center gap-1 shrink-0"
+        <select
+          value={selectedState}
+          onChange={(e) => setSelectedState(e.target.value)}
+          className="px-4 py-2 text-xs font-bold bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white uppercase tracking-wider focus:outline-none"
         >
-          <Compass className="w-3.5 h-3.5" />
-          <span>{detectingLocation ? "Detecting GPS..." : "Detect My State"}</span>
-        </button>
+          {NIGERIAN_STATES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
       </div>
 
-      {/* Category Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 text-xs font-bold whitespace-nowrap transition-all ${
-              selectedCategory === cat
-                ? "bg-black text-white"
-                : "bg-white text-slate-700 hover:bg-slate-100 shadow-sm"
-            }`}
-          >
-            {cat}
-          </button>
+      {/* Marketplace Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredListings.map((item) => (
+          <div key={item.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+            <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
+              <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+              <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold uppercase px-2.5 py-1">
+                {item.roleBadge}
+              </span>
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-base font-bold text-[#121815] dark:text-white font-display line-clamp-1">{item.title}</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">{item.location} · {item.distanceKm}km away</p>
+              <div className="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400 pt-1">
+                ₦{item.price.toLocaleString()}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
+              <button
+                onClick={() => setContactedListing(item.id)}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                {contactedListing === item.id ? "WhatsApp Opened" : "Contact Seller ➔"}
+              </button>
+
+              <button
+                onClick={() => handleFlagListing(item.title)}
+                className="text-slate-500 hover:text-red-600 text-xs font-semibold cursor-pointer"
+              >
+                Report
+              </button>
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Listings Grid */}
-      {filtered.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((item) => (
-            <div key={item.id} className="p-5 bg-white shadow-sm space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className={`h-36 ${item.imageBg} text-white p-4 flex flex-col justify-between`}>
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-black/70 w-fit">
-                    {item.roleBadge} · {item.state}
-                  </span>
-                  <div className="text-xl font-black">₦{item.price.toLocaleString()}</div>
-                </div>
-
-                <div>
-                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5">
-                    {item.category} · {item.condition}
-                  </span>
-                  <h3 className="text-sm font-black text-black mt-2 leading-snug">{item.title}</h3>
-                  <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400" /> {item.location}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-3 flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-600">{item.seller}</span>
-                <button
-                  onClick={() => setContactedListing(item.id)}
-                  className={`px-3 py-1.5 text-xs font-bold transition-all flex items-center gap-1 ${
-                    contactedListing === item.id
-                      ? "bg-emerald-500 text-white"
-                      : "bg-slate-100 text-black hover:bg-black hover:text-white"
-                  }`}
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>{contactedListing === item.id ? "Chat Active" : "Chat Corper"}</span>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="p-8 bg-white text-center space-y-3 shadow-sm">
-          <p className="text-sm font-bold text-slate-700">No listings found in {selectedState} for this category.</p>
-          <button
-            onClick={() => setSelectedState("All States")}
-            className="px-4 py-2 bg-black text-white text-xs font-bold"
-          >
-            Show All States Listings
-          </button>
-        </div>
-      )}
-
-      {/* Post Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white text-black p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black text-black">Post Item / POP Setup</h3>
-              <button onClick={() => setShowModal(false)} className="p-1 text-slate-500 hover:text-black">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase">Item Title</label>
-                <input type="text" placeholder="e.g. Mouka Mattress 4.5ft + Pillow" className="w-full p-2.5 bg-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1 uppercase">Asking Price (₦)</label>
-                  <input type="number" placeholder="25000" className="w-full p-2.5 bg-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1 uppercase">Category</label>
-                  <select className="w-full p-2.5 bg-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option>Furniture</option>
-                    <option>Electronics</option>
-                    <option>Kitchenware</option>
-                    <option>Pre-Camp Gear</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase">State & LGA Location</label>
-                <input type="text" placeholder="Ikeja LGA, Lagos" className="w-full p-2.5 bg-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowModal(false)}
-              className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm transition-all"
-            >
-              Publish Listing Free
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

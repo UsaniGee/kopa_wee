@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import ThemeToggle from "@/shared/components/ThemeToggle";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "KopaWee+",
-  description: "",
+  title: "KopaWee+ | NYSC Companion App",
+  description: "The proactive companion for Nigerian Corps Members — camp guides, PPA logbooks, accommodation, safety, and marketplace.",
 };
 
 export default function RootLayout({
@@ -23,8 +26,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased light`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${outfit.variable} ${jakarta.variable} h-full antialiased light`}>
+      <body className="min-h-full flex flex-col font-sans">
+        {children}
+        {/* Global floating theme toggle — fixed bottom-right on every page */}
+        <div
+          className="fixed bottom-6 right-6 z-[9999]"
+          style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.25))" }}
+          aria-label="Theme toggle"
+        >
+          <ThemeToggle size="13px" />
+        </div>
+      </body>
     </html>
   );
 }
