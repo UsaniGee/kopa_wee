@@ -37,11 +37,67 @@ interface DashboardNavbarProps {
 export default function DashboardNavbar({ currentRole, onRoleChange }: DashboardNavbarProps) {
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const activeRoleObj = DASHBOARD_ROLES.find(r => r.id === currentRole) || DASHBOARD_ROLES[1];
-  
+
+  const [userName, setUserName] = useState<string>("");
+  const [stateCode, setStateCode] = useState<string>("");
+
+  React.useEffect(() => {
+    // 1. Initial load from local storage
+    const storedName = localStorage.getItem("kopawee_user_name");
+    const storedEmail = localStorage.getItem("kopawee_user_email");
+    const storedProfileStr = localStorage.getItem("kopawee_user_profile");
+    const userId = localStorage.getItem("kopawee_user_id");
+
+    if (storedName) {
+      setUserName(storedName.startsWith("Corper ") ? storedName : `Corper ${storedName.split(" ")[0]}`);
+    } else if (storedEmail) {
+      const nameFromEmail = storedEmail.split("@")[0].replace(".", " ");
+      setUserName(`Corper ${nameFromEmail}`);
+    }
+
+    if (storedProfileStr) {
+      try {
+        const prof = JSON.parse(storedProfileStr);
+        if (prof.fullName || prof.displayName) {
+          const name = prof.displayName || prof.fullName;
+          setUserName(name.startsWith("Corper ") ? name : `Corper ${name.split(" ")[0]}`);
+        }
+        if (prof.stateCode) {
+          setStateCode(prof.stateCode);
+        }
+      } catch (e) {}
+    }
+
+    // 2. Fetch live profile from database API
+    if (userId) {
+      fetch(`/api/users/me?userId=${userId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.data) {
+            const dbUser = data.data;
+            if (dbUser.name) {
+              const formattedName = dbUser.name.startsWith("Corper ")
+                ? dbUser.name
+                : `Corper ${dbUser.name.split(" ")[0]}`;
+              setUserName(formattedName);
+              localStorage.setItem("kopawee_user_name", dbUser.name);
+            }
+            if (dbUser.stateCode) {
+              setStateCode(dbUser.stateCode);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("kopawee_auth_token");
     localStorage.removeItem("kopawee_active_role");
     localStorage.removeItem("kopawee_user_profile");
+    localStorage.removeItem("kopawee_user_name");
+    localStorage.removeItem("kopawee_user_email");
+    localStorage.removeItem("kopawee_user_id");
     window.location.href = "/auth?mode=signup";
   };
 
@@ -156,8 +212,8 @@ export default function DashboardNavbar({ currentRole, onRoleChange }: Dashboard
                 <User className="w-4 h-4 text-white" />
               </div>
               <div className="hidden xl:flex flex-col text-left">
-                <span className="text-xs font-bold text-white leading-tight font-display">Corper Chidi</span>
-                <span className="text-[10px] text-emerald-400 font-mono">LA/24A/1042</span>
+                <span className="text-xs font-bold text-white leading-tight font-display">{userName || "Corps Member"}</span>
+                <span className="text-[10px] text-emerald-400 font-mono">{stateCode || "LA/26A/1234"}</span>
               </div>
             </div>
 
