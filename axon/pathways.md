@@ -15,3 +15,4 @@
 - [x] **Pathway: Replace Lucide React with React Icons Dependency Migration** *Link: [index.md](./pathways/replace_lucide_with_react_icons_20260827/index.md)*
 - [x] **Pathway: Backend API, Prisma PostgreSQL Database & NextAuth RBAC Infrastructure** *Link: [index.md](./pathways/backend_api_20260831/index.md)*
 - [x] **Pathway: Purge Mock Data & Dynamic Live User Flow** *Link: [index.md](./pathways/purge_dummy_data_20260831/index.md)*
+- [ ] **Pathway: Fresh Auth & Onboarding Clean Slate** *Link: [index.md](./pathways/fresh_auth_clean_slate_20260831/index.md)*
