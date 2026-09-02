@@ -1,0 +1,8 @@
+{
+  "id": "smart_ai_posting_backend_states_roommates_20260902",
+  "type": "Feature",
+  "status": "new",
+  "createdAt": "2026-09-02T14:43:15Z",
+  "updatedAt": "2026-09-02T14:43:15Z",
+  "description": "Implement Backend States API source of truth, reusable Smart AI Listing Posting service, device image upload with previews, backend roommate request system with single-active DB constraint, location-aware ranking, unverified accommodation badges, and fix posting errors."
+}
