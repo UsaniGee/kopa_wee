@@ -1,0 +1,8 @@
+{
+  "id": "auth_gated_navbar_navigation_20260902",
+  "type": "Feature",
+  "status": "new",
+  "createdAt": "2026-09-02T13:36:00Z",
+  "updatedAt": "2026-09-02T13:36:00Z",
+  "description": "Enforce authentication checks across navbar links, hero CTA buttons, and dashboard layout route protection. Logged-in users access their dashboard directly; unauthenticated users are redirected to Sign Up."
+}
