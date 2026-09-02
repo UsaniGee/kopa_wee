@@ -1,0 +1,8 @@
+{
+  "id": "cascading_states_lgas_clean_placeholders_20260902",
+  "type": "Feature",
+  "status": "new",
+  "createdAt": "2026-09-02T15:08:02Z",
+  "updatedAt": "2026-09-02T15:08:02Z",
+  "description": "Seed all Nigerian LGAs into database, implement cascading State -> LGA -> Area selection APIs and UI components, and purge all pre-selected 'Lagos' defaults with generic placeholders project-wide."
+}
