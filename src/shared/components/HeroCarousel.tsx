@@ -31,23 +31,24 @@ export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef<number | null>(null);
   const isTouchDevice = useRef(false);
+  const onSlideChangeRef = useRef(onSlideChange);
+
+  useEffect(() => {
+    onSlideChangeRef.current = onSlideChange;
+  }, [onSlideChange]);
 
   const goTo = useCallback(
     (index: number) => {
       if (isTransitioning.current) return;
       isTransitioning.current = true;
 
-      setActiveIndex((prev) => {
-        const nextIdx = ((index % services.length) + services.length) % services.length;
-        onSlideChange?.(nextIdx);
-        return nextIdx;
-      });
+      setActiveIndex(((index % services.length) + services.length) % services.length);
 
       setTimeout(() => {
         isTransitioning.current = false;
       }, 600);
     },
-    [onSlideChange]
+    []
   );
 
   const next = useCallback(() => {
@@ -81,8 +82,8 @@ export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
   };
 
   useEffect(() => {
-    onSlideChange?.(activeIndex);
-  }, [activeIndex, onSlideChange]);
+    onSlideChangeRef.current?.(activeIndex);
+  }, [activeIndex]);
 
   useEffect(() => {
     if (isPaused) return;

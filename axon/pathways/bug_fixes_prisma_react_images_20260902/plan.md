@@ -6,33 +6,34 @@ Execution roadmap for database connection pool parameters, Prisma client instant
 
 ## Phase 1: Database Connection Pool Tuning & Prisma Client Optimization
 
-- [ ] Task: Update `.env` `DATABASE_URL` Parameters
-  - [ ] Add `connection_limit=15&pool_timeout=30&pgbouncer=true` to Neon PostgreSQL URL
-- [ ] Task: Enhance `src/shared/lib/prisma.ts` Client
-  - [ ] Ensure singleton PrismaClient caching across HMR Fast Refresh
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Update `.env` `DATABASE_URL` Parameters
+  - [x] Add `connection_limit=15&pool_timeout=30&pgbouncer=true` to Neon PostgreSQL URL
+- [x] Task: Enhance `src/shared/lib/prisma.ts` Client
+  - [x] Ensure singleton PrismaClient caching across HMR Fast Refresh
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 2: Refactor HeroCarousel Component
 
-- [ ] Task: Update `src/shared/components/HeroCarousel.tsx`
-  - [ ] Remove `onSlideChange` side-effect from `setActiveIndex((prev) => ...)` updater function
-  - [ ] Manage `onSlideChange` execution safely via `useEffect` with `onSlideChangeRef`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Update `src/shared/components/HeroCarousel.tsx`
+  - [x] Remove `onSlideChange` side-effect from `setActiveIndex((prev) => ...)` updater function
+  - [x] Manage `onSlideChange` execution safely via `useEffect` with `onSlideChangeRef`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 3: Next.js Image Performance Optimization
 
-- [ ] Task: Update `src/app/auth/page.tsx`
-  - [ ] Add `sizes="(max-width: 1024px) 100vw, 50vw"` to the background `<Image />` component
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Update `src/app/auth/page.tsx`
+  - [x] Add `sizes="(max-width: 1024px) 100vw, 50vw"` to the background `<Image />` component
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 4: End-to-End Build & Verification
 
-- [ ] Task: End-to-End Build Verification (`npm run build`)
-  - [ ] Verify 100% clean compilation across all routes with zero TypeScript or runtime errors
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: End-to-End Build Verification (`npm run build`)
+  - [x] Verify 100% clean compilation across all routes with zero TypeScript or runtime errors
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+

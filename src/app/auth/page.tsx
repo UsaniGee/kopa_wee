@@ -123,6 +123,7 @@ function AuthPageContent() {
             src="https://res.cloudinary.com/dnu4lxiie/image/upload/v1787322615/loginImage_ouju1n.jpg"
             alt="Login Background"
             fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-cover object-center filter grayscale contrast-[1.1]"
             priority={true}
           />
