@@ -423,6 +423,215 @@ export default function AccommodationPage() {
         </div>
       )}
 
+      {/* POST LODGE CLASSIFIED MODAL */}
+      {addModalOpen && (
+        <PostLodgeModal
+          onClose={() => setAddModalOpen(false)}
+          onSuccess={() => {
+            setAddModalOpen(false);
+            alert("🎉 Lodge listing submitted! Your listing is currently under review by Platform Moderation. Once approved, it will go live for all corpers.");
+          }}
+        />
+      )}
+
+    </div>
+  );
+}
+
+function PostLodgeModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [title, setTitle] = useState("");
+  const [rent, setRent] = useState("");
+  const [state, setState] = useState("Lagos");
+  const [lga, setLga] = useState("Ikeja");
+  const [address, setAddress] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !rent.trim() || !contactPhone.trim() || !description.trim()) {
+      setErrorMsg("Please fill in all required lodge details");
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMsg("");
+
+    const userId = localStorage.getItem("kopawee_user_id") || "user_demo_123";
+
+    try {
+      const res = await fetch("/api/accommodation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownerId: userId,
+          title,
+          price: `₦${Number(rent.replace(/[^0-9]/g, "")).toLocaleString()}/year`,
+          state,
+          lga,
+          location: `${lga}, ${state}`,
+          contactPhone,
+          description,
+          splitInfo: "Roommate Split Preferred",
+          images: imageUrl ? [imageUrl] : ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=85"],
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        onSuccess();
+      } else {
+        setErrorMsg(data.error || "Failed to submit lodge listing");
+      }
+    } catch (err) {
+      setErrorMsg("Network error posting lodge listing");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto font-sans">
+      <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 max-w-lg w-full p-6 space-y-5 animate-fadeIn text-[#121815] dark:text-white">
+        <div className="flex items-center justify-between border-b border-slate-300/60 dark:border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <Home className="w-5 h-5 text-emerald-600" />
+            <h2 className="text-lg font-bold font-display uppercase tracking-wider">List Lodge / Accommodation</h2>
+          </div>
+          <button onClick={onClose} className="p-1 hover:text-red-500 cursor-pointer">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {errorMsg && (
+          <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 text-xs font-semibold">
+            {errorMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          <div className="space-y-1">
+            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+              Lodge Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Modern Self-Contain Lodge near Secretariat"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Rent (NGN/yr) *
+              </label>
+              <input
+                type="number"
+                required
+                placeholder="e.g. 180000"
+                value={rent}
+                onChange={(e) => setRent(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 font-mono"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Contact WhatsApp / Phone *
+              </label>
+              <input
+                type="tel"
+                required
+                placeholder="e.g. 08012345678"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                State Location *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Lagos"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                LGA / Area *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Ikeja"
+                value={lga}
+                onChange={(e) => setLga(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+              Photo URL (Optional)
+            </label>
+            <input
+              type="url"
+              placeholder="https://images.unsplash.com/..."
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+              Lodge Description & Amenities *
+            </label>
+            <textarea
+              rows={3}
+              required
+              placeholder="Water supply, security, proximity to PPA..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+            />
+          </div>
+
+          <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-300/60 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-400 dark:border-slate-700 font-bold uppercase tracking-wider text-[11px]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-[11px] flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {submitting ? "SUBMITTING LODGE..." : "POST LODGE FOR REVIEW ➔"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

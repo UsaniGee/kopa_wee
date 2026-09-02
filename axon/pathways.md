@@ -24,4 +24,4 @@
 - [x] **Pathway: Hydration, Theme & Scroll UX Fix** *Link: [index.md](./pathways/hydration_theme_scroll_fix_20260902/index.md)*
 - [x] **Pathway: Auth-Gated Navbar Navigation & Dashboard Protection** *Link: [index.md](./pathways/auth_gated_navbar_navigation_20260902/index.md)*
 - [x] **Pathway: Dynamic Auth-Aware Navbar Action Buttons** *Link: [index.md](./pathways/auth_aware_navbar_buttons_20260902/index.md)*
-- [ ] **Pathway: Classified Ads Posting, Product Owner `/admin` Dashboard & Email Verification** *Link: [index.md](./pathways/classified_ads_admin_email_verify_20260902/index.md)*
+- [x] **Pathway: Classified Ads Posting, Product Owner `/admin` Dashboard & Email Verification** *Link: [index.md](./pathways/classified_ads_admin_email_verify_20260902/index.md)*

@@ -19,6 +19,9 @@ enum Role {
 }
 
 enum ListingStatus {
+  PENDING_APPROVAL
+  ACTIVE
+  REJECTED
   AVAILABLE
   RESERVED
   SOLD
@@ -36,22 +39,23 @@ enum SOSStatus {
 }
 
 model User {
-  id             String   @id @default(cuid())
-  name           String
-  email          String   @unique
-  passwordHash   String?
-  phone          String?
-  role           Role     @default(PCM)
-  stateOfOrigin  String?
-  deployedState  String?
-  lga            String?
-  ppaName        String?
-  callUpNo       String?
-  stateCode      String?  @unique
-  avatarUrl      String?
-  isVerified     Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                String   @id @default(cuid())
+  name              String
+  email             String   @unique
+  passwordHash      String?
+  phone             String?
+  role              Role     @default(PCM)
+  stateOfOrigin     String?
+  deployedState     String?
+  lga               String?
+  ppaName           String?
+  callUpNo          String?
+  stateCode         String?  @unique
+  avatarUrl         String?
+  isVerified        Boolean  @default(false)
+  verificationToken String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Relationships
   checklist           CampChecklist?

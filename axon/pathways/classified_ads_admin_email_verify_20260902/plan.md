@@ -6,55 +6,56 @@ Execution roadmap for Prisma schema sync, posting modals, API endpoints, `/admin
 
 ## Phase 1: Prisma Schema Sync & API Endpoint Updates
 
-- [ ] Task: Update `prisma/schema.prisma`
-  - [ ] Add `PENDING_APPROVAL`, `ACTIVE`, `REJECTED` to `ListingStatus` enum
-  - [ ] Add `verificationToken` String? to `User` model
-  - [ ] Run `npx prisma db push` to update Neon PostgreSQL
-- [ ] Task: Update `/api/marketplace` and `/api/accommodation` Route Handlers
-  - [ ] Support `POST` creation with `PENDING_APPROVAL` status
-  - [ ] Support `PATCH` admin approval/rejection status transitions
-- [ ] Task: Create `/api/auth/verify` Endpoint & Update `/api/auth/register`
-  - [ ] Generate verification token on registration
-  - [ ] Handle token verification at `GET /api/auth/verify?token=...`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Update `prisma/schema.prisma`
+  - [x] Add `PENDING_APPROVAL`, `ACTIVE`, `REJECTED` to `ListingStatus` enum
+  - [x] Add `verificationToken` String? to `User` model
+  - [x] Run `npx prisma db push` to update Neon PostgreSQL
+- [x] Task: Update `/api/marketplace` and `/api/accommodation` Route Handlers
+  - [x] Support `POST` creation with `PENDING_APPROVAL` status
+  - [x] Support `PATCH` admin approval/rejection status transitions
+- [x] Task: Create `/api/auth/verify` Endpoint & Update `/api/auth/register`
+  - [x] Generate verification token on registration
+  - [x] Handle token verification at `GET /api/auth/verify?token=...`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 2: Build Classified Ads Posting Modals
 
-- [ ] Task: Build `PostItemModal` in `src/app/dashboard/marketplace/page.tsx`
-  - [ ] Add title, category, price, state, lga, condition, image URL, and description fields
-  - [ ] Connect modal to `POST /api/marketplace` and show confirmation banner
-- [ ] Task: Build `PostLodgeModal` in `src/app/dashboard/accommodation/page.tsx`
-  - [ ] Add title, rent, state, lga, address, bedrooms, bathrooms, split info, images, and description fields
-  - [ ] Connect modal to `POST /api/accommodation` and show confirmation banner
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Build `PostItemModal` in `src/app/dashboard/marketplace/page.tsx`
+  - [x] Add title, category, price, state, lga, condition, image URL, and description fields
+  - [x] Connect modal to `POST /api/marketplace` and show confirmation banner
+- [x] Task: Build `PostLodgeModal` in `src/app/dashboard/accommodation/page.tsx`
+  - [x] Add title, rent, state, lga, address, bedrooms, bathrooms, split info, images, and description fields
+  - [x] Connect modal to `POST /api/accommodation` and show confirmation banner
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 3: Build Email Magic Link Verification Screen
 
-- [ ] Task: Refactor `src/app/auth/page.tsx` Sign-Up Flow
-  - [ ] Show *"Check Your Email"* screen with simulated email inbox / link click trigger
-- [ ] Task: Build `src/app/auth/verify/page.tsx` Token Verification Route
-  - [ ] Verify token with `/api/auth/verify`, mark user as verified, and redirect to `/onboarding`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Refactor `src/app/auth/page.tsx` Sign-Up Flow
+  - [x] Show *"Check Your Email"* screen with simulated email inbox / link click trigger
+- [x] Task: Build `src/app/auth/verify/page.tsx` Token Verification Route
+  - [x] Verify token with `/api/auth/verify`, mark user as verified, and redirect to `/onboarding`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 4: Build Platform Owner `/admin` Dashboard Portal
 
-- [ ] Task: Create `src/app/admin/login/page.tsx`
-  - [ ] Build admin authentication login screen (`admin@kopawee.ng`)
-- [ ] Task: Create `src/app/admin/page.tsx` Admin Dashboard
-  - [ ] Build moderation tabs for Pending Marketplace Ads, Pending Lodges, Active Ads, and User Verifications
-  - [ ] Implement **Approve Ad** and **Reject Ad** actions with live DB updates
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Create `src/app/admin/login/page.tsx`
+  - [x] Build admin authentication login screen (`admin@kopawee.ng`)
+- [x] Task: Create `src/app/admin/page.tsx` Admin Dashboard
+  - [x] Build moderation tabs for Pending Marketplace Ads, Pending Lodges, Active Ads, and User Verifications
+  - [x] Implement **Approve Ad** and **Reject Ad** actions with live DB updates
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 5: End-to-End Build & Verification
 
-- [ ] Task: End-to-End Build Verification (`npm run build`)
-  - [ ] Verify 100% clean compilation of all routes with zero TypeScript errors
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: End-to-End Build Verification (`npm run build`)
+  - [x] Verify 100% clean compilation of all routes with zero TypeScript errors
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+

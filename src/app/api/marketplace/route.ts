@@ -18,16 +18,21 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const state = searchParams.get("state");
     const category = searchParams.get("category");
+    const statusParam = searchParams.get("status");
+
+    const statusFilter = statusParam 
+      ? (statusParam as any)
+      : { in: ["ACTIVE", "AVAILABLE"] };
 
     const items = await prisma.marketplaceItem.findMany({
       where: {
-        status: "AVAILABLE",
+        status: statusFilter,
         ...(state && { state }),
         ...(category && category !== "All Categories" && { category }),
       },
       include: {
         seller: {
-          select: { name: true, phone: true, stateCode: true, avatarUrl: true },
+          select: { name: true, phone: true, stateCode: true, avatarUrl: true, email: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -51,11 +56,14 @@ export async function POST(req: Request) {
     const validatedData = itemSchema.parse(body);
 
     const newItem = await prisma.marketplaceItem.create({
-      data: validatedData,
+      data: {
+        ...validatedData,
+        status: "PENDING_APPROVAL",
+      },
     });
 
     return NextResponse.json(
-      { success: true, data: newItem, message: "Item posted for sale" },
+      { success: true, data: newItem, message: "Item submitted for approval" },
       { status: 201 }
     );
   } catch (error) {
@@ -67,6 +75,36 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(
       { success: false, error: "Failed to post item" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, status } = body;
+
+    if (!id || !status) {
+      return NextResponse.json(
+        { success: false, error: "Listing ID and status are required" },
+        { status: 400 }
+      );
+    }
+
+    const updatedItem = await prisma.marketplaceItem.update({
+      where: { id },
+      data: { status: status as any },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: updatedItem,
+      message: `Listing status updated to ${status}`,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: "Failed to update item status" },
       { status: 500 }
     );
   }

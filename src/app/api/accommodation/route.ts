@@ -20,15 +20,21 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const state = searchParams.get("state");
     const lga = searchParams.get("lga");
+    const statusParam = searchParams.get("status");
+
+    const statusFilter = statusParam 
+      ? (statusParam as any)
+      : { in: ["ACTIVE", "AVAILABLE"] };
 
     const listings = await prisma.accommodationListing.findMany({
       where: {
+        status: statusFilter,
         ...(state && { state }),
         ...(lga && { lga }),
       },
       include: {
         owner: {
-          select: { name: true, phone: true, stateCode: true, avatarUrl: true },
+          select: { name: true, phone: true, stateCode: true, avatarUrl: true, email: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -52,11 +58,14 @@ export async function POST(req: Request) {
     const validatedData = listingSchema.parse(body);
 
     const newListing = await prisma.accommodationListing.create({
-      data: validatedData,
+      data: {
+        ...validatedData,
+        status: "PENDING_APPROVAL",
+      },
     });
 
     return NextResponse.json(
-      { success: true, data: newListing, message: "Listing posted successfully" },
+      { success: true, data: newListing, message: "Lodge listing submitted for approval" },
       { status: 201 }
     );
   } catch (error) {
@@ -68,6 +77,36 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(
       { success: false, error: "Failed to post accommodation listing" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, status } = body;
+
+    if (!id || !status) {
+      return NextResponse.json(
+        { success: false, error: "Listing ID and status are required" },
+        { status: 400 }
+      );
+    }
+
+    const updatedListing = await prisma.accommodationListing.update({
+      where: { id },
+      data: { status: status as any },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: updatedListing,
+      message: `Lodge status updated to ${status}`,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: "Failed to update lodge listing status" },
       { status: 500 }
     );
   }

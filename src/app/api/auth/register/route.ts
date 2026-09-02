@@ -34,6 +34,7 @@ export async function POST(req: Request) {
 
     // Hash password & create user
     const passwordHash = await hashPassword(validatedData.password);
+    const verificationToken = `vtok_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
 
     const newUser = await prisma.user.create({
       data: {
@@ -46,6 +47,8 @@ export async function POST(req: Request) {
         lga: validatedData.lga,
         ppaName: validatedData.ppaName,
         stateCode: validatedData.stateCode,
+        verificationToken,
+        isVerified: false,
       },
       select: {
         id: true,
@@ -55,6 +58,7 @@ export async function POST(req: Request) {
         deployedState: true,
         lga: true,
         stateCode: true,
+        verificationToken: true,
         createdAt: true,
       },
     });
@@ -63,7 +67,8 @@ export async function POST(req: Request) {
       {
         success: true,
         data: newUser,
-        message: "User registered successfully",
+        verificationUrl: `/auth/verify?token=${verificationToken}&email=${encodeURIComponent(newUser.email)}`,
+        message: "Registration successful! Please check your email to verify your account.",
       },
       { status: 201 }
     );

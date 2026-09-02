@@ -22,6 +22,8 @@ function AuthPageContent() {
 
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showVerificationNotice, setShowVerificationNotice] = useState(false);
+  const [verificationUrl, setVerificationUrl] = useState("");
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +57,10 @@ function AuthPageContent() {
         localStorage.setItem("kopawee_user_name", user.name);
         localStorage.setItem("kopawee_active_role", "pcm");
 
-        const nextPath = redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding";
-        router.push(nextPath);
+        setVerificationUrl(data.verificationUrl || `/auth/verify?email=${encodeURIComponent(user.email)}`);
+        setShowVerificationNotice(true);
+        setLoading(false);
+        return;
       } else {
         // Sign in flow — authenticate against Neon PostgreSQL API
         const res = await fetch("/api/auth/login", {
@@ -180,24 +184,59 @@ function AuthPageContent() {
         </div>
 
         <div className="w-full max-w-md mx-auto my-auto space-y-8">
-          {/* Mode Switcher */}
-          <div className="space-y-2">
-            <h2 className="text-3xl sm:text-4xl font-medium text-[#121815] dark:text-white font-display tracking-tight">
-              {mode === "signup" ? "Create Account" : "Sign In"}
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-              {mode === "signup"
-                ? "Already registered with KopaWee?"
-                : "Need a new corper companion account?"}{" "}
-              <button
-                type="button"
-                onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
-                className="font-bold text-emerald-700 dark:text-emerald-400 underline hover:text-emerald-800 transition-colors uppercase tracking-wider text-xs ml-1 cursor-pointer"
-              >
-                {mode === "signup" ? "Sign In Here" : "Sign Up Free"}
-              </button>
-            </p>
-          </div>
+          {showVerificationNotice ? (
+            <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-emerald-600/60 dark:border-emerald-500/50 space-y-5 text-center animate-fadeIn shadow-xl">
+              <div className="w-12 h-12 bg-emerald-600/10 border border-emerald-600/30 rounded-full flex items-center justify-center mx-auto text-emerald-600">
+                <FiMail className="w-6 h-6" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold font-display text-[#121815] dark:text-white">
+                  Check Your Email Inbox! ✉️
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  We sent a secure magic verification link to <strong className="text-[#121815] dark:text-white font-mono">{email}</strong>. Click the link in your email to verify your address and proceed to onboarding.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-300/60 dark:border-slate-800 space-y-3">
+                <p className="text-[11px] text-slate-500 font-mono">
+                  ✨ Demo Email Preview Trigger:
+                </p>
+                <Link
+                  href={verificationUrl}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 block shadow-md"
+                >
+                  <span>Simulate Email Link Click ➔</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowVerificationNotice(false)}
+                  className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white uppercase tracking-wider"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Mode Switcher */}
+              <div className="space-y-2">
+                <h2 className="text-3xl sm:text-4xl font-medium text-[#121815] dark:text-white font-display tracking-tight">
+                  {mode === "signup" ? "Create Account" : "Sign In"}
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                  {mode === "signup"
+                    ? "Already registered with KopaWee?"
+                    : "Need a new corper companion account?"}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+                    className="font-bold text-emerald-700 dark:text-emerald-400 underline hover:text-emerald-800 transition-colors uppercase tracking-wider text-xs ml-1 cursor-pointer"
+                  >
+                    {mode === "signup" ? "Sign In Here" : "Sign Up Free"}
+                  </button>
+                </p>
+              </div>
 
           {/* Social Google Login Button */}
           <button
@@ -323,6 +362,8 @@ function AuthPageContent() {
               );
             })()}
           </form>
+            </>
+          )}
         </div>
 
         <div className="text-center text-xs text-slate-500 pt-8 border-t border-slate-300/50 dark:border-slate-800 font-mono">

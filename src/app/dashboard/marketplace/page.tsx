@@ -261,34 +261,241 @@ export default function MarketplacePage() {
                 </span>
               </div>
 
-            <div className="space-y-1.5">
-              <h3 className="text-base font-bold text-[#121815] dark:text-white font-display line-clamp-1">{item.title}</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400">{item.location} · {item.distanceKm}km away</p>
-              <div className="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400 pt-1">
-                ₦{item.price.toLocaleString()}
+              <div className="space-y-1.5">
+                <h3 className="text-base font-bold text-[#121815] dark:text-white font-display line-clamp-1">{item.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400">{item.location} · {item.distanceKm}km away</p>
+                <div className="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400 pt-1">
+                  ₦{item.price.toLocaleString()}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
+                <button
+                  onClick={() => setContactedListing(item.id)}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  {contactedListing === item.id ? "WhatsApp Opened" : "Contact Seller ➔"}
+                </button>
+
+                <button
+                  onClick={() => handleFlagListing(item.title)}
+                  className="text-slate-500 hover:text-red-600 text-xs font-semibold cursor-pointer"
+                >
+                  Report
+                </button>
               </div>
             </div>
-
-            <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
-              <button
-                onClick={() => setContactedListing(item.id)}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-              >
-                {contactedListing === item.id ? "WhatsApp Opened" : "Contact Seller ➔"}
-              </button>
-
-              <button
-                onClick={() => handleFlagListing(item.title)}
-                className="text-slate-500 hover:text-red-600 text-xs font-semibold cursor-pointer"
-              >
-                Report
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
 
+      {/* POST ITEM CLASSIFIED MODAL */}
+      {showModal && (
+        <PostItemModal
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {
+            setShowModal(false);
+            alert("🎉 Ad submitted! Your item is currently under review by Platform Moderation. Once approved, it will go live for all corpers.");
+          }}
+        />
+      )}
+
+    </div>
+  );
+}
+
+function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Pre-Camp Gear");
+  const [price, setPrice] = useState("");
+  const [state, setState] = useState("Lagos");
+  const [lga, setLga] = useState("Ikeja");
+  const [imageUrl, setImageUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !price.trim() || !description.trim()) {
+      setErrorMsg("Please fill in all required item details");
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMsg("");
+
+    const userId = localStorage.getItem("kopawee_user_id") || "user_demo_123";
+
+    try {
+      const res = await fetch("/api/marketplace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sellerId: userId,
+          title,
+          category,
+          price: `₦${Number(price.replace(/[^0-9]/g, "")).toLocaleString()}`,
+          state,
+          lga,
+          description,
+          images: imageUrl ? [imageUrl] : ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"],
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        onSuccess();
+      } else {
+        setErrorMsg(data.error || "Failed to submit item");
+      }
+    } catch (err) {
+      setErrorMsg("Network error posting item");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 max-w-lg w-full p-6 space-y-5 animate-fadeIn text-[#121815] dark:text-white">
+        <div className="flex items-center justify-between border-b border-slate-300/60 dark:border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-emerald-600" />
+            <h2 className="text-lg font-bold font-display uppercase tracking-wider">Post Item for Sale</h2>
+          </div>
+          <button onClick={onClose} className="p-1 hover:text-red-500 cursor-pointer">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {errorMsg && (
+          <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 text-xs font-semibold">
+            {errorMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
+          <div className="space-y-1">
+            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+              Item Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Plain White Rubber Shoes (Size 42)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Category *
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              >
+                {["Pre-Camp Gear", "Furniture", "Electronics", "Kitchenware", "Full House"].map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Price (NGN) *
+              </label>
+              <input
+                type="number"
+                required
+                placeholder="e.g. 4500"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                State Location *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Lagos"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                LGA / Area *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Ikeja"
+                value={lga}
+                onChange={(e) => setLga(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+              Image URL (Optional)
+            </label>
+            <input
+              type="url"
+              placeholder="https://images.unsplash.com/..."
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+              Description & Condition *
+            </label>
+            <textarea
+              rows={3}
+              required
+              placeholder="Describe condition, size, reason for selling..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+            />
+          </div>
+
+          <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-300/60 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-slate-400 dark:border-slate-700 font-bold uppercase tracking-wider text-[11px]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-[11px] flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {submitting ? "SUBMITTING AD..." : "POST AD FOR REVIEW ➔"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
