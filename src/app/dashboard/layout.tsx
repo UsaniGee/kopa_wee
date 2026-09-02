@@ -51,6 +51,8 @@ export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon:
   ],
 };
 
+import { isUserAuthenticated } from "@/shared/utils/authNav";
+
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -58,8 +60,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   const activeNavItems = ROLE_NAV_ITEMS[currentRole] || ROLE_NAV_ITEMS.serving;
 
-  // Auto-redirect if current pathname is invalid for the active role
+  // Route protection: redirect unauthenticated users to Sign Up
   useEffect(() => {
+    if (!isUserAuthenticated()) {
+      router.push(`/auth?mode=signup&redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
     const isPathValidForRole = activeNavItems.some(item => item.href === pathname);
     if (!isPathValidForRole) {
       const firstTabHref = activeNavItems[0]?.href || "/dashboard";

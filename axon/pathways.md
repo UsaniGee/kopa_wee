@@ -22,4 +22,4 @@
 - [x] **Pathway: Dynamic User Profile & Header Sync** *Link: [index.md](./pathways/dynamic_user_header_20260831/index.md)*
 - [x] **Pathway: Form Validation & Loading UX Enhancements** *Link: [index.md](./pathways/auth_onboarding_loading_validation_20260831/index.md)*
 - [x] **Pathway: Hydration, Theme & Scroll UX Fix** *Link: [index.md](./pathways/hydration_theme_scroll_fix_20260902/index.md)*
-- [ ] **Pathway: Auth-Gated Navbar Navigation & Dashboard Protection** *Link: [index.md](./pathways/auth_gated_navbar_navigation_20260902/index.md)*
+- [x] **Pathway: Auth-Gated Navbar Navigation & Dashboard Protection** *Link: [index.md](./pathways/auth_gated_navbar_navigation_20260902/index.md)*

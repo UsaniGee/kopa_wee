@@ -15,7 +15,13 @@ export const ROLE_ALLOWED_ROUTES: Record<string, string[]> = {
 export function isUserAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
   const token = localStorage.getItem("kopawee_auth_token");
-  return Boolean(token && token.trim().length > 0);
+  const userId = localStorage.getItem("kopawee_user_id");
+  const profile = localStorage.getItem("kopawee_user_profile");
+  return Boolean(
+    (token && token.trim().length > 0) ||
+    (userId && userId.trim().length > 0) ||
+    (profile && profile.trim().length > 0)
+  );
 }
 
 /**
