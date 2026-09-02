@@ -81,20 +81,20 @@ export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
   };
 
   useEffect(() => {
+    onSlideChange?.(activeIndex);
+  }, [activeIndex, onSlideChange]);
+
+  useEffect(() => {
     if (isPaused) return;
 
     timerRef.current = setInterval(() => {
-      setActiveIndex((current) => {
-        const nextIdx = (current + 1) % services.length;
-        onSlideChange?.(nextIdx);
-        return nextIdx;
-      });
+      setActiveIndex((current) => (current + 1) % services.length);
     }, AUTOPLAY_MS);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isPaused, onSlideChange]);
+  }, [isPaused]);
 
   const slide = services[activeIndex];
 

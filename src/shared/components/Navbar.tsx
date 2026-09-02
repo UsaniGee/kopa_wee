@@ -35,8 +35,8 @@ export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-black/95 backdrop-blur-md py-3 text-slate-900 shadow-xs border-b border-slate-200"
-          : "bg-transparent py-5 text-slate-900 dark:text-white"
+          ? "bg-[#eaf5ed]/90 dark:bg-[#0a0f0d]/95 backdrop-blur-md py-3 text-[#121815] dark:text-white shadow-sm border-b border-slate-300/60 dark:border-slate-800"
+          : "bg-transparent py-5 text-[#121815] dark:text-white"
       }`}
     >
       <div className="mx-auto px-6 sm:px-10 lg:px-16">

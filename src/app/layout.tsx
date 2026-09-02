@@ -26,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${jakarta.variable} h-full antialiased light`}>
-      <body className="min-h-full flex flex-col font-sans">
+    <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${jakarta.variable} h-full antialiased light`}>
+      <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
         {children}
         {/* Global floating theme toggle — fixed bottom-right on every page */}
         <div

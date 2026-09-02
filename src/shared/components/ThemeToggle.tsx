@@ -13,16 +13,25 @@ export default function ThemeToggle({ size = "13px", className = "" }: ThemeTogg
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem("kopawee_theme");
-    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    if (savedTheme === "dark" || (!savedTheme && systemDark) || document.documentElement.classList.contains("dark")) {
-      setIsDark(true);
-      document.documentElement.classList.add("dark");
-    } else {
-      setIsDark(false);
-      document.documentElement.classList.remove("dark");
-    }
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const applyTheme = () => {
+      const savedTheme = localStorage.getItem("kopawee_theme");
+      const systemDark = mediaQuery.matches;
+
+      if (savedTheme === "dark" || (savedTheme === "system" && systemDark) || (!savedTheme && systemDark)) {
+        setIsDark(true);
+        document.documentElement.classList.add("dark");
+      } else {
+        setIsDark(false);
+        document.documentElement.classList.remove("dark");
+      }
+    };
+
+    applyTheme();
+
+    mediaQuery.addEventListener("change", applyTheme);
+    return () => mediaQuery.removeEventListener("change", applyTheme);
   }, []);
 
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
