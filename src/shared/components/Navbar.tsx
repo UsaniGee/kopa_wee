@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiMenu, FiX, FiArrowRight } from "react-icons/fi";
-import { navigateWithAuthCheck } from "@/shared/utils/authNav";
+import { navigateWithAuthCheck, isUserAuthenticated } from "@/shared/utils/authNav";
 
 const Menu = FiMenu, X = FiX, ArrowRight = FiArrowRight;
 
@@ -17,8 +17,10 @@ export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
+    setAuthenticated(isUserAuthenticated());
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -73,19 +75,31 @@ export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/auth?mode=signin"
-              className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-white hover:text-emerald-600 transition-colors uppercase tracking-wider"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/auth?mode=signup"
-              className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white tracking-widest uppercase transition-all flex items-center gap-2 group rounded-none"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-            </Link>
+            {authenticated ? (
+              <Link
+                href="/dashboard"
+                className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white tracking-widest uppercase transition-all flex items-center gap-2 group rounded-none"
+              >
+                <span>Dashboard</span>
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/auth?mode=signin"
+                  className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-white hover:text-emerald-600 transition-colors uppercase tracking-wider"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth?mode=signup"
+                  className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white tracking-widest uppercase transition-all flex items-center gap-2 group rounded-none"
+                >
+                  <span>Get Started</span>
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </>
+            )}
           </div>
 
           <div className="md:hidden flex items-center gap-2">
@@ -123,20 +137,32 @@ export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps
               </a>
             ))}
             <div className="pt-4 flex flex-col gap-2.5">
-              <Link
-                href="/auth?mode=signup"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-3 text-sm font-bold text-center text-white bg-emerald-600 active:bg-emerald-700 cursor-pointer uppercase tracking-wider block"
-              >
-                Get Started Free →
-              </Link>
-              <Link
-                href="/auth?mode=signin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-3 text-sm font-bold text-center text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 cursor-pointer uppercase tracking-wider block"
-              >
-                Sign In to Account
-              </Link>
+              {authenticated ? (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-3 text-sm font-bold text-center text-white bg-emerald-600 active:bg-emerald-700 cursor-pointer uppercase tracking-wider block"
+                >
+                  Go to Dashboard →
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/auth?mode=signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full py-3 text-sm font-bold text-center text-white bg-emerald-600 active:bg-emerald-700 cursor-pointer uppercase tracking-wider block"
+                  >
+                    Get Started Free →
+                  </Link>
+                  <Link
+                    href="/auth?mode=signin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full py-3 text-sm font-bold text-center text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 cursor-pointer uppercase tracking-wider block"
+                  >
+                    Sign In to Account
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

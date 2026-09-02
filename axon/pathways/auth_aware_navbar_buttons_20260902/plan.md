@@ -6,16 +6,17 @@ Execution roadmap for updating `src/shared/components/Navbar.tsx` to conditional
 
 ## Phase 1: Add Auth State & Refactor Navbar CTA Buttons
 
-- [ ] Task: Update `src/shared/components/Navbar.tsx`
-  - [ ] Add `authenticated` state initialized via `useEffect` with `isUserAuthenticated()`
-  - [ ] Render `Go to Dashboard →` when `authenticated === true` (desktop & mobile menu)
-  - [ ] Render `Sign In` / `Get Started` when `authenticated === false`
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Update `src/shared/components/Navbar.tsx`
+  - [x] Add `authenticated` state initialized via `useEffect` with `isUserAuthenticated()`
+  - [x] Render `Dashboard` / `Go to Dashboard →` when `authenticated === true` (desktop & mobile menu)
+  - [x] Render `Sign In` / `Get Started` when `authenticated === false`
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ---
 
 ## Phase 2: End-to-End Build & Verification
 
-- [ ] Task: End-to-End Build Verification (`npm run build`)
-  - [ ] Verify 100% clean compilation of all 23 routes with zero TypeScript errors
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: End-to-End Build Verification (`npm run build`)
+  - [x] Verify 100% clean compilation of all 23 routes with zero TypeScript errors
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
