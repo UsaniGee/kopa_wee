@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRole } from "@/shared/context/RoleContext";
 import { FiShoppingBag, FiPlus, FiFilter, FiMapPin, FiTag, FiMessageSquare, FiCheckCircle, FiX, FiPackage, FiAward, FiCompass, FiNavigation, FiAlertTriangle, FiFlag } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
@@ -320,16 +320,36 @@ export default function MarketplacePage() {
 function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [postingMode, setPostingMode] = useState<"manual" | "ai">("manual");
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("Pre-Camp Gear");
+  const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
-  const [state, setState] = useState("Lagos");
-  const [lga, setLga] = useState("Ikeja");
+  const [state, setState] = useState("");
+  const [availableLgas, setAvailableLgas] = useState<string[]>([]);
+  const [lga, setLga] = useState("");
+  const [area, setArea] = useState("");
+  const [street, setStreet] = useState("");
   const [description, setDescription] = useState("");
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [aiPrompt, setAiPrompt] = useState("");
   const [analyzingAi, setAnalyzingAi] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [statesList, setStatesList] = useState<{ id: string; name: string; lgas: string[] }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/states")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setStatesList(data.data || []);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleStateChange = (selectedStateName: string) => {
+    setState(selectedStateName);
+    setLga("");
+    const matched = statesList.find((s) => s.name === selectedStateName);
+    setAvailableLgas(matched ? matched.lgas : []);
+  };
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -577,10 +597,12 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
                   Category *
                 </label>
                 <select
+                  required
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
                 >
+                  <option value="" disabled>Select Category...</option>
                   {["Pre-Camp Gear", "Furniture", "Electronics", "Kitchenware", "Full House"].map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
@@ -594,7 +616,7 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
                 <input
                   type="number"
                   required
-                  placeholder="e.g. 4500"
+                  placeholder="Enter selling price..."
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 font-mono"
@@ -602,31 +624,68 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
               </div>
             </div>
 
+            {/* Cascading State & LGA Selection */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
                   State Location *
                 </label>
+                <select
+                  required
+                  value={state}
+                  onChange={(e) => handleStateChange(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+                >
+                  <option value="" disabled>Select State...</option>
+                  {statesList.map((s) => (
+                    <option key={s.id} value={s.name}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                  LGA *
+                </label>
+                <select
+                  required
+                  disabled={!state}
+                  value={lga}
+                  onChange={(e) => setLga(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none disabled:opacity-50"
+                >
+                  <option value="" disabled>{!state ? "Select State First..." : "Select LGA..."}</option>
+                  {availableLgas.map((l) => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Specific Area & Street / Landmark inputs */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                  Area / Neighborhood
+                </label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. Lagos"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
+                  placeholder="Enter area / neighborhood..."
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
                 <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                  LGA / Area *
+                  Street / Landmark
                 </label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. Ikeja"
-                  value={lga}
-                  onChange={(e) => setLga(e.target.value)}
+                  placeholder="Enter street / landmark..."
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
                   className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
                 />
               </div>

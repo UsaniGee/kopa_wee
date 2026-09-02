@@ -284,6 +284,7 @@ function OnboardingContent() {
                   </label>
                   <input
                     type="text"
+                    placeholder="Enter full name..."
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     className="w-full px-4 py-3 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs focus:outline-none focus:border-emerald-600"
@@ -296,6 +297,7 @@ function OnboardingContent() {
                   </label>
                   <input
                     type="tel"
+                    placeholder="Enter phone number..."
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full px-4 py-3 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs focus:outline-none focus:border-emerald-600"

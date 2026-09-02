@@ -1,61 +1,55 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { NIGERIA_STATES_AND_LGAS } from "@/shared/data/nigeriaStatesLgas";
 
-export const NIGERIAN_STATES_DATA = [
-  { name: "Abia", code: "AB" },
-  { name: "Adamawa", code: "AD" },
-  { name: "Akwa Ibom", code: "AK" },
-  { name: "Anambra", code: "AN" },
-  { name: "Bauchi", code: "BA" },
-  { name: "Bayelsa", code: "BY" },
-  { name: "Benue", code: "BN" },
-  { name: "Borno", code: "BO" },
-  { name: "Cross River", code: "CR" },
-  { name: "Delta", code: "DE" },
-  { name: "Ebonyi", code: "EB" },
-  { name: "Edo", code: "ED" },
-  { name: "Ekiti", code: "EK" },
-  { name: "Enugu", code: "EN" },
-  { name: "FCT - Abuja", code: "FC" },
-  { name: "Gombe", code: "GO" },
-  { name: "Imo", code: "IM" },
-  { name: "Jigawa", code: "JI" },
-  { name: "Kaduna", code: "KD" },
-  { name: "Kano", code: "KN" },
-  { name: "Katsina", code: "KT" },
-  { name: "Kebbi", code: "KB" },
-  { name: "Kogi", code: "KO" },
-  { name: "Kwara", code: "KW" },
-  { name: "Lagos", code: "LA" },
-  { name: "Nasarawa", code: "NA" },
-  { name: "Niger", code: "NI" },
-  { name: "Ogun", code: "OG" },
-  { name: "Ondo", code: "ON" },
-  { name: "Osun", code: "OS" },
-  { name: "Oyo", code: "OY" },
-  { name: "Plateau", code: "PL" },
-  { name: "Rivers", code: "RI" },
-  { name: "Sokoto", code: "SO" },
-  { name: "Taraba", code: "TA" },
-  { name: "Yobe", code: "YO" },
-  { name: "Zamfara", code: "ZA" },
-];
-
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const stateName = searchParams.get("state");
+
     let states = await prisma.state.findMany({
+      include: { lgas: true },
       orderBy: { name: "asc" },
     });
 
     if (states.length === 0) {
-      // Auto-seed all 36 States + FCT into Neon DB
-      await prisma.state.createMany({
-        data: NIGERIAN_STATES_DATA,
-        skipDuplicates: true,
-      });
+      // Seed States and LGAs in DB
+      for (const item of NIGERIA_STATES_AND_LGAS) {
+        const stateRecord = await prisma.state.upsert({
+          where: { code: item.code },
+          update: { name: item.state },
+          create: { name: item.state, code: item.code },
+        });
+
+        for (const lgaName of item.lgas) {
+          await prisma.lGA.upsert({
+            where: {
+              stateId_name: {
+                stateId: stateRecord.id,
+                name: lgaName,
+              },
+            },
+            update: {},
+            create: {
+              name: lgaName,
+              stateId: stateRecord.id,
+            },
+          });
+        }
+      }
 
       states = await prisma.state.findMany({
+        include: { lgas: true },
         orderBy: { name: "asc" },
+      });
+    }
+
+    if (stateName) {
+      const matched = states.find((s) => s.name.toLowerCase() === stateName.toLowerCase());
+      const lgas = matched ? matched.lgas.map((l) => l.name).sort() : [];
+      return NextResponse.json({
+        success: true,
+        data: lgas,
       });
     }
 
@@ -65,16 +59,29 @@ export async function GET() {
         id: s.id,
         name: s.name,
         code: s.code,
+        lgas: s.lgas.map((l) => l.name).sort(),
       })),
     });
   } catch (error) {
-    // Fallback response with all 36 states + FCT if DB connection delays
+    // Fallback dictionary search
+    const { searchParams } = new URL(req.url);
+    const stateName = searchParams.get("state");
+
+    if (stateName) {
+      const item = NIGERIA_STATES_AND_LGAS.find((s) => s.state.toLowerCase() === stateName.toLowerCase());
+      return NextResponse.json({
+        success: true,
+        data: item ? item.lgas.sort() : [],
+      });
+    }
+
     return NextResponse.json({
       success: true,
-      data: NIGERIAN_STATES_DATA.map((s, idx) => ({
+      data: NIGERIA_STATES_AND_LGAS.map((s, idx) => ({
         id: `state_${s.code.toLowerCase()}_${idx}`,
-        name: s.name,
+        name: s.state,
         code: s.code,
+        lgas: s.lgas.sort(),
       })),
     });
   }

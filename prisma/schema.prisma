@@ -95,9 +95,21 @@ model State {
   id        String   @id @default(cuid())
   name      String   @unique
   code      String   @unique
+  lgas      LGA[]
   createdAt DateTime @default(now())
 
   @@index([name])
+}
+
+model LGA {
+  id        String   @id @default(cuid())
+  name      String
+  stateId   String
+  state     State    @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([stateId, name])
+  @@index([stateId])
 }
 
 model RoommateRequest {

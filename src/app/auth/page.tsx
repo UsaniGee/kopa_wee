@@ -291,7 +291,7 @@ function AuthPageContent() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Grace Okafor"
+                    placeholder="Enter full name..."
                     className="w-full pl-10 pr-4 py-3 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-600 transition-colors"
                   />
                 </div>
@@ -309,7 +309,7 @@ function AuthPageContent() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="corper@kopawee.ng"
+                  placeholder="Enter email address..."
                   className="w-full pl-10 pr-4 py-3 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-600 transition-colors"
                 />
               </div>
@@ -326,7 +326,7 @@ function AuthPageContent() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Enter password..."
                   className="w-full pl-10 pr-4 py-3 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-600 transition-colors"
                 />
               </div>

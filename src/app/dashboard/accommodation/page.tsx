@@ -143,7 +143,7 @@ export default function AccommodationPage() {
     fetchRoommatesData();
   }, [userId]);
 
-  useEffect(() => {
+  const fetchAccommodationData = () => {
     fetch("/api/accommodation")
       .then((res) => res.json())
       .then((data) => {
@@ -165,6 +165,10 @@ export default function AccommodationPage() {
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchAccommodationData();
   }, []);
 
 
@@ -414,6 +418,18 @@ export default function AccommodationPage() {
       )}
 
 
+      {/* Post Lodge Modal */}
+      {addModalOpen && (
+        <PostLodgeModal
+          states={states}
+          onClose={() => setAddModalOpen(false)}
+          onSuccess={() => {
+            setAddModalOpen(false);
+            fetchAccommodationData();
+          }}
+        />
+      )}
+
       {/* Request Roommate Modal */}
       {roommateModalOpen && (
         <RequestRoommateModal
@@ -482,10 +498,11 @@ export default function AccommodationPage() {
       {/* POST LODGE CLASSIFIED MODAL */}
       {addModalOpen && (
         <PostLodgeModal
+          states={states}
           onClose={() => setAddModalOpen(false)}
           onSuccess={() => {
             setAddModalOpen(false);
-            alert("🎉 Lodge listing submitted! Your listing is currently under review by Platform Moderation. Once approved, it will go live for all corpers.");
+            fetchAccommodationData();
           }}
         />
       )}
@@ -494,20 +511,41 @@ export default function AccommodationPage() {
   );
 }
 
-function PostLodgeModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function PostLodgeModal({
+  states,
+  onClose,
+  onSuccess,
+}: {
+  states: { id: string; name: string; code: string; lgas?: string[] }[];
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
   const [title, setTitle] = useState("");
   const [rent, setRent] = useState("");
-  const [state, setState] = useState("Lagos");
-  const [lga, setLga] = useState("Ikeja");
-  const [address, setAddress] = useState("");
+  const [state, setState] = useState("");
+  const [availableLgas, setAvailableLgas] = useState<string[]>([]);
+  const [lga, setLga] = useState("");
+  const [area, setArea] = useState("");
+  const [street, setStreet] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const handleStateChange = (stateName: string) => {
+    setState(stateName);
+    setLga("");
+    const matched = states.find((s) => s.name === stateName);
+    setAvailableLgas(matched && matched.lgas ? matched.lgas : []);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!state || !lga) {
+      setErrorMsg("Please select both State and LGA");
+      return;
+    }
     if (!title.trim() || !rent.trim() || !contactPhone.trim() || !description.trim()) {
       setErrorMsg("Please fill in all required lodge details");
       return;
@@ -528,7 +566,7 @@ function PostLodgeModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
           price: `₦${Number(rent.replace(/[^0-9]/g, "")).toLocaleString()}/year`,
           state,
           lga,
-          location: `${lga}, ${state}`,
+          location: [street, area, lga, state].filter(Boolean).join(", "),
           contactPhone,
           description,
           splitInfo: "Roommate Split Preferred",
@@ -576,7 +614,7 @@ function PostLodgeModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
             <input
               type="text"
               required
-              placeholder="e.g. Modern Self-Contain Lodge near Secretariat"
+              placeholder="Enter lodge title..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
@@ -591,7 +629,7 @@ function PostLodgeModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
               <input
                 type="number"
                 required
-                placeholder="e.g. 180000"
+                placeholder="Enter annual rent..."
                 value={rent}
                 onChange={(e) => setRent(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 font-mono"
@@ -605,7 +643,7 @@ function PostLodgeModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
               <input
                 type="tel"
                 required
-                placeholder="e.g. 08012345678"
+                placeholder="Enter phone number..."
                 value={contactPhone}
                 onChange={(e) => setContactPhone(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
@@ -618,26 +656,61 @@ function PostLodgeModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
               <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
                 State Location *
               </label>
+              <select
+                required
+                value={state}
+                onChange={(e) => handleStateChange(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              >
+                <option value="" disabled>Select State...</option>
+                {states.map((s) => (
+                  <option key={s.id} value={s.name}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                LGA *
+              </label>
+              <select
+                required
+                disabled={!state}
+                value={lga}
+                onChange={(e) => setLga(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none disabled:opacity-50"
+              >
+                <option value="" disabled>{!state ? "Select State First..." : "Select LGA..."}</option>
+                {availableLgas.map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Area / Neighborhood
+              </label>
               <input
                 type="text"
-                required
-                placeholder="e.g. Lagos"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
+                placeholder="Enter area / neighborhood..."
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
               />
             </div>
 
             <div className="space-y-1">
               <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                LGA / Area *
+                Street / Landmark
               </label>
               <input
                 type="text"
-                required
-                placeholder="e.g. Ikeja"
-                value={lga}
-                onChange={(e) => setLga(e.target.value)}
+                placeholder="Enter street / landmark..."
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
               />
             </div>
@@ -698,22 +771,35 @@ function RequestRoommateModal({
   onClose,
   onSuccess,
 }: {
-  states: { id: string; name: string; code: string }[];
+  states: { id: string; name: string; code: string; lgas?: string[] }[];
   userId: string;
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [selectedState, setSelectedState] = useState("Lagos");
-  const [lga, setLga] = useState("Ikeja");
+  const [selectedState, setSelectedState] = useState("");
+  const [availableLgas, setAvailableLgas] = useState<string[]>([]);
+  const [lga, setLga] = useState("");
   const [area, setArea] = useState("");
+  const [street, setStreet] = useState("");
   const [budget, setBudget] = useState("");
-  const [accommodationType, setAccommodationType] = useState("Shared Apartment");
+  const [accommodationType, setAccommodationType] = useState("");
   const [preferences, setPreferences] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const handleStateChange = (stateName: string) => {
+    setSelectedState(stateName);
+    setLga("");
+    const matched = states.find((s) => s.name === stateName);
+    setAvailableLgas(matched && matched.lgas ? matched.lgas : []);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedState || !lga) {
+      setErrorMsg("Please select both State and LGA");
+      return;
+    }
     if (!budget.trim()) {
       setErrorMsg("Please enter your budget");
       return;
@@ -730,9 +816,9 @@ function RequestRoommateModal({
           userId,
           state: selectedState,
           lga,
-          area,
+          area: [area, street].filter(Boolean).join(", "),
           budget: `₦${Number(budget.replace(/[^0-9]/g, "")).toLocaleString()}/yr`,
-          accommodationType,
+          accommodationType: accommodationType || "Shared Apartment",
           preferences,
         }),
       });
@@ -776,10 +862,12 @@ function RequestRoommateModal({
                 Preferred State *
               </label>
               <select
+                required
                 value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
+                onChange={(e) => handleStateChange(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
               >
+                <option value="" disabled>Select State...</option>
                 {states.map((s) => (
                   <option key={s.id} value={s.name}>{s.name}</option>
                 ))}
@@ -788,14 +876,46 @@ function RequestRoommateModal({
 
             <div className="space-y-1">
               <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                LGA / City *
+                Preferred LGA *
+              </label>
+              <select
+                required
+                disabled={!selectedState}
+                value={lga}
+                onChange={(e) => setLga(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none disabled:opacity-50"
+              >
+                <option value="" disabled>{!selectedState ? "Select State First..." : "Select LGA..."}</option>
+                {availableLgas.map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Area / Neighborhood
               </label>
               <input
                 type="text"
-                required
-                placeholder="e.g. Ikeja"
-                value={lga}
-                onChange={(e) => setLga(e.target.value)}
+                placeholder="Enter area / neighborhood..."
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Street / Landmark
+              </label>
+              <input
+                type="text"
+                placeholder="Enter street / landmark..."
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
               />
             </div>
@@ -809,7 +929,7 @@ function RequestRoommateModal({
               <input
                 type="number"
                 required
-                placeholder="e.g. 120000"
+                placeholder="Enter annual budget..."
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none font-mono"
@@ -821,10 +941,12 @@ function RequestRoommateModal({
                 Accommodation Type *
               </label>
               <select
+                required
                 value={accommodationType}
                 onChange={(e) => setAccommodationType(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
               >
+                <option value="" disabled>Select Type...</option>
                 <option value="Shared Apartment">Shared Apartment</option>
                 <option value="Self Contain">Self Contain</option>
                 <option value="2-Bedroom Flatshare">2-Bedroom Flatshare</option>
