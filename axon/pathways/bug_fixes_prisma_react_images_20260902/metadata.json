@@ -1,0 +1,8 @@
+{
+  "id": "bug_fixes_prisma_react_images_20260902",
+  "type": "BugFix",
+  "status": "new",
+  "createdAt": "2026-09-02T15:52:50Z",
+  "updatedAt": "2026-09-02T15:52:50Z",
+  "description": "Fix Prisma connection pool timeouts and closed PostgreSQL socket errors, fix React state update during render warning in HeroCarousel, and add missing Next.js Image sizes prop in Auth page."
+}

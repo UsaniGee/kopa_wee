@@ -27,3 +27,4 @@
 - [x] **Pathway: Classified Ads Posting, Product Owner `/admin` Dashboard & Email Verification** *Link: [index.md](./pathways/classified_ads_admin_email_verify_20260902/index.md)*
 - [x] **Pathway: Smart AI Posting, Backend States API, Roommate System & Posting Fixes** *Link: [index.md](./pathways/smart_ai_posting_backend_states_roommates_20260902/index.md)*
 - [x] **Pathway: Cascading Backend States/LGAs & Clean Placeholders** *Link: [index.md](./pathways/cascading_states_lgas_clean_placeholders_20260902/index.md)*
+- [ ] **Pathway: Prisma Connection Pool Timeout, React Render Warning & Image Sizes Fix** *Link: [index.md](./pathways/bug_fixes_prisma_react_images_20260902/index.md)*
