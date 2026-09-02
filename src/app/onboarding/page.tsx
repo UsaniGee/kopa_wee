@@ -22,13 +22,7 @@ const Phone = FiPhone;
 const Mail = FiMail;
 const GraduationCap = FiBookOpen;
 
-const NIGERIAN_STATES = [
-  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
-  "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT - Abuja", "Gombe", 
-  "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
-  "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", 
-  "Taraba", "Yobe", "Zamfara"
-];
+// NIGERIAN_STATES fetched dynamically from GET /api/states backend source of truth
 
 const FIELDS_OF_STUDY = [
   "Computer Science / Software Engineering",
@@ -48,6 +42,19 @@ function OnboardingContent() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
   const { setRole } = useRole();
+
+  const [states, setStates] = useState<{ id: string; name: string; code: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/states")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setStates(data.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const [step, setStep] = useState(1);
 

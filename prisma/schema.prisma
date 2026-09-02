@@ -64,6 +64,7 @@ model User {
   logbookEntries      PPALogbookEntry[]      @relation("CorperLogbooks")
   approvedLogbooks    PPALogbookEntry[]      @relation("EmployerApprovals")
   sosAlerts           SOSAlert[]
+  roommateRequests    RoommateRequest[]
 
   @@index([role])
   @@index([deployedState])
@@ -77,22 +78,64 @@ model CampChecklist {
   updatedAt      DateTime @updatedAt
 }
 
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum RoommateRequestStatus {
+  ACTIVE
+  CANCELLED
+  MATCHED
+}
+
+model State {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([name])
+}
+
+model RoommateRequest {
+  id                 String                @id @default(cuid())
+  userId             String
+  user               User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  state              String
+  lga                String
+  area               String?
+  budget             String
+  accommodationType  String
+  moveInDate         String?
+  preferences        String?
+  status             RoommateRequestStatus @default(ACTIVE)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  @@index([userId, status])
+  @@index([state, lga])
+}
+
 model AccommodationListing {
-  id            String        @id @default(cuid())
-  title         String
-  description   String
-  location      String
-  state         String
-  lga           String
-  price         String
-  splitInfo     String?
-  contactPhone  String
-  images        String[]
-  status        ListingStatus @default(AVAILABLE)
-  ownerId       String
-  owner         User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                 String             @id @default(cuid())
+  title              String
+  description        String
+  location           String
+  state              String
+  lga                String
+  price              String
+  splitInfo          String?
+  contactPhone       String
+  images             String[]
+  status             ListingStatus      @default(AVAILABLE)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  ownerId            String
+  owner              User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   @@index([state, lga])
 }

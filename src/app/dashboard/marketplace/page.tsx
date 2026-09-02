@@ -54,10 +54,22 @@ const NIGERIAN_STATES = ["All States", "Lagos", "Kaduna", "FCT - Abuja", "Oyo", 
 export default function MarketplacePage() {
   const { currentRole } = useRole();
   const [listings, setListings] = useState<Listing[]>([]);
+  const [states, setStates] = useState<{ id: string; name: string; code: string }[]>([]);
   const [selectedState, setSelectedState] = useState("All States");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [contactedListing, setContactedListing] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetch("/api/states")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setStates(data.data || []);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Modal Form State
   const [itemTitle, setItemTitle] = useState("");
@@ -224,8 +236,9 @@ export default function MarketplacePage() {
           onChange={(e) => setSelectedState(e.target.value)}
           className="px-4 py-2 text-xs font-bold bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white uppercase tracking-wider focus:outline-none"
         >
-          {NIGERIAN_STATES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+          <option value="All States">ALL STATES</option>
+          {states.map((s) => (
+            <option key={s.id} value={s.name}>{s.name.toUpperCase()}</option>
           ))}
         </select>
       </div>
@@ -305,15 +318,82 @@ export default function MarketplacePage() {
 }
 
 function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [postingMode, setPostingMode] = useState<"manual" | "ai">("manual");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Pre-Camp Gear");
   const [price, setPrice] = useState("");
   const [state, setState] = useState("Lagos");
   const [lga, setLga] = useState("Ikeja");
-  const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [analyzingAi, setAnalyzingAi] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newPreviews: string[] = [];
+    Array.from(files).forEach((file) => {
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMsg("Image files must be under 5MB each");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setImagePreviews((prev) => [...prev, event.target!.result as string]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImagePreview = (index: number) => {
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRunAiAnalysis = async () => {
+    if (!aiPrompt.trim() && imagePreviews.length === 0) {
+      setErrorMsg("Please upload at least 1 image or type a short item description for AI analysis");
+      return;
+    }
+
+    setAnalyzingAi(true);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch("/api/ai/listing/analyse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          images: imagePreviews,
+          description: aiPrompt,
+          type: "marketplace",
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.data) {
+        const draft = data.data;
+        if (draft.title) setTitle(draft.title);
+        if (draft.categoryOrType) setCategory(draft.categoryOrType);
+        if (draft.price) setPrice(draft.price.toString());
+        if (draft.state) setState(draft.state);
+        if (draft.lga) setLga(draft.lga);
+        if (draft.description) setDescription(draft.description);
+        setPostingMode("manual"); // Switch to manual edit & confirm mode
+      } else {
+        setErrorMsg(data.error || "AI analysis failed");
+      }
+    } catch (err) {
+      setErrorMsg("Error communicating with AI service");
+    } finally {
+      setAnalyzingAi(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -335,11 +415,11 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
           sellerId: userId,
           title,
           category,
-          price: `₦${Number(price.replace(/[^0-9]/g, "")).toLocaleString()}`,
+          price: `₦${Number(price.toString().replace(/[^0-9]/g, "")).toLocaleString()}`,
           state,
           lga,
           description,
-          images: imageUrl ? [imageUrl] : ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"],
+          images: imagePreviews.length > 0 ? imagePreviews : ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"],
         }),
       });
 
@@ -347,7 +427,7 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
       if (data.success) {
         onSuccess();
       } else {
-        setErrorMsg(data.error || "Failed to submit item");
+        setErrorMsg(data.error || data.message || "Failed to submit item");
       }
     } catch (err) {
       setErrorMsg("Network error posting item");
@@ -357,7 +437,7 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto font-sans">
       <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 max-w-lg w-full p-6 space-y-5 animate-fadeIn text-[#121815] dark:text-white">
         <div className="flex items-center justify-between border-b border-slate-300/60 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
@@ -369,132 +449,252 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
           </button>
         </div>
 
+        {/* Posting Method Mode Selector */}
+        <div className="grid grid-cols-2 gap-2 p-1 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800">
+          <button
+            type="button"
+            onClick={() => setPostingMode("manual")}
+            className={`py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              postingMode === "manual"
+                ? "bg-emerald-700 text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-white"
+            }`}
+          >
+            Manual Posting
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPostingMode("ai")}
+            className={`py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              postingMode === "ai"
+                ? "bg-emerald-700 text-white shadow-sm"
+                : "text-emerald-700 dark:text-emerald-400 font-extrabold hover:text-emerald-300"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Create with AI ✨</span>
+          </button>
+        </div>
+
         {errorMsg && (
           <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 text-xs font-semibold">
             {errorMsg}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
-          <div className="space-y-1">
-            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-              Item Title *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Plain White Rubber Shoes (Size 42)"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                Category *
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
-              >
-                {["Pre-Camp Gear", "Furniture", "Electronics", "Kitchenware", "Full House"].map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+        {postingMode === "ai" ? (
+          <div className="space-y-4 text-xs">
+            <div className="p-3 bg-emerald-600/10 border border-emerald-600/30 text-emerald-800 dark:text-emerald-300 space-y-1">
+              <div className="flex items-center gap-1.5 font-bold font-display uppercase tracking-wider">
+                <Sparkles className="w-4 h-4" />
+                <span>Smart AI Listing Draft Generator</span>
+              </div>
+              <p className="text-[11px] leading-relaxed">
+                Upload photos of your item and type a quick description (e.g. "Standing fan, good condition, 12k"). AI will auto-fill your draft for your final review!
+              </p>
             </div>
 
             <div className="space-y-1">
               <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                Price (NGN) *
+                Short Description / Key Specs
               </label>
-              <input
-                type="number"
-                required
-                placeholder="e.g. 4500"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 font-mono"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                State Location *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Lagos"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
+              <textarea
+                rows={3}
+                placeholder="e.g. Binatone standing fan, 3 speeds, used for 5 months during camp in Ikeja. Selling for 15,000."
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
                 className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
               />
             </div>
 
-            <div className="space-y-1">
+            {/* Local Storage Photo Picker */}
+            <div className="space-y-2">
               <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                LGA / Area *
+                Upload Photos from Device
               </label>
               <input
-                type="text"
-                required
-                placeholder="e.g. Ikeja"
-                value={lga}
-                onChange={(e) => setLga(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageFileChange}
+                className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800 cursor-pointer"
               />
+
+              {imagePreviews.length > 0 && (
+                <div className="flex items-center gap-3 overflow-x-auto pt-2">
+                  {imagePreviews.map((src, idx) => (
+                    <div key={idx} className="relative w-16 h-16 border border-slate-300 dark:border-slate-700 shrink-0">
+                      <img src={src} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImagePreview(idx)}
+                        className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full p-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
 
-          <div className="space-y-1">
-            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-              Image URL (Optional)
-            </label>
-            <input
-              type="url"
-              placeholder="https://images.unsplash.com/..."
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-              Description & Condition *
-            </label>
-            <textarea
-              rows={3}
-              required
-              placeholder="Describe condition, size, reason for selling..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
-            />
-          </div>
-
-          <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-300/60 dark:border-slate-800">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-slate-400 dark:border-slate-700 font-bold uppercase tracking-wider text-[11px]"
+              disabled={analyzingAi}
+              onClick={handleRunAiAnalysis}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-[11px] flex items-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              {submitting ? "SUBMITTING AD..." : "POST AD FOR REVIEW ➔"}
+              {analyzingAi ? (
+                <span>ANALYZING IMAGES & TEXT...</span>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  <span>GENERATE STRUCTURED DRAFT FOR REVIEW ➔</span>
+                </>
+              )}
             </button>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Item Title *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Plain White Rubber Shoes (Size 42)"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                  Category *
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+                >
+                  {["Pre-Camp Gear", "Furniture", "Electronics", "Kitchenware", "Full House"].map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                  Price (NGN) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  placeholder="e.g. 4500"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                  State Location *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Lagos"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                  LGA / Area *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ikeja"
+                  value={lga}
+                  onChange={(e) => setLga(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Device Local Photo Picker */}
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Item Photos (Device Storage)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageFileChange}
+                className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800 cursor-pointer"
+              />
+
+              {imagePreviews.length > 0 && (
+                <div className="flex items-center gap-3 overflow-x-auto pt-2">
+                  {imagePreviews.map((src, idx) => (
+                    <div key={idx} className="relative w-16 h-16 border border-slate-300 dark:border-slate-700 shrink-0">
+                      <img src={src} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImagePreview(idx)}
+                        className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full p-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                Description & Condition *
+              </label>
+              <textarea
+                rows={3}
+                required
+                placeholder="Describe condition, size, reason for selling..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
+              />
+            </div>
+
+            <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-300/60 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 border border-slate-400 dark:border-slate-700 font-bold uppercase tracking-wider text-[11px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-[11px] flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {submitting ? "SUBMITTING AD..." : "POST AD FOR REVIEW ➔"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
