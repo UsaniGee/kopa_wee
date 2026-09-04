@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
   const [revertLoading, setRevertLoading] = useState(false);
 
   // TODO: get real admin userId from auth session
-  const adminUserId = localStorage?.getItem("kopawee_admin_user_id") || "admin_user_id";
+  const adminUserId = typeof window !== "undefined" ? (localStorage.getItem("kopawee_admin_user_id") || "admin_user_id") : "admin_user_id";
 
   const fetchPendingData = async () => {
     setLoading(true);
