@@ -41,6 +41,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Verify user exists in database before attempting to seed packing items
+    const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+    if (!userExists) {
+      return NextResponse.json({ success: true, data: [] });
+    }
+
     // Check if user has any packing items yet; if not, seed defaults
     const existingCount = await prisma.packingItem.count({ where: { userId } });
 
