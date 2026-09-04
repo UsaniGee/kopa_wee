@@ -15,6 +15,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Get total clearance count for user
+    const completedCount = await prisma.monthlyClearance.count({
+      where: { userId },
+    });
+
     // Get the most recent clearance record
     const latestClearance = await prisma.monthlyClearance.findFirst({
       where: { userId },
@@ -29,6 +34,8 @@ export async function GET(req: NextRequest) {
           lastClearedAt: null,
           nextEligibleAt: null,
           isEligible: true,
+          completedCount: 0,
+          isCompletedService: false,
         },
       });
     }
@@ -43,6 +50,8 @@ export async function GET(req: NextRequest) {
         lastClearedAt: latestClearance.completedAt,
         nextEligibleAt: latestClearance.nextEligibleAt,
         isEligible,
+        completedCount,
+        isCompletedService: completedCount >= 12,
       },
     });
   } catch (error) {

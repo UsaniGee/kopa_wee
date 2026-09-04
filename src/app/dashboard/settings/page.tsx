@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FiSave, FiLoader, FiCalendar, FiInfo, FiCheck, FiAlertTriangle, FiBook, FiPackage, FiLock } from "react-icons/fi";
 
+import { useRole } from "@/shared/context/RoleContext";
+
 interface JourneyData {
   campEntryDate: string | null;
   campExitDate: string | null;
@@ -25,9 +27,18 @@ interface UserData {
 }
 
 export default function AccountSettingsPage() {
-  // TODO: Replace with real session userId
-  const userId = "demo_user_id";
-  const nyscStatus = "PCM"; // TODO: get from session
+  const { currentRole } = useRole();
+  const [activeUserId, setActiveUserId] = useState<string>("demo_user_id");
+  const [userStatus, setUserStatus] = useState<string>("PCM");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedId = localStorage.getItem("kopawee_user_id") || "demo_user_id";
+      setActiveUserId(storedId);
+    }
+  }, []);
+
+  const userId = activeUserId;
 
   const [journeyData, setJourneyData] = useState<JourneyData>({
     campEntryDate: "",
@@ -59,18 +70,23 @@ export default function AccountSettingsPage() {
     try {
       const res = await fetch(`/api/users/journey?userId=${userId}`);
       const data = await res.json();
-      if (data.success && data.data.journey) {
-        const j = data.data.journey;
-        setJourneyData({
-          campEntryDate: formatDateForInput(j.campEntryDate),
-          campExitDate: formatDateForInput(j.campExitDate),
-          serviceStartDate: formatDateForInput(j.serviceStartDate),
-          serviceEndDate: formatDateForInput(j.serviceEndDate),
-          batch: j.batch || "",
-          stream: j.stream || "",
-          institution: j.institution || "",
-          courseOfStudy: j.courseOfStudy || "",
-        });
+      if (data.success) {
+        if (data.data.user?.nyscStatus) {
+          setUserStatus(data.data.user.nyscStatus);
+        }
+        if (data.data.journey) {
+          const j = data.data.journey;
+          setJourneyData({
+            campEntryDate: formatDateForInput(j.campEntryDate),
+            campExitDate: formatDateForInput(j.campExitDate),
+            serviceStartDate: formatDateForInput(j.serviceStartDate),
+            serviceEndDate: formatDateForInput(j.serviceEndDate),
+            batch: j.batch || "",
+            stream: j.stream || "",
+            institution: j.institution || "",
+            courseOfStudy: j.courseOfStudy || "",
+          });
+        }
       }
     } catch (err) {
       console.error("Failed to fetch journey:", err);
@@ -283,51 +299,53 @@ export default function AccountSettingsPage() {
           </div>
         </div>
 
-        {/* Service Dates Section */}
-        <div className="space-y-5">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-700">
-            <FiBook className="w-4 h-4 text-emerald-600" />
-            <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display">
-              Service Year Dates
-            </h2>
-            <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1">
-              Optional
-            </span>
-          </div>
-
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 mb-4">
-            <p className="text-xs text-blue-800 dark:text-blue-300 flex items-start gap-2 leading-relaxed">
-              <FiInfo className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              When your Service End Date (expected POP date) arrives, KopaWee will automatically update your status to &quot;Alumni&quot;.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
-                Service Start Date
-              </label>
-              <input
-                type="date"
-                value={journeyData.serviceStartDate || ""}
-                onChange={(e) => setJourneyData((p) => ({ ...p, serviceStartDate: e.target.value }))}
-                className="w-full px-4 py-3 text-xs bg-white dark:bg-[#0a0f0d] border border-slate-300 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 transition-colors"
-              />
+        {/* Service Information Section (ONLY visible to Serving Corps Members & Alumni) */}
+        {(currentRole === "serving" || currentRole === "alumni" || userStatus === "SERVING" || userStatus === "ALUMNI") && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-700">
+              <FiBook className="w-4 h-4 text-emerald-600" />
+              <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display">
+                Service Information & Timeline
+              </h2>
+              <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-[#121815] dark:text-white bg-emerald-100 dark:bg-emerald-900/40 px-2 py-1 border border-emerald-300 dark:border-emerald-700">
+                Serving Only
+              </span>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
-                Expected POP Date (End of Service)
-              </label>
-              <input
-                type="date"
-                value={journeyData.serviceEndDate || ""}
-                onChange={(e) => setJourneyData((p) => ({ ...p, serviceEndDate: e.target.value }))}
-                className="w-full px-4 py-3 text-xs bg-white dark:bg-[#0a0f0d] border border-slate-300 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 transition-colors"
-              />
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 mb-4">
+              <p className="text-xs text-blue-800 dark:text-blue-300 flex items-start gap-2 leading-relaxed">
+                <FiInfo className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                Add your service start date and expected end date (POP). When your Expected POP Date arrives, KopaWee will automatically update your status to &quot;Alumni&quot;.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
+                  Service Start Date / Year
+                </label>
+                <input
+                  type="date"
+                  value={journeyData.serviceStartDate || ""}
+                  onChange={(e) => setJourneyData((p) => ({ ...p, serviceStartDate: e.target.value }))}
+                  className="w-full px-4 py-3 text-xs bg-white dark:bg-[#0a0f0d] border border-slate-300 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 transition-colors"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
+                  Expected Service End Date / POP Date
+                </label>
+                <input
+                  type="date"
+                  value={journeyData.serviceEndDate || ""}
+                  onChange={(e) => setJourneyData((p) => ({ ...p, serviceEndDate: e.target.value }))}
+                  className="w-full px-4 py-3 text-xs bg-white dark:bg-[#0a0f0d] border border-slate-300 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 transition-colors"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Save Button */}
         <div className="flex items-center gap-4 pt-2">

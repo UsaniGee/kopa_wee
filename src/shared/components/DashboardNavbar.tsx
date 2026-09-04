@@ -35,7 +35,6 @@ interface DashboardNavbarProps {
 }
 
 export default function DashboardNavbar({ currentRole, onRoleChange }: DashboardNavbarProps) {
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const activeRoleObj = DASHBOARD_ROLES.find(r => r.id === currentRole) || DASHBOARD_ROLES[1];
 
   const [userName, setUserName] = useState<string>("");
@@ -127,63 +126,13 @@ export default function DashboardNavbar({ currentRole, onRoleChange }: Dashboard
             </div>
           </div>
 
-          {/* Right: Role Switcher & User Controls */}
+          {/* Right: Read-only NYSC Status Badge & User Controls */}
           <div className="flex items-center gap-4">
             
-            {/* Role Switcher Dropdown */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-              >
-                <Sparkles className="w-3.5 h-3.5 fill-white" />
-                <span className="hidden sm:inline">ROLE:</span>
-                <span>{activeRoleObj.badge}</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-
-              {roleDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-[#121815] text-white border border-slate-800 shadow-2xl z-50 p-2 space-y-1">
-                  <div className="px-3 py-2 bg-slate-900 mb-1 border-b border-slate-800">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block font-display">
-                      Switch Active Role View
-                    </span>
-                    <span className="text-xs text-slate-400">
-                      Dynamically present relevant mini-products.
-                    </span>
-                  </div>
-
-                  {DASHBOARD_ROLES.map((r) => {
-                    const isSelected = r.id === currentRole;
-                    return (
-                      <button
-                        key={r.id}
-                        onClick={() => {
-                          onRoleChange(r.id);
-                          setRoleDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-2.5 text-xs flex items-center justify-between transition-all cursor-pointer ${
-                          isSelected 
-                            ? "bg-emerald-800/40 border-l-2 border-emerald-500 font-bold text-white" 
-                            : "hover:bg-slate-900 text-slate-300"
-                        }`}
-                      >
-                        <div>
-                          <div className="font-bold text-white flex items-center gap-2 font-display">
-                            <span>{r.label}</span>
-                            <span className="text-[9px] px-1.5 py-0.5 bg-slate-800 text-emerald-400 font-mono">
-                              {r.badge}
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">{r.subtitle}</span>
-                        </div>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+            {/* Read-Only Status Badge */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs font-bold font-mono uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>{activeRoleObj.label}</span>
             </div>
 
             {/* Notifications */}

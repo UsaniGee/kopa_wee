@@ -323,6 +323,70 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* EARLY ACCESS / PRICING SECTION */}
+        <section id="pricing" className="py-24 bg-[#eaf5ed] dark:bg-[#0a0f0d] border-t border-slate-300/60 dark:border-slate-800">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 space-y-12">
+            <div className="text-center max-w-2xl mx-auto space-y-4">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-800 dark:text-emerald-300 font-display">
+                Early Access Pricing
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-[#121815] dark:text-white font-display">
+                Free for now. Premium plans coming soon.
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                We&apos;re currently giving users free access while we build and improve the platform. Premium features and subscription plans will be introduced in the future.
+              </p>
+            </div>
+
+            <div className="max-w-xl mx-auto p-8 sm:p-10 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-8 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-6">
+                <div>
+                  <div className="inline-block text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-emerald-700 text-white font-display mb-2">
+                    Early Access Member
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#121815] dark:text-white font-display">
+                    Full Platform Access
+                  </h3>
+                </div>
+                <div className="text-right">
+                  <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 font-display block">₦0</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Free Currently</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <span className="text-xs font-bold text-[#121815] dark:text-white uppercase tracking-wider font-display block mb-2">
+                  What&apos;s Included:
+                </span>
+                {[
+                  "Core NYSC Mobilization & Camp Tools",
+                  "Monthly LGA Clearance Tracker & Biometrics Reminders",
+                  "Verified Corper Lodge & Roommate Finder",
+                  "Peer-to-Peer Classifieds Marketplace",
+                  "Highway Travel Safety SOS Monitor",
+                  "AI Regulatory & Bye-law Assistant",
+                  "Ex-Corpers Alumni Career Network",
+                ].map((feat, i) => (
+                  <div key={i} className="flex items-center gap-3 text-xs text-slate-700 dark:text-slate-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{feat}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  href="/auth?mode=signup"
+                  className="w-full py-4 bg-[#121815] hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-2 group cursor-pointer"
+                >
+                  <span>Get Early Access</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* BOTTOM HERO CTA */}
         <section className="py-24 bg-[#121815] text-white">
           <div className="max-w-5xl mx-auto px-6 text-center space-y-8">

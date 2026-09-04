@@ -104,12 +104,17 @@ function ClearanceModal({ onConfirm, onCancel, isLoading }: ClearanceModalProps)
 interface StatusUpdateModalProps {
   fromStatus: string;
   toStatus: string;
+  campExitDate?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
   isLoading: boolean;
 }
 
-function StatusUpdateModal({ fromStatus, toStatus, onConfirm, onCancel, isLoading }: StatusUpdateModalProps) {
+function StatusUpdateModal({ fromStatus, toStatus, campExitDate, onConfirm, onCancel, isLoading }: StatusUpdateModalProps) {
+  const formattedExitDate = campExitDate
+    ? new Date(campExitDate).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
+    : null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white dark:bg-[#121815] border border-slate-200 dark:border-slate-700 max-w-md w-full p-8 space-y-6 shadow-2xl">
@@ -138,12 +143,32 @@ function StatusUpdateModal({ fromStatus, toStatus, onConfirm, onCancel, isLoadin
             <span className="text-sm font-bold text-emerald-600">{toStatus}</span>
           </div>
 
+          {formattedExitDate ? (
+            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 space-y-1">
+              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                📅 Automatic Schedule Active
+              </p>
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                Your status is scheduled to automatically transition to <strong>Serving Corps Member</strong> on <strong>{formattedExitDate}</strong> when orientation camp ends. Would you like to update to Serving now anyway?
+              </p>
+            </div>
+          ) : (
+            <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 space-y-1">
+              <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
+                ⚠️ No Camp Dates Found
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                You haven't set your orientation camp dates in Account Settings. You can update your status manually now, or add your camp dates in Settings to enable automatic status transitions.
+              </p>
+            </div>
+          )}
+
           <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
             <p className="text-sm text-red-800 dark:text-red-300 leading-relaxed font-medium">
-              ⚠️ This action cannot be undone by you.
+              ⚠️ Manual transitions are non-reversible
             </p>
-            <p className="text-xs text-red-700 dark:text-red-400 mt-2 leading-relaxed">
-              Once you update your status to <strong>{toStatus}</strong>, you will not be able to reverse it yourself. If this was done in error, you would need to contact a KopaWee administrator.
+            <p className="text-xs text-red-700 dark:text-red-400 mt-1 leading-relaxed">
+              Once updated to <strong>{toStatus}</strong>, you cannot revert to PCM yourself. Only an administrator can revert status corrections.
             </p>
           </div>
         </div>
@@ -436,11 +461,14 @@ interface ClearanceWidgetProps {
 }
 
 function ClearanceWidget({ userId }: ClearanceWidgetProps) {
+  const { setRole } = useRole();
   const [clearanceData, setClearanceData] = useState<{
     hasCleared: boolean;
     lastClearedAt: string | null;
     nextEligibleAt: string | null;
     isEligible: boolean;
+    completedCount?: number;
+    isCompletedService?: boolean;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -489,6 +517,32 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
     }
   };
 
+  const transitionToAlumni = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/users/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          newStatus: "ALUMNI",
+          reason: "Completed 12 monthly clearances and transitioned to Alumni status",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRole("alumni");
+      } else {
+        setError(data.message || "Failed to transition to Alumni");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <button
@@ -498,6 +552,26 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
         <FiLoader className="w-4 h-4 animate-spin" />
         <span>Loading...</span>
       </button>
+    );
+  }
+
+  const isCompletedService = clearanceData?.isCompletedService || (clearanceData?.completedCount && clearanceData.completedCount >= 12);
+
+  if (isCompletedService) {
+    return (
+      <div className="flex flex-col items-end gap-2">
+        <button
+          onClick={transitionToAlumni}
+          disabled={submitting}
+          className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg animate-pulse"
+        >
+          <Award className="w-4 h-4" />
+          <span>🎓 Complete Service & Transition to Alumni ({clearanceData?.completedCount || 12}/12 Done)</span>
+        </button>
+        <p className="text-[10px] text-amber-400 font-mono">
+          All 12 monthly clearances completed! Congratulations Corper!
+        </p>
+      </div>
     );
   }
 
@@ -528,14 +602,14 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
         <CheckCircle2 className="w-4 h-4" />
         <span>
           {clearanceData?.hasCleared && !isEligible
-            ? "Clearance Done ✓"
-            : "Mark Clearance Done"}
+            ? `Clearance Done ✓ (${clearanceData?.completedCount || 1}/12)`
+            : `Mark Clearance Done (${clearanceData?.completedCount || 0}/12)`}
         </span>
       </button>
 
       {clearanceData?.hasCleared && !isEligible && nextEligibleDate && (
-        <p className="text-[10px] text-slate-400 dark:text-slate-500">
-          Next clearance: {nextEligibleDate}
+        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+          Next clearance window: {nextEligibleDate}
         </p>
       )}
 
@@ -568,9 +642,25 @@ export default function DashboardOverviewPage() {
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [activeUserId, setActiveUserId] = useState<string>("demo_user_id");
+  const [journeyInfo, setJourneyInfo] = useState<any>(null);
 
-  // TODO: Replace with real session user id
-  const userId = "demo_user_id";
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const id = localStorage.getItem("kopawee_user_id") || "demo_user_id";
+      setActiveUserId(id);
+      fetch(`/api/users/journey?userId=${id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.data?.journey) {
+            setJourneyInfo(data.data.journey);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
+
+  const userId = activeUserId;
 
   const handleLeaveAction = (id: number, status: "approved" | "rejected") => {
     setLeaveRequests((prev) => prev.map((req) => req.id === id ? { ...req, status } : req));
@@ -741,6 +831,7 @@ export default function DashboardOverviewPage() {
           <StatusUpdateModal
             fromStatus="Prospective Corps Member (PCM)"
             toStatus="Serving Corps Member"
+            campExitDate={journeyInfo?.campExitDate}
             onConfirm={handleStatusUpdate}
             onCancel={() => setShowStatusModal(false)}
             isLoading={statusUpdating}
@@ -772,6 +863,45 @@ export default function DashboardOverviewPage() {
 
           <ClearanceWidget userId={userId} />
         </div>
+
+        {/* Timeline Completion Prompt */}
+        {(!journeyInfo?.serviceStartDate || !journeyInfo?.serviceEndDate) && (
+          <div className="p-6 bg-emerald-950/40 border border-emerald-700/60 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold font-display text-emerald-300">Complete your service timeline</h3>
+              <p className="text-xs text-slate-300">
+                Add your service start and expected end dates so we can help you track your NYSC journey and upcoming POP.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/settings"
+              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-colors"
+            >
+              Update Service Information
+            </Link>
+          </div>
+        )}
+
+        {/* POP Journey Tracking Widget */}
+        {journeyInfo?.serviceEndDate && (
+          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 font-display">
+                Your Service Journey
+              </span>
+              <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">
+                Expected POP: {new Date(journeyInfo.serviceEndDate).toLocaleDateString("en-NG", { month: "long", year: "numeric" })}
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Service Start: {journeyInfo.serviceStartDate ? new Date(journeyInfo.serviceStartDate).toLocaleDateString("en-NG", { month: "short", year: "numeric" }) : "N/A"} · Expected Completion: {new Date(journeyInfo.serviceEndDate).toLocaleDateString("en-NG", { month: "short", year: "numeric" })}
+              </p>
+            </div>
+            <div className="px-4 py-2 bg-emerald-700 text-white text-xs font-bold font-mono uppercase tracking-wider flex items-center gap-2">
+              <Award className="w-4 h-4 text-amber-300" />
+              <span>Your POP is approaching</span>
+            </div>
+          </div>
+        )}
 
         {/* Metric Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
