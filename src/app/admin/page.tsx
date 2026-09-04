@@ -14,7 +14,9 @@ import {
   FiLogOut,
   FiCheck,
   FiClock,
-  FiAlertTriangle
+  FiAlertTriangle,
+  FiSearch,
+  FiLoader
 } from "react-icons/fi";
 
 const Shield = FiShield;
@@ -28,6 +30,7 @@ const LogOut = FiLogOut;
 const Check = FiCheck;
 const Clock = FiClock;
 const AlertTriangle = FiAlertTriangle;
+const Search = FiSearch;
 
 interface PendingItem {
   id: string;
@@ -60,11 +63,23 @@ interface PendingLodge {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"marketplace" | "accommodation">("marketplace");
+  const [activeTab, setActiveTab] = useState<"marketplace" | "accommodation" | "users">("marketplace");
   const [loading, setLoading] = useState(true);
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [pendingLodges, setPendingLodges] = useState<PendingLodge[]>([]);
   const [actionMsg, setActionMsg] = useState("");
+
+  // User status management state
+  const [userSearch, setUserSearch] = useState("");
+  const [userSearchResult, setUserSearchResult] = useState<any>(null);
+  const [userHistory, setUserHistory] = useState<any[]>([]);
+  const [userSearchLoading, setUserSearchLoading] = useState(false);
+  const [revertReason, setRevertReason] = useState("");
+  const [revertStatus, setRevertStatus] = useState<"PCM" | "SERVING" | "ALUMNI">("PCM");
+  const [revertLoading, setRevertLoading] = useState(false);
+
+  // TODO: get real admin userId from auth session
+  const adminUserId = localStorage?.getItem("kopawee_admin_user_id") || "admin_user_id";
 
   const fetchPendingData = async () => {
     setLoading(true);
@@ -134,6 +149,58 @@ export default function AdminDashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem("kopawee_admin_token");
     router.push("/admin/login");
+  };
+
+  const searchUserById = async () => {
+    if (!userSearch.trim()) return;
+    setUserSearchLoading(true);
+    setUserSearchResult(null);
+    setUserHistory([]);
+    try {
+      const res = await fetch(`/api/admin/users/${userSearch.trim()}/history?adminUserId=${adminUserId}`);
+      const data = await res.json();
+      if (data.success) {
+        setUserSearchResult(data.data.user);
+        setUserHistory(data.data.statusHistory);
+      } else {
+        setActionMsg(`❌ ${data.error}`);
+      }
+    } catch (err) {
+      setActionMsg("❌ Failed to search user");
+    } finally {
+      setUserSearchLoading(false);
+    }
+  };
+
+  const handleRevertStatus = async () => {
+    if (!userSearchResult || !revertReason.trim()) return;
+    setRevertLoading(true);
+    try {
+      const res = await fetch("/api/admin/users/revert-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          adminUserId,
+          targetUserId: userSearchResult.id,
+          newStatus: revertStatus,
+          reason: revertReason,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActionMsg(`✅ ${data.message}`);
+        setUserSearchResult({ ...userSearchResult, nyscStatus: revertStatus });
+        setRevertReason("");
+        // Refresh history
+        searchUserById();
+      } else {
+        setActionMsg(`❌ ${data.error || data.message}`);
+      }
+    } catch (err) {
+      setActionMsg("❌ Failed to revert status");
+    } finally {
+      setRevertLoading(false);
+    }
   };
 
   return (
@@ -234,6 +301,18 @@ export default function AdminDashboardPage() {
           >
             <Home className="w-4 h-4" />
             <span>Pending Lodges ({pendingLodges.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`px-5 py-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 border ${
+              activeTab === "users"
+                ? "bg-emerald-600 text-white border-emerald-500"
+                : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>User Status Management</span>
           </button>
         </div>
 
@@ -354,6 +433,131 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* User Status Management Tab */}
+        {activeTab === "users" && (
+          <div className="space-y-6">
+            {/* Search User */}
+            <div className="p-6 bg-[#121a16] border border-slate-800 space-y-4">
+              <h3 className="text-sm font-bold font-display text-white uppercase tracking-widest">Search User by ID</h3>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && searchUserById()}
+                  placeholder="Enter User ID..."
+                  className="flex-1 px-4 py-3 text-xs bg-[#0a0f0d] border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                />
+                <button
+                  onClick={searchUserById}
+                  disabled={userSearchLoading}
+                  className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 disabled:opacity-50"
+                >
+                  {userSearchLoading ? <FiLoader className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  <span>Search</span>
+                </button>
+              </div>
+            </div>
+
+            {/* User Result */}
+            {userSearchResult && (
+              <div className="space-y-4">
+                {/* User Profile Summary */}
+                <div className="p-6 bg-[#121a16] border border-slate-800 space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-display">User Profile</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest">Name</p>
+                      <p className="text-sm font-bold text-white">{userSearchResult.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest">Email</p>
+                      <p className="text-xs text-slate-300 font-mono">{userSearchResult.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest">NYSC Status</p>
+                      <p className={`text-sm font-bold ${
+                        userSearchResult.nyscStatus === "SERVING" ? "text-emerald-400" :
+                        userSearchResult.nyscStatus === "ALUMNI" ? "text-blue-400" : "text-amber-400"
+                      }`}>{userSearchResult.nyscStatus}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest">App Role</p>
+                      <p className="text-xs font-bold text-white">{userSearchResult.applicationRole}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status History */}
+                {userHistory.length > 0 && (
+                  <div className="p-6 bg-[#121a16] border border-slate-800 space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-display">Status History</h3>
+                    <div className="space-y-2">
+                      {userHistory.map((h) => (
+                        <div key={h.id} className="flex items-center gap-4 py-2 border-b border-slate-800/60 text-xs font-mono">
+                          <span className="text-slate-500">{new Date(h.createdAt).toLocaleDateString()}</span>
+                          <span className="text-red-400">{h.previousStatus}</span>
+                          <span className="text-slate-500">→</span>
+                          <span className="text-emerald-400">{h.newStatus}</span>
+                          <span className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
+                            h.changeType === "ADMIN_REVERSAL" ? "bg-red-900/30 text-red-400 border border-red-800" :
+                            h.changeType === "AUTOMATIC" ? "bg-blue-900/30 text-blue-400 border border-blue-800" :
+                            "bg-slate-900 text-slate-400 border border-slate-700"
+                          }`}>{h.changeType}</span>
+                          <span className="text-slate-500 flex-1 truncate">{h.reason}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Admin Revert Status */}
+                <div className="p-6 bg-[#1a0f0f] border border-red-900/60 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-red-400" />
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-red-400 font-display">Admin Status Reversal</h3>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Use this only to correct errors. All reversals are recorded in the audit log and the user will be notified.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">New Status</label>
+                      <select
+                        value={revertStatus}
+                        onChange={(e) => setRevertStatus(e.target.value as any)}
+                        className="w-full px-3 py-3 text-xs bg-[#0a0f0d] border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                      >
+                        <option value="PCM">PCM</option>
+                        <option value="SERVING">SERVING</option>
+                        <option value="ALUMNI">ALUMNI</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Reason (required)</label>
+                      <input
+                        type="text"
+                        value={revertReason}
+                        onChange={(e) => setRevertReason(e.target.value)}
+                        placeholder="Reason for status change..."
+                        className="w-full px-3 py-3 text-xs bg-[#0a0f0d] border border-slate-700 text-white focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleRevertStatus}
+                    disabled={revertLoading || !revertReason.trim()}
+                    className="px-6 py-3 bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {revertLoading ? <FiLoader className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />}
+                    <span>Apply Status Change</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

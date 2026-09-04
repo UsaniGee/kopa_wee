@@ -4,7 +4,7 @@ import { prisma } from "@/shared/lib/prisma";
 // GET /api/admin/users/[userId]/history
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const { searchParams } = new URL(req.url);
@@ -31,6 +31,7 @@ export async function GET(
     }
 
     const { userId } = await params;
+
 
     const [user, statusHistory] = await Promise.all([
       prisma.user.findUnique({
