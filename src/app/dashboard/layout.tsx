@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import DashboardNavbar from "@/shared/components/DashboardNavbar";
 import { RoleProvider, useRole } from "@/shared/context/RoleContext";
-import { FiGrid, FiCalendar, FiShoppingBag, FiHome, FiAlertOctagon, FiBriefcase, FiUsers } from "react-icons/fi";
+import { FiGrid, FiCalendar, FiShoppingBag, FiHome, FiAlertOctagon, FiBriefcase, FiUsers, FiSettings } from "react-icons/fi";
 
 const LayoutDashboard = FiGrid;
 const CalendarCheck = FiCalendar;
@@ -14,6 +14,7 @@ const Home = FiHome;
 const ShieldAlert = FiAlertOctagon;
 const Briefcase = FiBriefcase;
 const Users = FiUsers;
+const Settings = FiSettings;
 
 export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon: React.ElementType }[]> = {
   pcm: [
@@ -21,6 +22,7 @@ export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon:
     { href: "/dashboard/companion", label: "Camp Guide & Packing", icon: CalendarCheck },
     { href: "/dashboard/marketplace", label: "Pre-Camp Gear Market", icon: ShoppingBag },
     { href: "/dashboard/safety", label: "Travel & Route Safety", icon: ShieldAlert },
+    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   serving: [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -30,24 +32,29 @@ export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon:
     { href: "/dashboard/safety", label: "Safety SOS", icon: ShieldAlert },
     { href: "/dashboard/workplace", label: "PPA Logbook", icon: Briefcase },
     { href: "/dashboard/community", label: "CDS Hub", icon: Users },
+    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   cds_exec: [
     { href: "/dashboard", label: "CDS Executive Hub", icon: LayoutDashboard },
     { href: "/dashboard/community", label: "Attendance, Projects & Dues", icon: Users },
     { href: "/dashboard/safety", label: "Group Safety SOS", icon: ShieldAlert },
+    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   ppa: [
     { href: "/dashboard", label: "PPA Employer Portal", icon: LayoutDashboard },
     { href: "/dashboard/workplace", label: "Corper Staff & Leave Requests", icon: Briefcase },
+    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   nysc_official: [
     { href: "/dashboard", label: "LGA Inspector Portal", icon: LayoutDashboard },
     { href: "/dashboard/companion", label: "Biometric Clearance Portal", icon: CalendarCheck },
+    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   alumni: [
     { href: "/dashboard", label: "Ex-Corper Hub", icon: LayoutDashboard },
     { href: "/dashboard/marketplace", label: "POP Household Deals", icon: ShoppingBag },
     { href: "/dashboard/workplace", label: "Career & Gigs", icon: Briefcase },
+    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
 };
 
@@ -67,7 +74,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const isPathValidForRole = activeNavItems.some(item => item.href === pathname);
+    // settings is universally accessible across all roles
+    const isSettingsPage = pathname === "/dashboard/settings";
+    const isPathValidForRole = isSettingsPage || activeNavItems.some(item => item.href === pathname);
     if (!isPathValidForRole) {
       const firstTabHref = activeNavItems[0]?.href || "/dashboard";
       router.push(firstTabHref);

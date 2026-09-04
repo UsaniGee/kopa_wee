@@ -9,6 +9,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// System application-level roles (access control)
+enum ApplicationRole {
+  USER
+  ADMIN
+}
+
+// NYSC lifecycle journey status (separate from application role)
+enum NyscStatus {
+  PCM
+  SERVING
+  ALUMNI
+}
+
+// Legacy role enum kept for backwards compat with existing RBAC guards
 enum Role {
   PCM
   SERVING_CORPER
@@ -38,38 +52,140 @@ enum SOSStatus {
   RESOLVED
 }
 
+enum ItemTrackingStatus {
+  INTACT
+  USED
+  MISSING
+}
+
+enum StatusChangeType {
+  MANUAL
+  AUTOMATIC
+  ADMIN_REVERSAL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum DateSource {
+  USER_PROVIDED
+  ADMIN_VERIFIED
+  OFFICIAL_SOURCE
+  SYSTEM
+}
+
 model User {
-  id                String   @id @default(cuid())
+  id                String          @id @default(cuid())
   name              String
-  email             String   @unique
+  email             String          @unique
   passwordHash      String?
   phone             String?
-  role              Role     @default(PCM)
+  // Legacy UI role kept for dashboard view switching
+  role              Role            @default(PCM)
+  // Application access control role
+  applicationRole   ApplicationRole @default(USER)
+  // NYSC lifecycle journey status
+  nyscStatus        NyscStatus      @default(PCM)
   stateOfOrigin     String?
   deployedState     String?
   lga               String?
   ppaName           String?
   callUpNo          String?
-  stateCode         String?  @unique
+  stateCode         String?         @unique
   avatarUrl         String?
-  isVerified        Boolean  @default(false)
+  isVerified        Boolean         @default(false)
   verificationToken String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   // Relationships
   checklist           CampChecklist?
+  packingItems        PackingItem[]
   accommodations      AccommodationListing[]
   marketplaceItems    MarketplaceItem[]
   logbookEntries      PPALogbookEntry[]      @relation("CorperLogbooks")
   approvedLogbooks    PPALogbookEntry[]      @relation("EmployerApprovals")
   sosAlerts           SOSAlert[]
   roommateRequests    RoommateRequest[]
+  monthlyClearances   MonthlyClearance[]
+  statusHistory       UserStatusHistory[]    @relation("StatusHistoryUser")
+  adminStatusChanges  UserStatusHistory[]    @relation("StatusHistoryAdmin")
+  nyscJourney         NYSCJourney?
+  notifications       Notification[]
+  subscription        UserSubscription?
 
   @@index([role])
   @@index([deployedState])
+  @@index([nyscStatus])
+  @@index([applicationRole])
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// NYSC JOURNEY (Progressive profiling: camp dates & service dates)
+// ─────────────────────────────────────────────────────────────────────────────
+model NYSCJourney {
+  id                    String     @id @default(cuid())
+  userId                String     @unique
+  user                  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // PCM phase dates
+  campEntryDate         DateTime?
+  campExitDate          DateTime?
+  campDateSource        DateSource @default(USER_PROVIDED)
+  // Serving phase dates
+  serviceStartDate      DateTime?
+  serviceEndDate        DateTime?
+  serviceDateSource     DateSource @default(USER_PROVIDED)
+  // Additional NYSC info
+  batch                 String?
+  stream                String?
+  institution           String?
+  courseOfStudy         String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MONTHLY CLEARANCE
+// ─────────────────────────────────────────────────────────────────────────────
+model MonthlyClearance {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completedAt     DateTime @default(now())
+  nextEligibleAt  DateTime
+  notes           String?
+
+  @@index([userId])
+  @@index([userId, nextEligibleAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PACKING ITEMS (rich per-item tracking replacing simple JSON CampChecklist)
+// ─────────────────────────────────────────────────────────────────────────────
+model PackingItem {
+  id                    String             @id @default(cuid())
+  userId                String
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                  String
+  category              String             @default("general")
+  isCustom              Boolean            @default(false)
+  // PCM phase
+  pcmCompleted          Boolean            @default(false)
+  // Serving phase stock tracking
+  servingTrackingStatus ItemTrackingStatus @default(INTACT)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([userId, category])
+}
+
+// Legacy CampChecklist (kept for backwards compatibility during migration)
 model CampChecklist {
   id             String   @id @default(cuid())
   userId         String   @unique
@@ -78,6 +194,77 @@ model CampChecklist {
   updatedAt      DateTime @updatedAt
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// USER STATUS HISTORY (Audit trail for all NYSC status transitions)
+// ─────────────────────────────────────────────────────────────────────────────
+model UserStatusHistory {
+  id             String           @id @default(cuid())
+  userId         String
+  user           User             @relation("StatusHistoryUser", fields: [userId], references: [id], onDelete: Cascade)
+  previousStatus NyscStatus
+  newStatus      NyscStatus
+  changedBy      String
+  changedByUser  User?            @relation("StatusHistoryAdmin", fields: [changedBy], references: [id])
+  changeType     StatusChangeType
+  reason         String?
+  createdAt      DateTime         @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUBSCRIPTION PLANS & USER SUBSCRIPTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+model SubscriptionPlan {
+  id            String             @id @default(cuid())
+  name          String             @unique
+  slug          String             @unique
+  description   String
+  price         Float              @default(0)
+  isActive      Boolean            @default(true)
+  isEarlyAccess Boolean            @default(false)
+  features      Json               @default("[]")
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  subscriptions UserSubscription[]
+
+  @@index([slug])
+}
+
+model UserSubscription {
+  id        String             @id @default(cuid())
+  userId    String             @unique
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId    String
+  plan      SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status    SubscriptionStatus @default(ACTIVE)
+  startsAt  DateTime           @default(now())
+  endsAt    DateTime?
+
+  @@index([userId])
+  @@index([planId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXISTING MODELS (unchanged)
+// ─────────────────────────────────────────────────────────────────────────────
 enum VerificationStatus {
   UNVERIFIED
   PENDING
@@ -226,4 +413,3 @@ model FormOption {
   @@unique([category, value])
   @@index([category])
 }
-

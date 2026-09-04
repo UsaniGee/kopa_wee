@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRole } from "@/shared/context/RoleContext";
-import { FiCalendar, FiShield, FiShoppingBag, FiHome, FiAlertOctagon, FiBriefcase, FiUsers, FiArrowRight, FiCheckCircle, FiClock, FiMapPin, FiTrendingUp, FiFileText, FiCpu, FiPackage, FiCompass, FiCheckSquare, FiAlertCircle, FiBox, FiUserCheck, FiUserX, FiPlus, FiSend, FiAward } from "react-icons/fi";
+import {
+  FiCalendar, FiShield, FiShoppingBag, FiHome, FiAlertOctagon,
+  FiBriefcase, FiUsers, FiArrowRight, FiCheckCircle, FiClock,
+  FiMapPin, FiTrendingUp, FiFileText, FiCpu, FiPackage, FiCompass,
+  FiCheckSquare, FiAlertCircle, FiBox, FiUserCheck, FiUserX,
+  FiPlus, FiSend, FiAward, FiX, FiLoader, FiTrash2, FiRefreshCw,
+} from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
 
 const Calendar = FiCalendar;
@@ -13,12 +19,9 @@ const Home = FiHome;
 const ShieldAlert = FiAlertOctagon;
 const Briefcase = FiBriefcase;
 const Users = FiUsers;
-const ArrowRight = FiArrowRight;
 const CheckCircle2 = FiCheckCircle;
 const Clock = FiClock;
-const MapPin = FiMapPin;
 const TrendingUp = FiTrendingUp;
-const FileText = FiFileText;
 const Sparkles = HiSparkles;
 const Bot = FiCpu;
 const Luggage = FiPackage;
@@ -26,36 +29,551 @@ const Compass = FiCompass;
 const CheckSquare = FiCheckSquare;
 const AlertCircle = FiAlertCircle;
 const Building2 = FiBox;
-const UserCheck = FiUserCheck;
-const UserX = FiUserX;
 const Plus = FiPlus;
 const Send = FiSend;
 const Award = FiAward;
+const X = FiX;
 
+// ─── Clearance Confirmation Modal ─────────────────────────────────────────────
+interface ClearanceModalProps {
+  onConfirm: () => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}
+
+function ClearanceModal({ onConfirm, onCancel, isLoading }: ClearanceModalProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white dark:bg-[#121815] border border-slate-200 dark:border-slate-700 max-w-md w-full p-8 space-y-6 shadow-2xl">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            </div>
+            <h2 className="text-lg font-bold text-[#121815] dark:text-white font-display">
+              Mark Monthly Clearance as Done?
+            </h2>
+          </div>
+          <button
+            onClick={onCancel}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
+          <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+            Are you sure you want to mark your clearance as completed for this month?
+          </p>
+          <p className="text-xs text-amber-700 dark:text-amber-400 mt-2 font-medium">
+            ⚠️ Once confirmed, you won&apos;t be able to mark another clearance as done until your next clearance, approximately{" "}
+            <strong>20 days from now</strong>.
+          </p>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={onCancel}
+            disabled={isLoading}
+            className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isLoading}
+            className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {isLoading ? (
+              <>
+                <FiLoader className="w-4 h-4 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <span>Yes, Mark Clearance Done</span>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Update Status Confirmation Modal ────────────────────────────────────────
+interface StatusUpdateModalProps {
+  fromStatus: string;
+  toStatus: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}
+
+function StatusUpdateModal({ fromStatus, toStatus, onConfirm, onCancel, isLoading }: StatusUpdateModalProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white dark:bg-[#121815] border border-slate-200 dark:border-slate-700 max-w-md w-full p-8 space-y-6 shadow-2xl">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30">
+              <FiRefreshCw className="w-5 h-5 text-blue-600" />
+            </div>
+            <h2 className="text-lg font-bold text-[#121815] dark:text-white font-display">
+              Update NYSC Status?
+            </h2>
+          </div>
+          <button
+            onClick={onCancel}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">From:</span>
+            <span className="text-sm font-bold text-[#121815] dark:text-white">{fromStatus}</span>
+            <span className="text-slate-400">→</span>
+            <span className="text-sm font-bold text-emerald-600">{toStatus}</span>
+          </div>
+
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+            <p className="text-sm text-red-800 dark:text-red-300 leading-relaxed font-medium">
+              ⚠️ This action cannot be undone by you.
+            </p>
+            <p className="text-xs text-red-700 dark:text-red-400 mt-2 leading-relaxed">
+              Once you update your status to <strong>{toStatus}</strong>, you will not be able to reverse it yourself. If this was done in error, you would need to contact a KopaWee administrator.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={onCancel}
+            disabled={isLoading}
+            className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isLoading}
+            className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {isLoading ? (
+              <>
+                <FiLoader className="w-4 h-4 animate-spin" />
+                <span>Updating...</span>
+              </>
+            ) : (
+              <span>Yes, Update Status</span>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Packing Checklist Component ─────────────────────────────────────────────
+interface PackingItem {
+  id: string;
+  name: string;
+  category: string;
+  isCustom: boolean;
+  pcmCompleted: boolean;
+  servingTrackingStatus: "INTACT" | "USED" | "MISSING";
+}
+
+interface PackingChecklistProps {
+  userId: string;
+  isServing?: boolean;
+}
+
+function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) {
+  const [items, setItems] = useState<PackingItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newItemName, setNewItemName] = useState("");
+  const [addingItem, setAddingItem] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const fetchItems = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const res = await fetch(`/api/packing-items?userId=${userId}`);
+      const data = await res.json();
+      if (data.success) setItems(data.data);
+    } catch (err) {
+      console.error("Failed to fetch packing items:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
+
+  const togglePcmCompleted = async (item: PackingItem) => {
+    const updated = { ...item, pcmCompleted: !item.pcmCompleted };
+    setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)));
+    await fetch("/api/packing-items", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ itemId: item.id, userId, pcmCompleted: updated.pcmCompleted }),
+    });
+  };
+
+  const setServingStatus = async (item: PackingItem, status: "INTACT" | "USED" | "MISSING") => {
+    const updated = { ...item, servingTrackingStatus: status };
+    setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)));
+    await fetch("/api/packing-items", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ itemId: item.id, userId, servingTrackingStatus: status }),
+    });
+  };
+
+  const addCustomItem = async () => {
+    if (!newItemName.trim()) return;
+    setAddingItem(true);
+    try {
+      const res = await fetch("/api/packing-items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, name: newItemName.trim(), category: "custom" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setItems((prev) => [...prev, data.data]);
+        setNewItemName("");
+        setShowAddForm(false);
+      }
+    } catch (err) {
+      console.error("Failed to add item:", err);
+    } finally {
+      setAddingItem(false);
+    }
+  };
+
+  const deleteItem = async (item: PackingItem) => {
+    if (!item.isCustom) return;
+    setItems((prev) => prev.filter((i) => i.id !== item.id));
+    await fetch("/api/packing-items", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ itemId: item.id, userId }),
+    });
+  };
+
+  const completedCount = items.filter((i) => i.pcmCompleted).length;
+  const categories = [...new Set(items.map((i) => i.category))];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8 text-slate-400">
+        <FiLoader className="w-5 h-5 animate-spin mr-2" />
+        <span className="text-xs">Loading checklist...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Serving notice banner */}
+      {isServing && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <p className="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">
+            Keep Track of Your Camp Items
+          </p>
+          <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+            This helps you keep track of the items you brought to camp. We&apos;re helping you keep an account of your belongings and track what you still have after camp.
+          </p>
+        </div>
+      )}
+
+      {/* Progress (PCM only) */}
+      {!isServing && items.length > 0 && (
+        <div className="flex items-center gap-3">
+          <div className="flex-1 bg-slate-200 dark:bg-slate-700 h-1.5">
+            <div
+              className="bg-emerald-600 h-1.5 transition-all"
+              style={{ width: `${(completedCount / items.length) * 100}%` }}
+            />
+          </div>
+          <span className="text-xs text-slate-500 shrink-0">
+            {completedCount}/{items.length}
+          </span>
+        </div>
+      )}
+
+      {/* Items by category */}
+      {categories.map((cat) => (
+        <div key={cat} className="space-y-1.5">
+          <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 font-display capitalize">
+            {cat}
+          </h4>
+          {items
+            .filter((i) => i.category === cat)
+            .map((item) => (
+              <div
+                key={item.id}
+                className={`flex items-center gap-3 p-3 text-xs border transition-all ${
+                  !isServing && item.pcmCompleted
+                    ? "bg-emerald-950/10 border-emerald-500/30 dark:bg-emerald-950/20"
+                    : isServing && item.servingTrackingStatus === "MISSING"
+                    ? "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800"
+                    : isServing && item.servingTrackingStatus === "USED"
+                    ? "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800"
+                    : "bg-[#eaf5ed] dark:bg-[#0a0f0d] border-slate-200 dark:border-slate-800"
+                }`}
+              >
+                {/* PCM checkbox */}
+                {!isServing && (
+                  <input
+                    type="checkbox"
+                    checked={item.pcmCompleted}
+                    onChange={() => togglePcmCompleted(item)}
+                    className="accent-emerald-600 w-4 h-4 shrink-0 cursor-pointer"
+                  />
+                )}
+
+                <span
+                  className={`flex-1 font-medium ${
+                    !isServing && item.pcmCompleted
+                      ? "line-through text-slate-400"
+                      : "text-slate-800 dark:text-slate-200"
+                  }`}
+                >
+                  {item.name}
+                  {item.isCustom && (
+                    <span className="ml-2 text-[10px] px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-bold uppercase tracking-wider">
+                      Custom
+                    </span>
+                  )}
+                </span>
+
+                {/* Serving stock tracking buttons */}
+                {isServing && (
+                  <div className="flex items-center gap-1 shrink-0">
+                    {(["INTACT", "USED", "MISSING"] as const).map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => setServingStatus(item, status)}
+                        className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider border transition-all ${
+                          item.servingTrackingStatus === status
+                            ? status === "INTACT"
+                              ? "bg-emerald-600 text-white border-emerald-600"
+                              : status === "USED"
+                              ? "bg-amber-500 text-white border-amber-500"
+                              : "bg-red-600 text-white border-red-600"
+                            : "bg-transparent text-slate-500 border-slate-300 dark:border-slate-600 hover:border-slate-500"
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Delete custom item */}
+                {item.isCustom && (
+                  <button
+                    onClick={() => deleteItem(item)}
+                    className="text-slate-400 hover:text-red-500 transition-colors shrink-0 ml-1"
+                  >
+                    <FiTrash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ))}
+        </div>
+      ))}
+
+      {/* Add custom item */}
+      {showAddForm ? (
+        <div className="flex gap-2 pt-1">
+          <input
+            type="text"
+            value={newItemName}
+            onChange={(e) => setNewItemName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addCustomItem()}
+            placeholder="Item name..."
+            autoFocus
+            className="flex-1 px-3 py-2 text-xs bg-white dark:bg-[#0a0f0d] border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-600"
+          />
+          <button
+            onClick={addCustomItem}
+            disabled={addingItem || !newItemName.trim()}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider disabled:opacity-50 transition-colors"
+          >
+            {addingItem ? <FiLoader className="w-3.5 h-3.5 animate-spin" /> : "Add"}
+          </button>
+          <button
+            onClick={() => { setShowAddForm(false); setNewItemName(""); }}
+            className="px-3 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors pt-1"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Add Item
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ─── Clearance Status Widget ──────────────────────────────────────────────────
+interface ClearanceWidgetProps {
+  userId: string;
+}
+
+function ClearanceWidget({ userId }: ClearanceWidgetProps) {
+  const [clearanceData, setClearanceData] = useState<{
+    hasCleared: boolean;
+    lastClearedAt: string | null;
+    nextEligibleAt: string | null;
+    isEligible: boolean;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchClearance = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const res = await fetch(`/api/clearance?userId=${userId}`);
+      const data = await res.json();
+      if (data.success) setClearanceData(data.data);
+    } catch (err) {
+      console.error("Failed to fetch clearance:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    fetchClearance();
+  }, [fetchClearance]);
+
+  const markClearanceDone = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/clearance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchClearance();
+        setShowModal(false);
+      } else {
+        setError(data.message || data.error || "Failed to mark clearance");
+        setShowModal(false);
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+      setShowModal(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <button
+        disabled
+        className="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2"
+      >
+        <FiLoader className="w-4 h-4 animate-spin" />
+        <span>Loading...</span>
+      </button>
+    );
+  }
+
+  const isEligible = clearanceData?.isEligible ?? true;
+  const nextEligibleDate = clearanceData?.nextEligibleAt
+    ? new Date(clearanceData.nextEligibleAt).toLocaleDateString("en-NG", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
+
+  return (
+    <div className="flex flex-col items-end gap-2">
+      <button
+        onClick={() => {
+          if (isEligible) setShowModal(true);
+        }}
+        disabled={!isEligible || submitting}
+        className={`px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
+          clearanceData?.hasCleared && !isEligible
+            ? "bg-emerald-800 text-white cursor-not-allowed opacity-80"
+            : isEligible
+            ? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+            : "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed"
+        }`}
+      >
+        <CheckCircle2 className="w-4 h-4" />
+        <span>
+          {clearanceData?.hasCleared && !isEligible
+            ? "Clearance Done ✓"
+            : "Mark Clearance Done"}
+        </span>
+      </button>
+
+      {clearanceData?.hasCleared && !isEligible && nextEligibleDate && (
+        <p className="text-[10px] text-slate-400 dark:text-slate-500">
+          Next clearance: {nextEligibleDate}
+        </p>
+      )}
+
+      {error && (
+        <p className="text-[10px] text-red-500 max-w-[200px] text-right">{error}</p>
+      )}
+
+      {showModal && (
+        <ClearanceModal
+          onConfirm={markClearanceDone}
+          onCancel={() => setShowModal(false)}
+          isLoading={submitting}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN DASHBOARD PAGE
+// ═══════════════════════════════════════════════════════════════════════════════
 export default function DashboardOverviewPage() {
   const { currentRole, setRole } = useRole();
 
-  const [clearanceDone, setClearanceDone] = useState(false);
-  const [checklist, setChecklist] = useState([
-    { id: 1, text: "Call-up Letter (3 colored copies)", checked: true },
-    { id: 2, text: "Green Card & Statement of Result", checked: true },
-    { id: 3, text: "Medical Fitness Certificate", checked: true },
-    { id: 4, text: "White Shorts (3 pairs) & Plain White Tees", checked: false },
-    { id: 5, text: "Waist Bag & Rubber Shoes", checked: false },
-  ]);
   const [leaveRequests, setLeaveRequests] = useState([
     { id: 1, name: "John Okoh", role: "ICT Assistant", reason: "Medical Leave (3 Days)", status: "pending" },
     { id: 2, name: "Amina Bello", role: "Research Associate", reason: "LGA Clearance Exemption", status: "pending" },
   ]);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState(false);
 
-  const toggleChecklist = (id: number) => {
-    setChecklist(prev => prev.map(item => item.id === id ? { ...item, checked: !item.checked } : item));
-  };
+  // TODO: Replace with real session user id
+  const userId = "demo_user_id";
 
   const handleLeaveAction = (id: number, status: "approved" | "rejected") => {
-    setLeaveRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
+    setLeaveRequests((prev) => prev.map((req) => req.id === id ? { ...req, status } : req));
   };
 
   const handleAskAI = (e: React.FormEvent) => {
@@ -68,11 +586,36 @@ export default function DashboardOverviewPage() {
     }
   };
 
+  const handleStatusUpdate = async () => {
+    setStatusUpdating(true);
+    try {
+      const res = await fetch("/api/users/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          newStatus: "SERVING",
+          reason: "User self-initiated transition from PCM dashboard",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRole("serving");
+        setShowStatusModal(false);
+      } else {
+        console.error("Status update failed:", data.message);
+      }
+    } catch (err) {
+      console.error("Failed to update status:", err);
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
   /* =========================================================================
      1. PROSPECTIVE CORPS MEMBER (PCM) VIEW
      ========================================================================= */
   if (currentRole === "pcm") {
-    const completedItems = checklist.filter(c => c.checked).length;
     return (
       <div className="space-y-8 font-sans">
         {/* Banner */}
@@ -91,7 +634,7 @@ export default function DashboardOverviewPage() {
           </div>
 
           <button
-            onClick={() => setRole("serving")}
+            onClick={() => setShowStatusModal(true)}
             className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 shrink-0 cursor-pointer"
           >
             <span>Update Status ➔ Serving Corper</span>
@@ -111,16 +654,11 @@ export default function DashboardOverviewPage() {
 
           <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-[10px] font-bold uppercase tracking-widest font-display">Packing Checklist</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest font-display">Camp Prep Progress</span>
               <CheckSquare className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-3xl font-bold font-display text-[#121815] dark:text-white">{completedItems} of {checklist.length} Ready</div>
-            <div className="w-full bg-slate-300 dark:bg-slate-800 h-1.5">
-              <div 
-                className="bg-emerald-600 h-1.5 transition-all"
-                style={{ width: `${(completedItems / checklist.length) * 100}%` }}
-              />
-            </div>
+            <div className="text-3xl font-bold font-display text-[#121815] dark:text-white">Camp Checklist Active</div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">Track your mandatory gear below</p>
           </div>
 
           <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
@@ -135,33 +673,15 @@ export default function DashboardOverviewPage() {
 
         {/* Interactive Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Packing Checklist */}
           <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
             <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
               <CheckSquare className="w-4 h-4 text-emerald-600" /> Camp Mandatory Gear Checklist
             </h2>
-            <div className="space-y-2">
-              {checklist.map((item) => (
-                <label 
-                  key={item.id}
-                  onClick={() => toggleChecklist(item.id)}
-                  className={`flex items-center gap-3 p-3.5 text-xs font-semibold transition-all cursor-pointer border ${
-                    item.checked 
-                      ? "bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 border-emerald-600/40 line-through" 
-                      : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-800 dark:text-slate-200 border-slate-300/60 dark:border-slate-800"
-                  }`}
-                >
-                  <input 
-                    type="checkbox" 
-                    checked={item.checked} 
-                    onChange={() => {}} 
-                    className="accent-emerald-600 w-4 h-4"
-                  />
-                  <span>{item.text}</span>
-                </label>
-              ))}
-            </div>
+            <PackingChecklist userId={userId} isServing={false} />
           </div>
 
+          {/* AI Assistant */}
           <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-xs uppercase tracking-widest font-display mb-2">
@@ -215,6 +735,17 @@ export default function DashboardOverviewPage() {
             ))}
           </div>
         </div>
+
+        {/* Status Update Modal */}
+        {showStatusModal && (
+          <StatusUpdateModal
+            fromStatus="Prospective Corps Member (PCM)"
+            toStatus="Serving Corps Member"
+            onConfirm={handleStatusUpdate}
+            onCancel={() => setShowStatusModal(false)}
+            isLoading={statusUpdating}
+          />
+        )}
       </div>
     );
   }
@@ -239,15 +770,7 @@ export default function DashboardOverviewPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setClearanceDone(!clearanceDone)}
-            className={`px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-              clearanceDone ? "bg-emerald-800 text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white"
-            }`}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>{clearanceDone ? "Biometrics Verified" : "Mark Clearance Done"}</span>
-          </button>
+          <ClearanceWidget userId={userId} />
         </div>
 
         {/* Metric Grid */}
@@ -270,6 +793,14 @@ export default function DashboardOverviewPage() {
               </div>
             );
           })}
+        </div>
+
+        {/* Item Stock Tracking */}
+        <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+          <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
+            <CheckSquare className="w-4 h-4 text-emerald-600" /> Camp Item Stock Tracker
+          </h2>
+          <PackingChecklist userId={userId} isServing={true} />
         </div>
 
         {/* Modules Grid */}
@@ -354,13 +885,13 @@ export default function DashboardOverviewPage() {
 
                 {req.status === "pending" ? (
                   <div className="flex items-center gap-2 shrink-0">
-                    <button 
+                    <button
                       onClick={() => handleLeaveAction(req.id, "approved")}
                       className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors"
                     >
                       Approve
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleLeaveAction(req.id, "rejected")}
                       className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors"
                     >

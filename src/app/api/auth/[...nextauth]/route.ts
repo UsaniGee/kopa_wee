@@ -26,6 +26,8 @@ export const authOptions = {
             name: user.name || "Google Corper",
             avatarUrl: user.image || undefined,
             role: "PCM",
+            applicationRole: "USER",
+            nyscStatus: "PCM",
             isVerified: true,
           },
         });
@@ -39,10 +41,20 @@ export const authOptions = {
       if (session.user?.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: session.user.email },
+          select: {
+            id: true,
+            role: true,
+            applicationRole: true,
+            nyscStatus: true,
+            isVerified: true,
+          },
         });
         if (dbUser) {
           (session.user as any).id = dbUser.id;
           (session.user as any).role = dbUser.role;
+          (session.user as any).applicationRole = dbUser.applicationRole;
+          (session.user as any).nyscStatus = dbUser.nyscStatus;
+          (session.user as any).isVerified = dbUser.isVerified;
         }
       }
       return session;

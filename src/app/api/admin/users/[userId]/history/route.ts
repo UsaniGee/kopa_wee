@@ -1,0 +1,72 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/shared/lib/prisma";
+
+// GET /api/admin/users/[userId]/history
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { userId: string } }
+) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const adminUserId = searchParams.get("adminUserId");
+
+    if (!adminUserId) {
+      return NextResponse.json(
+        { success: false, error: "adminUserId query parameter required" },
+        { status: 400 }
+      );
+    }
+
+    // Verify admin role
+    const admin = await prisma.user.findUnique({
+      where: { id: adminUserId },
+      select: { applicationRole: true },
+    });
+
+    if (!admin || admin.applicationRole !== "ADMIN") {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized. Admin access required." },
+        { status: 403 }
+      );
+    }
+
+    const { userId } = await params;
+
+    const [user, statusHistory] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          nyscStatus: true,
+          applicationRole: true,
+          role: true,
+          createdAt: true,
+        },
+      }),
+      prisma.userStatusHistory.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: { user, statusHistory },
+    });
+  } catch (error) {
+    console.error("[GET /api/admin/users/[userId]/history] Error:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch user history" },
+      { status: 500 }
+    );
+  }
+}
