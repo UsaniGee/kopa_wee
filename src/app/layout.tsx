@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "@/shared/components/ThemeToggle";
+import { SessionProvider } from "next-auth/react";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${jakarta.variable} h-full antialiased light`}>
       <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
         {/* Global floating theme toggle — fixed bottom-right on every page */}
         <div
           className="fixed bottom-6 right-6 z-[9999]"

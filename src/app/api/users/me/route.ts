@@ -1,26 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 
-export async function GET(req: Request) {
+export async function GET() {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId") || searchParams.get("id");
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "User ID parameter is required" },
-        { status: 400 }
-      );
-    }
-
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: auth.user!.id }, // Scoped to session user only
       select: {
         id: true,
         name: true,
         email: true,
         phone: true,
         role: true,
+        applicationRole: true,
+        nyscStatus: true,
         stateOfOrigin: true,
         deployedState: true,
         lga: true,
@@ -40,11 +36,8 @@ export async function GET(req: Request) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: user,
-    });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: user });
+  } catch {
     return NextResponse.json(
       { success: false, error: "Failed to fetch user profile" },
       { status: 500 }

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 
 const sosSchema = z.object({
-  userId: z.string(),
   latitude: z.number(),
   longitude: z.number(),
   state: z.string(),
@@ -12,12 +12,18 @@ const sosSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
     const validatedData = sosSchema.parse(body);
 
     const sosAlert = await prisma.sOSAlert.create({
-      data: validatedData,
+      data: {
+        ...validatedData,
+        userId: auth.user!.id, // Always use session user — never trust client-supplied userId
+      },
     });
 
     return NextResponse.json(

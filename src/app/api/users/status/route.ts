@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 
-// Valid manual transitions (users can only go forward)
 const ALLOWED_MANUAL_TRANSITIONS: Record<string, string[]> = {
   PCM: ["SERVING"],
-  SERVING: [],   // Users cannot manually transition from SERVING
-  ALUMNI: [],    // Users cannot manually transition from ALUMNI
+  SERVING: [],
+  ALUMNI: [],
 };
 
 const statusTransitionSchema = z.object({
@@ -15,11 +15,21 @@ const statusTransitionSchema = z.object({
   reason: z.string().optional(),
 });
 
-// POST /api/users/status — user-initiated controlled status transition
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
     const { userId, newStatus, reason } = statusTransitionSchema.parse(body);
+
+    // Ownership check — session user must match the userId
+    if (userId !== auth.user!.id) {
+      return NextResponse.json(
+        { success: false, error: "Forbidden: Cannot change status for another user" },
+        { status: 403 }
+      );
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId },

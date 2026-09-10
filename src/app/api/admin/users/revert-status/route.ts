@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAdmin } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 
 const revertSchema = z.object({
-  adminUserId: z.string().min(1, "Admin user ID required"),
   targetUserId: z.string().min(1, "Target user ID required"),
   newStatus: z.enum(["PCM", "SERVING", "ALUMNI"]),
   reason: z.string().min(1, "A reason is required for status reversals"),
@@ -11,26 +11,13 @@ const revertSchema = z.object({
 
 // POST /api/admin/users/revert-status
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
-    const { adminUserId, targetUserId, newStatus, reason } =
-      revertSchema.parse(body);
-
-    // Verify admin role
-    const admin = await prisma.user.findUnique({
-      where: { id: adminUserId },
-      select: { applicationRole: true },
-    });
-
-    if (!admin || admin.applicationRole !== "ADMIN") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized. Admin access required.",
-        },
-        { status: 403 }
-      );
-    }
+    const { targetUserId, newStatus, reason } = revertSchema.parse(body);
+    const adminUserId = auth.user!.id;
 
     // Get target user
     const targetUser = await prisma.user.findUnique({

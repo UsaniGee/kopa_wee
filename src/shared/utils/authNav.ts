@@ -1,5 +1,7 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+
 export const ROLE_ALLOWED_ROUTES: Record<string, string[]> = {
   pcm: ["/dashboard", "/dashboard/companion", "/dashboard/marketplace", "/dashboard/safety"],
   serving: ["/dashboard", "/dashboard/companion", "/dashboard/marketplace", "/dashboard/accommodation", "/dashboard/safety", "/dashboard/workplace", "/dashboard/community"],
@@ -10,22 +12,30 @@ export const ROLE_ALLOWED_ROUTES: Record<string, string[]> = {
 };
 
 /**
- * Checks if the user is authenticated (can be updated when backend API is plugged in)
+ * React hook — returns true when the NextAuth session is authenticated.
+ * Use this in client components instead of checking localStorage.
  */
-export function isUserAuthenticated(): boolean {
-  if (typeof window === "undefined") return false;
-  const token = localStorage.getItem("kopawee_auth_token");
-  const userId = localStorage.getItem("kopawee_user_id");
-  const profile = localStorage.getItem("kopawee_user_profile");
-  return Boolean(
-    (token && token.trim().length > 0) ||
-    (userId && userId.trim().length > 0) ||
-    (profile && profile.trim().length > 0)
-  );
+export function useIsAuthenticated(): boolean {
+  const { status } = useSession();
+  return status === "authenticated";
 }
 
 /**
- * Returns the currently stored user role (defaults to "serving")
+ * Legacy check kept for non-React contexts (e.g. redirect logic outside hooks).
+ * Reads from localStorage UX state — NOT a security gate. Use useIsAuthenticated() for UI guards.
+ * Real auth gating is handled by middleware.ts and getServerSession() in API routes.
+ */
+export function isUserAuthenticated(): boolean {
+  if (typeof window === "undefined") return false;
+  // Check localStorage UX state only — not a security decision
+  const userId = localStorage.getItem("kopawee_user_id");
+  const userEmail = localStorage.getItem("kopawee_user_email");
+  return Boolean(userId || userEmail);
+}
+
+/**
+ * Returns the currently stored user role from localStorage (UX display only).
+ * Defaults to "serving".
  */
 export function getUserRole(): string {
   if (typeof window === "undefined") return "serving";
@@ -33,22 +43,19 @@ export function getUserRole(): string {
 }
 
 /**
- * Resolves the destination route based on user role and system design rules.
- * If targetRoute is allowed for role, returns targetRoute.
- * Otherwise, returns the role's primary dashboard landing page.
+ * Resolves the destination route based on user role and allowed routes.
  */
 export function getRouteForRole(targetRoute: string, role: string): string {
   const allowed = ROLE_ALLOWED_ROUTES[role] || ROLE_ALLOWED_ROUTES.serving;
   if (allowed.includes(targetRoute)) {
     return targetRoute;
   }
-  // Fallback to role's first allowed route or /dashboard
   return allowed[0] || "/dashboard";
 }
 
 /**
  * Smart Navigation Action:
- * - If user IS authenticated: detects auth & navigates directly to role-appropriate route
+ * - If user IS authenticated: navigates directly to role-appropriate route
  * - If user IS NOT authenticated: redirects to sign-up page with redirect callback
  */
 export function navigateWithAuthCheck(

@@ -59,18 +59,21 @@ export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon:
 };
 
 import { isUserAuthenticated } from "@/shared/utils/authNav";
+import { useSession } from "next-auth/react";
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { currentRole, setRole } = useRole();
+  const { status } = useSession();
 
   const activeNavItems = ROLE_NAV_ITEMS[currentRole] || ROLE_NAV_ITEMS.serving;
 
-  // Route protection: redirect unauthenticated users to Sign Up
+  // Route protection: redirect unauthenticated users (middleware handles this too — belt & braces)
   useEffect(() => {
-    if (!isUserAuthenticated()) {
-      router.push(`/auth?mode=signup&redirect=${encodeURIComponent(pathname)}`);
+    if (status === "loading") return; // Wait for session to resolve
+    if (status === "unauthenticated") {
+      router.push(`/auth?mode=signin&redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 
@@ -81,7 +84,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       const firstTabHref = activeNavItems[0]?.href || "/dashboard";
       router.push(firstTabHref);
     }
-  }, [currentRole, pathname, activeNavItems, router]);
+  }, [status, currentRole, pathname, activeNavItems, router]);
 
   const handleRoleChange = (newRole: string) => {
     setRole(newRole as any);

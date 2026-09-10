@@ -18,25 +18,25 @@
 
 ## Phase 2: NextAuth v5 Session Type Augmentation & CredentialsProvider
 
-- [ ] Task: Write failing tests for CredentialsProvider auth flow
-  - [ ] Test: valid email + password returns a session with `id`, `role`, `nyscStatus`, `applicationRole`, `isVerified`
-  - [ ] Test: wrong password returns `null` (no session created)
-  - [ ] Test: unverified user (`isVerified: false`) is rejected with an appropriate error
-  - [ ] Confirm tests fail (Red phase)
-- [ ] Task: Create `next-auth.d.ts` type augmentation
-  - [ ] Extend `Session.user` with `id: string`, `role: Role`, `applicationRole: ApplicationRole`, `nyscStatus: NyscStatus`, `isVerified: boolean`
-  - [ ] Extend `JWT` token with the same fields
-  - [ ] Remove all `(session.user as any)` casts from `[...nextauth]/route.ts`
-- [ ] Task: Add `CredentialsProvider` to NextAuth config
-  - [ ] Accept `email` and `password` credentials
-  - [ ] Look up user by email in DB via Prisma
-  - [ ] Verify password with `bcrypt.compare`
-  - [ ] Reject if `isVerified` is `false` with error message `"EMAIL_NOT_VERIFIED"`
-  - [ ] Return typed user object `{ id, email, name, role, applicationRole, nyscStatus, isVerified }`
-- [ ] Task: Update `jwt` callback to persist custom fields into the token
-- [ ] Task: Update `session` callback to read fields from token (not DB re-query on every request)
-- [ ] Task: Run tests — confirm Green phase
-- [ ] Task: Phase 2 Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Write failing tests for CredentialsProvider auth flow
+  - [x] Test: valid email + password returns a session with `id`, `role`, `nyscStatus`, `applicationRole`, `isVerified`
+  - [x] Test: wrong password returns `null` (no session created)
+  - [x] Test: unverified user (`isVerified: false`) is rejected with an appropriate error
+  - [x] Confirm tests fail (Red phase)
+- [x] Task: Create `next-auth.d.ts` type augmentation
+  - [x] Extend `Session.user` with `id: string`, `role: Role`, `applicationRole: ApplicationRole`, `nyscStatus: NyscStatus`, `isVerified: boolean`
+  - [x] Extend `JWT` token with the same fields
+  - [x] Remove all `(session.user as any)` casts from `[...nextauth]/route.ts`
+- [x] Task: Add `CredentialsProvider` to NextAuth config
+  - [x] Accept `email` and `password` credentials
+  - [x] Look up user by email in DB via Prisma
+  - [x] Verify password with `bcrypt.compare`
+  - [x] Reject if `isVerified` is `false` with error message `"EMAIL_NOT_VERIFIED"`
+  - [x] Return typed user object `{ id, email, name, role, applicationRole, nyscStatus, isVerified }`
+- [x] Task: Update `jwt` callback to persist custom fields into the token
+- [x] Task: Update `session` callback to read fields from token (not DB re-query on every request)
+- [x] Task: Run tests — confirm Green phase
+- [x] Task: Phase 2 Verification & Checkpoint (Refer to workflow.md) [checkpoint: 957af04]
 
 ---
 

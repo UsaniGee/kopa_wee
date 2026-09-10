@@ -1,26 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 
 const CLEARANCE_LOCK_DAYS = 20;
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    // Always scope to session user — ignore any userId query param
+    const userId = auth.user!.id;
 
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "userId parameter required" },
-        { status: 400 }
-      );
-    }
-
-    // Get total clearance count for user
     const completedCount = await prisma.monthlyClearance.count({
       where: { userId },
     });
 
-    // Get the most recent clearance record
     const latestClearance = await prisma.monthlyClearance.findFirst({
       where: { userId },
       orderBy: { completedAt: "desc" },
@@ -64,69 +59,56 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
     const { userId } = body;
 
-    if (!userId) {
+    // Ownership check — session user must match the userId in the request body
+    if (userId && userId !== auth.user!.id) {
       return NextResponse.json(
-        { success: false, error: "userId is required" },
-        { status: 400 }
-      );
-    }
-
-    // Verify user is a SERVING member
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { nyscStatus: true },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    if (user.nyscStatus !== "SERVING") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Only serving corps members can mark clearance",
-        },
+        { success: false, error: "Forbidden: Cannot mark clearance for another user" },
         { status: 403 }
       );
     }
 
-    // Use a transaction to prevent race conditions / double submissions
+    const sessionUserId = auth.user!.id;
+
+    const user = await prisma.user.findUnique({
+      where: { id: sessionUserId },
+      select: { nyscStatus: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+    }
+
+    if (user.nyscStatus !== "SERVING") {
+      return NextResponse.json(
+        { success: false, error: "Only serving corps members can mark clearance" },
+        { status: 403 }
+      );
+    }
+
     const result = await prisma.$transaction(async (tx) => {
-      // Check the most recent clearance inside the transaction
       const latestClearance = await tx.monthlyClearance.findFirst({
-        where: { userId },
+        where: { userId: sessionUserId },
         orderBy: { completedAt: "desc" },
       });
 
       const now = new Date();
 
-      // Check if user is eligible (no recent clearance OR past nextEligibleAt)
       if (latestClearance && now < latestClearance.nextEligibleAt) {
-        return {
-          eligible: false,
-          nextEligibleAt: latestClearance.nextEligibleAt,
-        };
+        return { eligible: false, nextEligibleAt: latestClearance.nextEligibleAt };
       }
 
-      // Calculate nextEligibleAt (now + CLEARANCE_LOCK_DAYS)
       const nextEligibleAt = new Date(now);
       nextEligibleAt.setDate(nextEligibleAt.getDate() + CLEARANCE_LOCK_DAYS);
 
-      // Create the clearance record
       const clearance = await tx.monthlyClearance.create({
-        data: {
-          userId,
-          completedAt: now,
-          nextEligibleAt,
-        },
+        data: { userId: sessionUserId, completedAt: now, nextEligibleAt },
       });
 
       return { eligible: true, clearance };
@@ -137,7 +119,7 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           error: "CLEARANCE_NOT_YET_AVAILABLE",
-          message: `You are not yet eligible for clearance. Your next clearance window opens on ${new Date(result.nextEligibleAt!).toLocaleDateString("en-NG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}.`,
+          message: `You are not yet eligible. Next clearance window: ${new Date(result.nextEligibleAt!).toLocaleDateString("en-NG", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}.`,
           nextEligibleAt: result.nextEligibleAt,
         },
         { status: 409 }

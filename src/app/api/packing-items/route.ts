@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 
 const DEFAULT_PACKING_ITEMS = [
@@ -28,30 +29,16 @@ const DEFAULT_PACKING_ITEMS = [
   { name: "First Aid Kit", category: "essentials" },
 ];
 
-// GET /api/packing-items?userId=...
-export async function GET(req: NextRequest) {
+// GET /api/packing-items — scoped to session user
+export async function GET() {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const userId = auth.user!.id;
 
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "userId parameter required" },
-        { status: 400 }
-      );
-    }
-
-    // Verify user exists in database before attempting to seed packing items
-    const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
-    if (!userExists) {
-      return NextResponse.json({ success: true, data: [] });
-    }
-
-    // Check if user has any packing items yet; if not, seed defaults
     const existingCount = await prisma.packingItem.count({ where: { userId } });
-
     if (existingCount === 0) {
-      // Seed default items for this user
       await prisma.packingItem.createMany({
         data: DEFAULT_PACKING_ITEMS.map((item) => ({
           userId,
@@ -80,21 +67,22 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/packing-items — create a custom item
 const createItemSchema = z.object({
-  userId: z.string().min(1),
   name: z.string().min(1, "Item name is required").max(200),
   category: z.string().default("custom"),
 });
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
-    const { userId, name, category } = createItemSchema.parse(body);
+    const { name, category } = createItemSchema.parse(body);
 
     const item = await prisma.packingItem.create({
       data: {
-        userId,
+        userId: auth.user!.id,
         name,
         category,
         isCustom: true,
@@ -103,50 +91,35 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: item,
-      message: "Custom item added",
-    });
+    return NextResponse.json({ success: true, data: item, message: "Custom item added" });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
-    console.error("[POST /api/packing-items] Error:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create packing item" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to create packing item" }, { status: 500 });
   }
 }
 
-// PATCH /api/packing-items — update PCM completed or serving tracking status
 const updateItemSchema = z.object({
   itemId: z.string().min(1),
-  userId: z.string().min(1),
   pcmCompleted: z.boolean().optional(),
   servingTrackingStatus: z.enum(["INTACT", "USED", "MISSING"]).optional(),
 });
 
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
-    const { itemId, userId, pcmCompleted, servingTrackingStatus } =
-      updateItemSchema.parse(body);
+    const { itemId, pcmCompleted, servingTrackingStatus } = updateItemSchema.parse(body);
 
-    // Verify ownership
     const existing = await prisma.packingItem.findFirst({
-      where: { id: itemId, userId },
+      where: { id: itemId, userId: auth.user!.id }, // Ownership check
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: "Item not found or not owned by user" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Item not found or not owned by user" }, { status: 404 });
     }
 
     const updated = await prisma.packingItem.update({
@@ -160,65 +133,41 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
-    console.error("[PATCH /api/packing-items] Error:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to update item" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to update item" }, { status: 500 });
   }
 }
 
-// DELETE /api/packing-items — only custom items can be deleted
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
-    const { itemId, userId } = z
-      .object({ itemId: z.string(), userId: z.string() })
-      .parse(body);
+    const { itemId } = z.object({ itemId: z.string() }).parse(body);
 
     const existing = await prisma.packingItem.findFirst({
-      where: { id: itemId, userId },
+      where: { id: itemId, userId: auth.user!.id }, // Ownership check
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { success: false, error: "Item not found or not owned by user" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Item not found or not owned by user" }, { status: 404 });
     }
 
     if (!existing.isCustom) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Standard items cannot be deleted. You can uncheck them instead.",
-        },
+        { success: false, error: "Standard items cannot be deleted. You can uncheck them instead." },
         { status: 403 }
       );
     }
 
     await prisma.packingItem.delete({ where: { id: itemId } });
-
-    return NextResponse.json({
-      success: true,
-      message: "Custom item deleted",
-    });
+    return NextResponse.json({ success: true, message: "Custom item deleted" });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: error.errors[0].message },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
-    console.error("[DELETE /api/packing-items] Error:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to delete item" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to delete item" }, { status: 500 });
   }
 }
