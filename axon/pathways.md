@@ -30,6 +30,6 @@
 - [x] **Pathway: Prisma Connection Pool Timeout, React Render Warning & Image Sizes Fix** *Link: [index.md](./pathways/bug_fixes_prisma_react_images_20260902/index.md)*
 - [x] **Pathway: NYSC Platform — Clearance, Packing Checklist, Role Status & Subscription Implementation** *Link: [index.md](./pathways/clearance_checklist_role_subscription_20260904/index.md)*
 - [ ] **Pathway: NYSC Platform — Final Updates to Dashboard, Account Settings & Subscription** *Link: [index.md](./pathways/dashboard_settings_subscription_20260904/index.md)*
-- [ ] **Pathway: Security Hardening, Unified Auth & Platform Completion** *Link: [index.md](./pathways/security_hardening_unified_auth_20260910/index.md)*
+- [~] **Pathway: Security Hardening, Unified Auth & Platform Completion** *Link: [index.md](./pathways/security_hardening_unified_auth_20260910/index.md)*
 
 
