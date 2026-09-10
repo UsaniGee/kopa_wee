@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ThemeToggle from "@/shared/components/ThemeToggle";
 import {
   FiShield,
   FiCheckCircle,
@@ -204,13 +205,13 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0f0d] text-white font-sans">
+    <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-white font-sans transition-colors duration-300">
       {/* Admin Top Navbar */}
       <nav className="bg-[#121815] border-b border-slate-800 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Shield className="w-6 h-6 text-emerald-400" />
           <div>
-            <h1 className="font-bold text-base font-display uppercase tracking-wider text-white">
+            <h1 className="font-bold text-base font-display uppercase tracking-wider text-white dark:text-white">
               KopaWee Platform Owner Control Center
             </h1>
             <p className="text-[10px] text-emerald-400 font-mono">CLASSIFIED AD MODERATION & APPROVAL PORTAL</p>
@@ -220,12 +221,13 @@ export default function AdminDashboardPage() {
         <div className="flex items-center gap-4">
           <button
             onClick={fetchPendingData}
-            className="p-2 bg-slate-900 border border-slate-800 hover:border-emerald-500 text-xs font-bold flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white"
+            className="px-3 py-2 bg-white/10 dark:bg-slate-900 border border-slate-600 dark:border-slate-800 hover:border-emerald-400 text-xs font-bold flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Refresh Feed</span>
           </button>
 
+          <ThemeToggle size="11px" />
           <button
             onClick={handleLogout}
             className="px-3.5 py-2 bg-red-950/60 border border-red-800/80 hover:bg-red-900 text-red-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
@@ -237,7 +239,7 @@ export default function AdminDashboardPage() {
       </nav>
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto p-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
         {actionMsg && (
           <div className="p-4 bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs font-bold flex items-center justify-between animate-fadeIn">
             <span>{actionMsg}</span>
@@ -247,44 +249,44 @@ export default function AdminDashboardPage() {
 
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-5 bg-[#121a16] border border-slate-800 space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+          <div className="p-5 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-1">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-mono">
               <span>PENDING MARKETPLACE ADS</span>
               <Clock className="w-4 h-4 text-amber-400" />
             </div>
             <div className="text-3xl font-bold font-mono text-amber-400">{pendingItems.length}</div>
-            <p className="text-[11px] text-slate-500">Requires Product Owner review before live publishing</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-500">Requires Product Owner review before live publishing</p>
           </div>
 
-          <div className="p-5 bg-[#121a16] border border-slate-800 space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+          <div className="p-5 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-1">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-mono">
               <span>PENDING LODGE LISTINGS</span>
               <Home className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="text-3xl font-bold font-mono text-emerald-400">{pendingLodges.length}</div>
-            <p className="text-[11px] text-slate-500">Corper accommodation & roommate split listings</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-500">Corper accommodation &amp; roommate split listings</p>
           </div>
 
-          <div className="p-5 bg-[#121a16] border border-slate-800 space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+          <div className="p-5 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-1">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-mono">
               <span>TOTAL UNDER REVIEW</span>
               <Shield className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="text-3xl font-bold font-mono text-white">
               {pendingItems.length + pendingLodges.length}
             </div>
-            <p className="text-[11px] text-slate-500">All classified items pending approval</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-500">All classified items pending approval</p>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+        <div className="flex items-center gap-3 border-b border-slate-300/60 dark:border-slate-800 pb-3 overflow-x-auto">
           <button
             onClick={() => setActiveTab("marketplace")}
             className={`px-5 py-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 border ${
               activeTab === "marketplace"
                 ? "bg-emerald-600 text-white border-emerald-500"
-                : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+                : "bg-[#eaf5ed] dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 hover:text-[#121815] dark:hover:text-white"
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
@@ -296,7 +298,7 @@ export default function AdminDashboardPage() {
             className={`px-5 py-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 border ${
               activeTab === "accommodation"
                 ? "bg-emerald-600 text-white border-emerald-500"
-                : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+                : "bg-[#eaf5ed] dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 hover:text-[#121815] dark:hover:text-white"
             }`}
           >
             <Home className="w-4 h-4" />
@@ -308,7 +310,7 @@ export default function AdminDashboardPage() {
             className={`px-5 py-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 border ${
               activeTab === "users"
                 ? "bg-emerald-600 text-white border-emerald-500"
-                : "bg-slate-900 text-slate-400 border-slate-800 hover:text-white"
+                : "bg-[#eaf5ed] dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 hover:text-[#121815] dark:hover:text-white"
             }`}
           >
             <Users className="w-4 h-4" />
@@ -320,41 +322,41 @@ export default function AdminDashboardPage() {
         {loading ? (
           <div className="p-12 text-center text-xs font-mono text-slate-400 space-y-2">
             <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p>Fetching pending listings for review...</p>
+            <p className="text-slate-500 dark:text-slate-400">Fetching pending listings for review...</p>
           </div>
         ) : activeTab === "marketplace" ? (
           pendingItems.length === 0 ? (
-            <div className="p-12 bg-[#121a16] border border-slate-800 text-center space-y-2">
+            <div className="p-12 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-center space-y-2">
               <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-              <h3 className="text-base font-bold font-display text-white">No Pending Marketplace Items!</h3>
-              <p className="text-xs text-slate-400">All submitted items have been reviewed by Product Owner admin.</p>
+              <h3 className="text-base font-bold font-display text-[#121815] dark:text-white">No Pending Marketplace Items!</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">All submitted items have been reviewed by Product Owner admin.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {pendingItems.map((item) => (
-                <div key={item.id} className="p-6 bg-[#121a16] border border-slate-800 space-y-4">
+                <div key={item.id} className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
                   <div className="flex items-start gap-4">
                     <img
                       src={item.images?.[0] || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"}
                       alt={item.title}
-                      className="w-24 h-24 object-cover border border-slate-700 shrink-0"
+                      className="w-24 h-24 object-cover border border-slate-300/60 dark:border-slate-700 shrink-0"
                     />
                     <div className="space-y-1">
                       <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-mono font-bold uppercase">
                         PENDING APPROVAL
                       </span>
-                      <h3 className="text-base font-bold font-display text-white">{item.title}</h3>
+                      <h3 className="text-base font-bold font-display text-[#121815] dark:text-white">{item.title}</h3>
                       <div className="text-emerald-400 font-mono font-bold text-sm">{item.price}</div>
-                      <p className="text-xs text-slate-400">{item.lga}, {item.state} · Category: {item.category}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{item.lga}, {item.state} · Category: {item.category}</p>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-300 bg-slate-900/60 p-3 border border-slate-800 leading-relaxed">
+                  <p className="text-xs text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-900/60 p-3 border border-slate-200 dark:border-slate-800 leading-relaxed">
                     "{item.description}"
                   </p>
 
                   {item.seller && (
-                    <div className="text-[11px] text-slate-400 font-mono border-t border-slate-800/80 pt-2 flex items-center justify-between">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono border-t border-slate-200/80 dark:border-slate-800/80 pt-2 flex items-center justify-between">
                       <span>Seller: {item.seller.name} ({item.seller.email})</span>
                       <span>Phone: {item.seller.phone}</span>
                     </div>
@@ -381,36 +383,36 @@ export default function AdminDashboardPage() {
             </div>
           )
         ) : pendingLodges.length === 0 ? (
-          <div className="p-12 bg-[#121a16] border border-slate-800 text-center space-y-2">
+          <div className="p-12 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-center space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-            <h3 className="text-base font-bold font-display text-white">No Pending Lodge Listings!</h3>
-            <p className="text-xs text-slate-400">All submitted accommodation listings have been reviewed.</p>
+            <h3 className="text-base font-bold font-display text-[#121815] dark:text-white">No Pending Lodge Listings!</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">All submitted accommodation listings have been reviewed.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {pendingLodges.map((lodge) => (
-              <div key={lodge.id} className="p-6 bg-[#121a16] border border-slate-800 space-y-4">
+              <div key={lodge.id} className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
                 <div className="flex items-start gap-4">
                   <img
                     src={lodge.images?.[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=85"}
                     alt={lodge.title}
-                    className="w-24 h-24 object-cover border border-slate-700 shrink-0"
+                    className="w-24 h-24 object-cover border border-slate-300/60 dark:border-slate-700 shrink-0"
                   />
                   <div className="space-y-1">
                     <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-mono font-bold uppercase">
                       PENDING APPROVAL
                     </span>
-                    <h3 className="text-base font-bold font-display text-white">{lodge.title}</h3>
+                    <h3 className="text-base font-bold font-display text-[#121815] dark:text-white">{lodge.title}</h3>
                     <div className="text-emerald-400 font-mono font-bold text-sm">{lodge.price}</div>
-                    <p className="text-xs text-slate-400">{lodge.location}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{lodge.location}</p>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-300 bg-slate-900/60 p-3 border border-slate-800 leading-relaxed">
+                <p className="text-xs text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-900/60 p-3 border border-slate-200 dark:border-slate-800 leading-relaxed">
                   "{lodge.description}"
                 </p>
 
-                <div className="text-[11px] text-slate-400 font-mono border-t border-slate-800/80 pt-2 flex items-center justify-between">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono border-t border-slate-200/80 dark:border-slate-800/80 pt-2 flex items-center justify-between">
                   <span>WhatsApp Contact: {lodge.contactPhone}</span>
                   <span>Owner: {lodge.owner?.name || "Corper User"}</span>
                 </div>
@@ -440,8 +442,8 @@ export default function AdminDashboardPage() {
         {activeTab === "users" && (
           <div className="space-y-6">
             {/* Search User */}
-            <div className="p-6 bg-[#121a16] border border-slate-800 space-y-4">
-              <h3 className="text-sm font-bold font-display text-white uppercase tracking-widest">Search User by ID</h3>
+            <div className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+              <h3 className="text-sm font-bold font-display text-[#121815] dark:text-white uppercase tracking-widest">Search User by ID</h3>
               <div className="flex gap-3">
                 <input
                   type="text"
@@ -449,7 +451,7 @@ export default function AdminDashboardPage() {
                   onChange={(e) => setUserSearch(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && searchUserById()}
                   placeholder="Enter User ID..."
-                  className="flex-1 px-4 py-3 text-xs bg-[#0a0f0d] border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                  className="flex-1 px-4 py-3 text-xs bg-[#dcece1] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 transition-colors"
                 />
                 <button
                   onClick={searchUserById}
@@ -466,39 +468,39 @@ export default function AdminDashboardPage() {
             {userSearchResult && (
               <div className="space-y-4">
                 {/* User Profile Summary */}
-                <div className="p-6 bg-[#121a16] border border-slate-800 space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-display">User Profile</h3>
+                <div className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 font-display">User Profile</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest">Name</p>
-                      <p className="text-sm font-bold text-white">{userSearchResult.name}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-display">Name</p>
+                      <p className="text-sm font-bold text-[#121815] dark:text-white">{userSearchResult.name}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest">Email</p>
-                      <p className="text-xs text-slate-300 font-mono">{userSearchResult.email}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-display">Email</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 font-mono">{userSearchResult.email}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest">NYSC Status</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-display">NYSC Status</p>
                       <p className={`text-sm font-bold ${
                         userSearchResult.nyscStatus === "SERVING" ? "text-emerald-400" :
                         userSearchResult.nyscStatus === "ALUMNI" ? "text-blue-400" : "text-amber-400"
                       }`}>{userSearchResult.nyscStatus}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest">App Role</p>
-                      <p className="text-xs font-bold text-white">{userSearchResult.applicationRole}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-display">App Role</p>
+                      <p className="text-xs font-bold text-[#121815] dark:text-white">{userSearchResult.applicationRole}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Status History */}
                 {userHistory.length > 0 && (
-                  <div className="p-6 bg-[#121a16] border border-slate-800 space-y-3">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 font-display">Status History</h3>
+                  <div className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 font-display">Status History</h3>
                     <div className="space-y-2">
                       {userHistory.map((h) => (
-                        <div key={h.id} className="flex items-center gap-4 py-2 border-b border-slate-800/60 text-xs font-mono">
-                          <span className="text-slate-500">{new Date(h.createdAt).toLocaleDateString()}</span>
+                        <div key={h.id} className="flex items-center gap-4 py-2 border-b border-slate-200 dark:border-slate-800/60 text-xs font-mono">
+                          <span className="text-slate-400 dark:text-slate-500">{new Date(h.createdAt).toLocaleDateString()}</span>
                           <span className="text-red-400">{h.previousStatus}</span>
                           <span className="text-slate-500">→</span>
                           <span className="text-emerald-400">{h.newStatus}</span>
@@ -525,11 +527,11 @@ export default function AdminDashboardPage() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">New Status</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 font-display">New Status</label>
                       <select
                         value={revertStatus}
                         onChange={(e) => setRevertStatus(e.target.value as any)}
-                        className="w-full px-3 py-3 text-xs bg-[#0a0f0d] border border-slate-700 text-white focus:outline-none focus:border-emerald-500"
+                        className="w-full px-3 py-3 text-xs bg-[#dcece1] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 transition-colors"
                       >
                         <option value="PCM">PCM</option>
                         <option value="SERVING">SERVING</option>
@@ -537,13 +539,13 @@ export default function AdminDashboardPage() {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Reason (required)</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 font-display">Reason (required)</label>
                       <input
                         type="text"
                         value={revertReason}
                         onChange={(e) => setRevertReason(e.target.value)}
                         placeholder="Reason for status change..."
-                        className="w-full px-3 py-3 text-xs bg-[#0a0f0d] border border-slate-700 text-white focus:outline-none focus:border-red-500"
+                        className="w-full px-3 py-3 text-xs bg-[#dcece1] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-red-500 transition-colors"
                       />
                     </div>
                   </div>

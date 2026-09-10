@@ -310,10 +310,10 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
       {isServing && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
           <p className="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">
-            Keep Track of Your Camp Items
+            Your Camp Item Stock Tracker
           </p>
           <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-            This helps you keep track of the items you brought to camp. We&apos;re helping you keep an account of your belongings and track what you still have after camp.
+            Track the status of items you brought from camp — mark what&apos;s intact, used up, or missing.
           </p>
         </div>
       )}

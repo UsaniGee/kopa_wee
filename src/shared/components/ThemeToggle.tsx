@@ -2,53 +2,91 @@
 
 import React, { useEffect, useState } from "react";
 
+type ThemeMode = "light" | "dark" | "system";
+
 interface ThemeToggleProps {
-  size?: string; // e.g. "12px", "13px", "14px"
+  size?: string;
   className?: string;
 }
 
+function resolveIsDark(mode: ThemeMode): boolean {
+  if (mode === "dark") return true;
+  if (mode === "light") return false;
+  // system
+  if (typeof window !== "undefined") {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  return false;
+}
+
+const TITLES: Record<ThemeMode, string> = {
+  light: "Switch to Dark Mode",
+  dark: "Use System Default",
+  system: "Switch to Light Mode",
+};
+
+const CYCLE: Record<ThemeMode, ThemeMode> = {
+  light: "dark",
+  dark: "system",
+  system: "light",
+};
+
 export default function ThemeToggle({ size = "13px", className = "" }: ThemeToggleProps) {
-  const [isDark, setIsDark] = useState<boolean>(false);
-  const [mounted, setMounted] = useState<boolean>(false);
+  const [theme, setTheme] = useState<ThemeMode>("light");
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const saved = (localStorage.getItem("kopawee_theme") as ThemeMode | null) || "light";
+    const resolved = saved === "dark" || saved === "light" || saved === "system" ? saved : "light";
+    setTheme(resolved);
+    setIsDark(resolveIsDark(resolved));
 
-    const applyTheme = () => {
-      const savedTheme = localStorage.getItem("kopawee_theme");
-      const systemDark = mediaQuery.matches;
+    if (resolved === "dark") {
+      document.documentElement.classList.add("dark");
+    } else if (resolved === "light") {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
 
-      if (savedTheme === "dark" || (savedTheme === "system" && systemDark) || (!savedTheme && systemDark)) {
-        setIsDark(true);
-        document.documentElement.classList.add("dark");
-      } else {
-        setIsDark(false);
-        document.documentElement.classList.remove("dark");
+  // System preference live listener
+  useEffect(() => {
+    if (!mounted) return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleSystem = () => {
+      if (theme === "system") {
+        const dark = mq.matches;
+        setIsDark(dark);
+        if (dark) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
       }
     };
 
-    applyTheme();
+    mq.addEventListener("change", handleSystem);
+    return () => mq.removeEventListener("change", handleSystem);
+  }, [theme, mounted]);
 
-    mediaQuery.addEventListener("change", applyTheme);
-    return () => mediaQuery.removeEventListener("change", applyTheme);
-  }, []);
-
-  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    setIsDark(checked);
-    if (checked) {
+  const handleClick = () => {
+    const next = CYCLE[theme];
+    const dark = resolveIsDark(next);
+    setTheme(next);
+    setIsDark(dark);
+    localStorage.setItem("kopawee_theme", next);
+    if (dark) {
       document.documentElement.classList.add("dark");
-      localStorage.setItem("kopawee_theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
-      localStorage.setItem("kopawee_theme", "light");
     }
   };
 
   if (!mounted) {
     return (
-      <div 
+      <div
         className={`theme-switch inline-block ${className}`}
         style={{ "--toggle-size": size } as React.CSSProperties}
       >
@@ -58,17 +96,19 @@ export default function ThemeToggle({ size = "13px", className = "" }: ThemeTogg
   }
 
   return (
-    <label 
+    <label
       className={`theme-switch cursor-pointer ${className}`}
       style={{ "--toggle-size": size } as React.CSSProperties}
-      title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      title={TITLES[theme]}
+      onClick={(e) => { e.preventDefault(); handleClick(); }}
     >
-      <input 
-        type="checkbox" 
-        aria-label="Toggle Light and Dark Theme"
-        className="theme-switch__checkbox" 
+      <input
+        type="checkbox"
+        aria-label={TITLES[theme]}
+        className="theme-switch__checkbox"
         checked={isDark}
-        onChange={handleToggle}
+        onChange={() => {}} // controlled via label onClick
+        readOnly
       />
       <div className="theme-switch__container">
         <div className="theme-switch__clouds"></div>

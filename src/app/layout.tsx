@@ -21,13 +21,37 @@ export const metadata: Metadata = {
   description: "The proactive companion for Nigerian Corps Members — camp guides, PPA logbooks, accommodation, safety, and marketplace.",
 };
 
+// Blocking script injected before paint to prevent FOUC.
+// Reads localStorage.kopawee_theme and applies .dark class synchronously.
+const themeScript = `
+(function() {
+  try {
+    var t = localStorage.getItem('kopawee_theme');
+    var sys = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (t === 'dark' || (t === 'system' && sys) || (!t && sys)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  } catch(e) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${jakarta.variable} h-full antialiased light`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${outfit.variable} ${jakarta.variable} h-full antialiased`}
+    >
+      <head>
+        {/* Blocking theme script — must run before body renders to prevent FOUC */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
         <SessionProvider>
           {children}

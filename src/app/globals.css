@@ -39,6 +39,10 @@
   div[class*="shadow"]:not([class*="theme-switch"]) {
     border-radius: 0rem; /*  sharp & clean geometric edges */
   }
+  select {
+    padding-right: 2.5rem; /* room for native dropdown arrow */
+    appearance: auto;
+  }
 
   :root {
     /*  Light Mint & Sage Canvas (User Palette) */
