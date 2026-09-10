@@ -14,7 +14,9 @@
 - **API Runtime:** Next.js 16 App Router RESTful Route Handlers (`src/app/api/.../route.ts`)
 - **Database System:** PostgreSQL
 - **ORM & Data Layer:** Prisma ORM (`prisma/schema.prisma`) & Prisma Client (`src/shared/lib/prisma.ts`)
-- **Authentication & Security:** NextAuth.js (Auth.js v5) with JWT & Role-Based Access Control (RBAC)
+- **Authentication & Security:** NextAuth.js (Auth.js v5) with JWT session strategy — `CredentialsProvider` (email/password) + `GoogleProvider` (OAuth). Session stored in HttpOnly cookie. Route protection via `src/middleware.ts`. Server-side auth via `src/shared/lib/apiAuth.ts`.
+- **Email:** Resend (`resend`) + React Email (`@react-email/components`, `@react-email/render`) for transactional emails (verification, password reset, SOS alerts, clearance reminders, logbook approvals)
+- **AI Assistant:** Google Gemini (`@google/generative-ai`) via `gemini-1.5-flash` model — NYSC-aware system prompt, rate-limited per user (20 req/hour)
 - **Validation:** Zod Schema Validation
 
 ## Client-Side & Offline Data
