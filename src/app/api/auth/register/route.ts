@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { hashPassword } from "@/shared/lib/auth";
+import { sendEmail } from "@/shared/lib/email";
+import VerificationEmail from "@/shared/emails/VerificationEmail";
 import { z } from "zod";
+import React from "react";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -20,9 +23,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = registerSchema.parse(body);
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email },
+      where: { email: validatedData.email.toLowerCase().trim() },
     });
 
     if (existingUser) {
@@ -32,14 +34,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash password & create user
     const passwordHash = await hashPassword(validatedData.password);
     const verificationToken = `vtok_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
 
     const newUser = await prisma.user.create({
       data: {
         name: validatedData.name,
-        email: validatedData.email,
+        email: validatedData.email.toLowerCase().trim(),
         passwordHash,
         role: validatedData.role,
         stateOfOrigin: validatedData.stateOfOrigin,
@@ -58,16 +59,27 @@ export async function POST(req: Request) {
         deployedState: true,
         lga: true,
         stateCode: true,
-        verificationToken: true,
         createdAt: true,
       },
+    });
+
+    // Send real verification email via Resend
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const verificationUrl = `${baseUrl}/auth/verify?token=${verificationToken}&email=${encodeURIComponent(newUser.email)}`;
+
+    await sendEmail({
+      to: newUser.email,
+      subject: "Verify your KopaWee email address",
+      template: React.createElement(VerificationEmail, {
+        name: newUser.name,
+        verificationUrl,
+      }),
     });
 
     return NextResponse.json(
       {
         success: true,
         data: newUser,
-        verificationUrl: `/auth/verify?token=${verificationToken}&email=${encodeURIComponent(newUser.email)}`,
         message: "Registration successful! Please check your email to verify your account.",
       },
       { status: 201 }

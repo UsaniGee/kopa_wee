@@ -98,6 +98,8 @@ model User {
   avatarUrl         String?
   isVerified        Boolean         @default(false)
   verificationToken String?
+  passwordResetToken  String?   @unique
+  passwordResetExpiry DateTime?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
