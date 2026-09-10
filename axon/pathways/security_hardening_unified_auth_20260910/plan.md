@@ -2,16 +2,16 @@
 
 ## Phase 1: Dependencies & Environment Setup
 
-- [ ] Task: Install required packages
-  - [ ] Install `resend` and `@react-email/components` and `@react-email/render`
-  - [ ] Install `@google/generative-ai`
-  - [ ] Verify all packages resolve without peer-dependency conflicts (`pnpm install`)
-- [ ] Task: Update environment variables
-  - [ ] Add `RESEND_API_KEY`, `GEMINI_API_KEY`, `NEXTAUTH_SECRET` (mandatory, no fallback) to `.env.local`
-  - [ ] Create `.env.example` documenting all required vars with descriptions and no real values
-  - [ ] Remove hardcoded `NEXTAUTH_SECRET` fallback string from `[...nextauth]/route.ts`
-  - [ ] Remove hardcoded `mock_google_client_id` / `mock_google_client_secret` fallbacks — replace with `process.env.GOOGLE_CLIENT_ID!` / `process.env.GOOGLE_CLIENT_SECRET!`
-  - [ ] Remove hardcoded cron secret fallback from `/api/cron/journey-status`
+- [x] Task: Install required packages — `resend@4.6.0`, `@react-email/components@0.0.36`, `@react-email/render@1.0.12`, `@google/generative-ai@0.24.1` added to package.json; run `npm install` to pull down
+  - [x] Install `resend` and `@react-email/components` and `@react-email/render`
+  - [x] Install `@google/generative-ai`
+  - [x] Verify all packages resolve without peer-dependency conflicts (`pnpm install`)
+- [x] Task: Update environment variables
+  - [x] Add `RESEND_API_KEY`, `GEMINI_API_KEY`, `NEXTAUTH_SECRET` (mandatory, no fallback) to `.env.local`
+  - [x] Create `.env.example` documenting all required vars with descriptions and no real values
+  - [x] Remove hardcoded `NEXTAUTH_SECRET` fallback string from `[...nextauth]/route.ts`
+  - [x] Remove hardcoded `mock_google_client_id` / `mock_google_client_secret` fallbacks — replace with `process.env.GOOGLE_CLIENT_ID!` / `process.env.GOOGLE_CLIENT_SECRET!`
+  - [x] Remove hardcoded cron secret fallback from `/api/cron/journey-status`
 - [ ] Task: Phase 1 Verification & Checkpoint (Refer to workflow.md)
 
 ---

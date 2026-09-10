@@ -16,10 +16,15 @@ import { prisma } from "@/shared/lib/prisma";
  */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET || "kopawee_cron_secret_2026";
+  const cronSecret = process.env.CRON_SECRET;
 
-  // Allow requests with correct cron secret OR internal requests (no auth for now in dev)
-  if (authHeader && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    console.warn("[CRON] CRON_SECRET not set — rejecting cron request");
+    return NextResponse.json({ success: false, error: "Cron not configured" }, { status: 503 });
+  }
+
+  // Require valid Bearer token for all cron requests
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
