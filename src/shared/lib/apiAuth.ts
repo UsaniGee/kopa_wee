@@ -1,12 +1,19 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import type { Session } from "next-auth";
 
-export type AuthenticatedUser = Session["user"];
+export interface AuthenticatedUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role: string;
+  applicationRole: string;
+  nyscStatus: string;
+  isVerified: boolean;
+}
 
 /**
- * Validates the NextAuth session for an API route.
+ * Validates the NextAuth v5 session for an API route.
  * Returns the typed session user on success.
  * Returns a NextResponse 401 if not authenticated — caller must return it.
  */
@@ -14,7 +21,7 @@ export async function requireAuth(): Promise<
   { user: AuthenticatedUser; error: null } |
   { user: null; error: NextResponse }
 > {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session?.user?.id) {
     return {
@@ -26,7 +33,7 @@ export async function requireAuth(): Promise<
     };
   }
 
-  return { user: session.user, error: null };
+  return { user: session.user as AuthenticatedUser, error: null };
 }
 
 /**
@@ -37,10 +44,10 @@ export async function requireAdmin(): Promise<
   { user: AuthenticatedUser; error: null } |
   { user: null; error: NextResponse }
 > {
-  const auth = await requireAuth();
-  if (auth.error) return auth;
+  const authResult = await requireAuth();
+  if (authResult.error) return authResult;
 
-  if (auth.user!.applicationRole !== "ADMIN") {
+  if (authResult.user!.applicationRole !== "ADMIN") {
     return {
       user: null,
       error: NextResponse.json(
@@ -50,5 +57,5 @@ export async function requireAdmin(): Promise<
     };
   }
 
-  return auth;
+  return authResult;
 }

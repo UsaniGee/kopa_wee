@@ -1,4 +1,3 @@
-import type { Role, ApplicationRole, NyscStatus } from "@prisma/client";
 import "next-auth";
 import "next-auth/jwt";
 
@@ -9,18 +8,17 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      role: Role;
-      applicationRole: ApplicationRole;
-      nyscStatus: NyscStatus;
+      role: string;
+      applicationRole: string;
+      nyscStatus: string;
       isVerified: boolean;
     };
   }
 
   interface User {
-    id: string;
-    role?: Role;
-    applicationRole?: ApplicationRole;
-    nyscStatus?: NyscStatus;
+    role?: string;
+    applicationRole?: string;
+    nyscStatus?: string;
     isVerified?: boolean;
   }
 }
@@ -28,9 +26,9 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
-    role: Role;
-    applicationRole: ApplicationRole;
-    nyscStatus: NyscStatus;
-    isVerified: boolean;
+    role?: string;
+    applicationRole?: string;
+    nyscStatus?: string;
+    isVerified?: boolean;
   }
 }
