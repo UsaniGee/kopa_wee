@@ -666,13 +666,28 @@ export default function DashboardOverviewPage() {
     setLeaveRequests((prev) => prev.map((req) => req.id === id ? { ...req, status } : req));
   };
 
-  const handleAskAI = (e: React.FormEvent) => {
+  const handleAskAI = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!aiPrompt.trim()) return;
-    if (aiPrompt.toLowerCase().includes("relocat")) {
-      setAiAnswer("To apply for relocation, submit your medical certificate or marital proof via the NYSC Portal during camp orientation. Approval takes 7–14 days after camp.");
-    } else {
-      setAiAnswer("NYSC Policy Guide: Always inform your Local Government Inspector (LGI) before traveling outside your state of deployment.");
+    setAiAnswer("Thinking...");
+    try {
+      const res = await fetch("/api/ai/listing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: aiPrompt }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAiAnswer(data.reply);
+      } else if (data.error === "AI_NOT_CONFIGURED") {
+        setAiAnswer("AI assistant is not configured yet. Please contact support.");
+      } else if (data.error === "RATE_LIMIT_EXCEEDED") {
+        setAiAnswer("You've reached the AI limit for this hour. Please try again later.");
+      } else {
+        setAiAnswer("Sorry, I couldn't process that request. Please try again.");
+      }
+    } catch {
+      setAiAnswer("Network error. Please check your connection and try again.");
     }
   };
 

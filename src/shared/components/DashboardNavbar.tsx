@@ -1,17 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { FiBell, FiSearch, FiUser, FiChevronDown, FiLogOut, FiCheckCircle } from "react-icons/fi";
-import { HiSparkles } from "react-icons/hi2";
+import { signOut } from "next-auth/react";
+import { FiBell, FiSearch, FiUser, FiLogOut, FiX } from "react-icons/fi";
 
 const Bell = FiBell;
 const Search = FiSearch;
 const User = FiUser;
-const ChevronDown = FiChevronDown;
 const LogOut = FiLogOut;
-const Sparkles = HiSparkles;
-const CheckCircle2 = FiCheckCircle;
+const X = FiX;
 
 export interface RoleOption {
   id: string;
@@ -26,8 +24,16 @@ export const DASHBOARD_ROLES: RoleOption[] = [
   { id: "alumni", label: "Ex-Corps Member", badge: "POP", subtitle: "Career, Gigs & Alumni Network" },
   { id: "cds_exec", label: "CDS Executive", badge: "CDS Exec", subtitle: "Attendance, Projects & Dues" },
   { id: "ppa", label: "PPA Representative", badge: "Employer", subtitle: "Staff Attendance & Leave Requests" },
-  { id: "nysc_official", label: "LGA NYSC Official", badge: "Inspector", subtitle: "Biometrics & Bi-Monthly Reports" }
+  { id: "nysc_official", label: "LGA NYSC Official", badge: "Inspector", subtitle: "Biometrics & Bi-Monthly Reports" },
 ];
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
 
 interface DashboardNavbarProps {
   currentRole: string;
@@ -35,81 +41,123 @@ interface DashboardNavbarProps {
 }
 
 export default function DashboardNavbar({ currentRole, onRoleChange }: DashboardNavbarProps) {
-  const activeRoleObj = DASHBOARD_ROLES.find(r => r.id === currentRole) || DASHBOARD_ROLES[1];
+  const activeRoleObj = DASHBOARD_ROLES.find((r) => r.id === currentRole) || DASHBOARD_ROLES[1];
 
   const [userName, setUserName] = useState<string>("");
   const [stateCode, setStateCode] = useState<string>("");
 
-  React.useEffect(() => {
-    // 1. Initial load from local storage
+  // Notification state
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const pollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // ── Fetch unread notifications ─────────────────────────────────────────────
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch("/api/notifications?unread=false");
+      const data = await res.json();
+      if (data.success) {
+        setNotifications(data.data.slice(0, 10));
+        setUnreadCount(data.unreadCount ?? 0);
+      }
+    } catch {
+      // Non-fatal — silently fail
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+    // Poll every 60 seconds
+    pollInterval.current = setInterval(fetchNotifications, 60_000);
+    return () => {
+      if (pollInterval.current) clearInterval(pollInterval.current);
+    };
+  }, [fetchNotifications]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // ── Mark all read ──────────────────────────────────────────────────────────
+  const handleMarkAllRead = async () => {
+    try {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markAllRead: true }),
+      });
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch {
+      // Non-fatal
+    }
+  };
+
+  // ── User profile from localStorage ────────────────────────────────────────
+  useEffect(() => {
     const storedName = localStorage.getItem("kopawee_user_name");
     const storedEmail = localStorage.getItem("kopawee_user_email");
-    const storedProfileStr = localStorage.getItem("kopawee_user_profile");
-    const userId = localStorage.getItem("kopawee_user_id");
 
     if (storedName) {
       setUserName(storedName.startsWith("Corper ") ? storedName : `Corper ${storedName.split(" ")[0]}`);
     } else if (storedEmail) {
-      const nameFromEmail = storedEmail.split("@")[0].replace(".", " ");
-      setUserName(`Corper ${nameFromEmail}`);
+      setUserName(`Corper ${storedEmail.split("@")[0].replace(".", " ")}`);
     }
 
-    if (storedProfileStr) {
-      try {
-        const prof = JSON.parse(storedProfileStr);
-        if (prof.fullName || prof.displayName) {
-          const name = prof.displayName || prof.fullName;
-          setUserName(name.startsWith("Corper ") ? name : `Corper ${name.split(" ")[0]}`);
-        }
-        if (prof.stateCode) {
-          setStateCode(prof.stateCode);
-        }
-      } catch (e) {}
-    }
-
-    // 2. Fetch live profile from database API
-    if (userId) {
-      fetch(`/api/users/me?userId=${userId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success && data.data) {
-            const dbUser = data.data;
-            if (dbUser.name) {
-              const formattedName = dbUser.name.startsWith("Corper ")
-                ? dbUser.name
-                : `Corper ${dbUser.name.split(" ")[0]}`;
-              setUserName(formattedName);
-              localStorage.setItem("kopawee_user_name", dbUser.name);
-            }
-            if (dbUser.stateCode) {
-              setStateCode(dbUser.stateCode);
-            }
+    // Fetch live profile
+    fetch("/api/users/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          const dbUser = data.data;
+          if (dbUser.name) {
+            const formatted = dbUser.name.startsWith("Corper ") ? dbUser.name : `Corper ${dbUser.name.split(" ")[0]}`;
+            setUserName(formatted);
+            localStorage.setItem("kopawee_user_name", dbUser.name);
           }
-        })
-        .catch(() => {});
-    }
+          if (dbUser.stateCode) setStateCode(dbUser.stateCode);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("kopawee_auth_token");
     localStorage.removeItem("kopawee_active_role");
-    localStorage.removeItem("kopawee_user_profile");
     localStorage.removeItem("kopawee_user_name");
     localStorage.removeItem("kopawee_user_email");
     localStorage.removeItem("kopawee_user_id");
-    window.location.href = "/auth?mode=signup";
+    signOut({ callbackUrl: "/auth?mode=signin" });
+  };
+
+  const formatRelativeTime = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60_000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
   };
 
   return (
     <header className="bg-[#121815] text-white sticky top-0 z-40 border-b border-slate-800 font-sans">
       <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between h-16">
-          
+
           {/* Brand */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 group">
               <span className="font-bold text-xl tracking-widest uppercase font-display text-white">
-                KOPA<span className="text-emerald-500 font-extrabold">'WEE</span>
+                KOPA<span className="text-emerald-500 font-extrabold">&apos;WEE</span>
               </span>
             </Link>
           </div>
@@ -122,28 +170,83 @@ export default function DashboardNavbar({ currentRole, onRoleChange }: Dashboard
                 type="text"
                 placeholder="Search LGA clearance, listings, roomies, SOS..."
                 className="w-full pl-10 pr-4 py-2 bg-slate-900/90 border border-slate-800 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all font-sans"
+                aria-label="Search"
               />
             </div>
           </div>
 
-          {/* Right: Read-only NYSC Status Badge & User Controls */}
+          {/* Right controls */}
           <div className="flex items-center gap-4">
-            
-            {/* Read-Only Status Badge */}
+
+            {/* Role badge */}
             <div className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs font-bold font-mono uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>{activeRoleObj.label}</span>
             </div>
 
-            {/* Notifications */}
-            <button 
-              type="button"
-              className="p-2.5 text-slate-300 hover:text-white bg-slate-900/80 border border-slate-800 relative cursor-pointer"
-              aria-label="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full" />
-            </button>
+            {/* ── Notification Bell ── */}
+            <div className="relative" ref={notifRef}>
+              <button
+                type="button"
+                onClick={() => setNotifOpen((prev) => !prev)}
+                className="p-2.5 text-slate-300 hover:text-white bg-slate-900/80 border border-slate-800 relative cursor-pointer transition-colors"
+                aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-emerald-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Dropdown */}
+              {notifOpen && (
+                <div className="absolute right-0 top-full mt-2 w-80 bg-[#121815] border border-slate-700 shadow-2xl z-50">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">Notifications</span>
+                    <div className="flex items-center gap-3">
+                      {unreadCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleMarkAllRead}
+                          className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 uppercase tracking-wider"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                      <button type="button" onClick={() => setNotifOpen(false)} className="text-slate-400 hover:text-white">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* List */}
+                  <div className="max-h-72 overflow-y-auto divide-y divide-slate-800">
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-xs text-slate-500">
+                        No notifications yet.
+                      </div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          className={`px-4 py-3 ${!n.isRead ? "bg-emerald-950/30" : ""}`}
+                        >
+                          <p className={`text-xs font-semibold mb-0.5 ${!n.isRead ? "text-white" : "text-slate-300"}`}>
+                            {!n.isRead && <span className="inline-block w-1.5 h-1.5 bg-emerald-400 rounded-full mr-1.5 mb-0.5" />}
+                            {n.title}
+                          </p>
+                          <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2">{n.message}</p>
+                          <p className="text-[10px] text-slate-600 mt-1 font-mono">{formatRelativeTime(n.createdAt)}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Logout */}
             <button
@@ -162,7 +265,7 @@ export default function DashboardNavbar({ currentRole, onRoleChange }: Dashboard
               </div>
               <div className="hidden xl:flex flex-col text-left">
                 <span className="text-xs font-bold text-white leading-tight font-display">{userName || "Corps Member"}</span>
-                <span className="text-[10px] text-emerald-400 font-mono">{stateCode || "LA/26A/1234"}</span>
+                <span className="text-[10px] text-emerald-400 font-mono">{stateCode || "—"}</span>
               </div>
             </div>
 
