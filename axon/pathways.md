@@ -35,3 +35,4 @@
 
 
 - [x] **Pathway: Theme FOUC, System Default, Admin Design, Dropdown Fix & Serving Tracker** *Link: [index.md](./pathways/theme_fouc_admin_design_ux_fixes_20260910/index.md)*
+- [~] **Pathway: Serving Companion Checklist Removal & Admin Login Redesign** *Link: [index.md](./pathways/serving_companion_fix_admin_login_redesign_20260910/index.md)*
