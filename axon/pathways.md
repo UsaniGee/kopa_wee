@@ -34,4 +34,4 @@
 - [x] **Pathway: Auth Startup Crash & Onboarding Name Pre-fill Bug** *Link: [index.md](./pathways/auth_startup_onboarding_name_fix_20260910/index.md)*
 
 
-- [~] **Pathway: Theme FOUC, System Default, Admin Design, Dropdown Fix & Serving Tracker** *Link: [index.md](./pathways/theme_fouc_admin_design_ux_fixes_20260910/index.md)*
+- [x] **Pathway: Theme FOUC, System Default, Admin Design, Dropdown Fix & Serving Tracker** *Link: [index.md](./pathways/theme_fouc_admin_design_ux_fixes_20260910/index.md)*
