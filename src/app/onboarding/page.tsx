@@ -3,6 +3,7 @@
 import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import { FiShield, FiArrowRight, FiArrowLeft, FiCheckCircle, FiPackage, FiBox, FiAward, FiMapPin, FiCompass, FiCheckSquare, FiLock, FiPhone, FiMail, FiBookOpen } from "react-icons/fi";
 import { getRouteForRole } from "@/shared/utils/authNav";
@@ -42,6 +43,7 @@ function OnboardingContent() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
   const { setRole } = useRole();
+  const { data: session } = useSession();
 
   const [states, setStates] = useState<{ id: string; name: string; code: string }[]>([]);
 
@@ -105,6 +107,20 @@ function OnboardingContent() {
       })
       .catch(() => {});
   }, []);
+
+  // Pre-fill Full Name from NextAuth session or localStorage
+  // Priority: session.user.name → localStorage kopawee_user_name → leave blank
+  useEffect(() => {
+    setFormData((prev) => {
+      if (prev.fullName.trim()) return prev; // Already filled — don't overwrite
+      const sessionName = session?.user?.name ?? null;
+      const storedName = typeof window !== "undefined"
+        ? localStorage.getItem("kopawee_user_name")
+        : null;
+      const resolved = sessionName || storedName || "";
+      return resolved ? { ...prev, fullName: resolved } : prev;
+    });
+  }, [session]);
 
   const isStepValid = (() => {
     if (step === 1) {
@@ -280,7 +296,7 @@ function OnboardingContent() {
               <div className="space-y-4 pt-2">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-display">
-                    Full Legal Name
+                    Full Name
                   </label>
                   <input
                     type="text"

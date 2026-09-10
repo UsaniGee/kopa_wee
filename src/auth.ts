@@ -4,9 +4,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/shared/lib/prisma";
 import { verifyPassword } from "@/shared/lib/auth";
 
-if (!process.env.NEXTAUTH_SECRET) {
+if (!process.env.NEXTAUTH_SECRET?.trim()) {
   throw new Error(
-    "NEXTAUTH_SECRET is not set. Generate one with: openssl rand -base64 32"
+    "NEXTAUTH_SECRET is not set or is empty in .env.local. " +
+    "Generate one with: openssl rand -base64 32 " +
+    "and paste the result as the value (no surrounding quotes needed in a .env file)."
   );
 }
 

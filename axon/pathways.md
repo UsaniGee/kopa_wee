@@ -31,6 +31,6 @@
 - [x] **Pathway: NYSC Platform — Clearance, Packing Checklist, Role Status & Subscription Implementation** *Link: [index.md](./pathways/clearance_checklist_role_subscription_20260904/index.md)*
 - [ ] **Pathway: NYSC Platform — Final Updates to Dashboard, Account Settings & Subscription** *Link: [index.md](./pathways/dashboard_settings_subscription_20260904/index.md)*
 - [x] **Pathway: Security Hardening, Unified Auth & Platform Completion** *Link: [index.md](./pathways/security_hardening_unified_auth_20260910/index.md)*
-- [~] **Pathway: Auth Startup Crash & Onboarding Name Pre-fill Bug** *Link: [index.md](./pathways/auth_startup_onboarding_name_fix_20260910/index.md)*
+- [x] **Pathway: Auth Startup Crash & Onboarding Name Pre-fill Bug** *Link: [index.md](./pathways/auth_startup_onboarding_name_fix_20260910/index.md)*
 
 
