@@ -29,7 +29,10 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { success: false, error: "A user with this email already exists" },
+        {
+          success: false,
+          error: "An account with this email already exists. Try signing in instead.",
+        },
         { status: 400 }
       );
     }
@@ -63,7 +66,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Send real verification email via Resend
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
     const verificationUrl = `${baseUrl}/auth/verify?token=${verificationToken}&email=${encodeURIComponent(newUser.email)}`;
 
@@ -91,6 +93,24 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    // Prisma unique constraint violation — email already registered (race condition)
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: string }).code === "P2002"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "An account with this email already exists. Try signing in instead.",
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error("[POST /api/auth/register] Error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to register user" },
       { status: 500 }
