@@ -3,13 +3,21 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FiShield, FiLock, FiMail, FiArrowRight, FiArrowLeft } from "react-icons/fi";
-import ThemeToggle from "@/shared/components/ThemeToggle";
+import {
+  FiShield,
+  FiLock,
+  FiMail,
+  FiArrowRight,
+  FiAlertTriangle,
+  FiEye,
+  FiEyeOff,
+} from "react-icons/fi";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("admin@kopawee.ng");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -34,103 +42,196 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-white flex flex-col font-sans transition-colors duration-300">
+    <div className="min-h-screen w-full bg-[#0a0f0d] grid grid-cols-1 lg:grid-cols-2 font-sans overflow-hidden">
 
-      {/* Top bar */}
-      <header className="bg-[#121815] text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white uppercase tracking-wider font-display transition-colors"
-        >
-          <FiArrowLeft className="w-4 h-4" />
-          <span>KopaWee Home</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] font-mono font-bold text-emerald-400 px-2 py-0.5 bg-emerald-950 border border-emerald-800 uppercase tracking-widest">
-            PLATFORM OWNER PORTAL
+      {/* ── LEFT PANEL: Editorial ops identity ─────────────────────────── */}
+      <div className="hidden lg:flex flex-col justify-between p-14 bg-[#080c0a] border-r border-red-900/30 relative overflow-hidden">
+
+        {/* Subtle grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(0deg,transparent,transparent 39px,#ef4444 39px,#ef4444 40px)," +
+              "repeating-linear-gradient(90deg,transparent,transparent 39px,#ef4444 39px,#ef4444 40px)",
+          }}
+        />
+
+        {/* Top: Logo + badge */}
+        <div className="relative z-10 flex items-center justify-between">
+          <Link href="/" className="font-bold text-xl tracking-widest uppercase font-display text-white">
+            KOPA<span className="text-red-500 font-extrabold">&apos;WEE</span>
+          </Link>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-[0.25em] px-2.5 py-1 bg-red-600/10 border border-red-500/40 text-red-400">
+            RESTRICTED
           </span>
-          <ThemeToggle size="11px" />
         </div>
-      </header>
 
-      {/* Main */}
-      <main className="flex-1 flex items-center justify-center p-8">
-        <div className="max-w-md w-full bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 p-10 space-y-8 shadow-sm">
-
-          {/* Header */}
-          <div className="space-y-3 text-center">
-            <div className="w-12 h-12 bg-emerald-600/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
-              <FiShield className="w-6 h-6" />
-            </div>
-            <h1 className="text-2xl font-bold font-display tracking-tight text-[#121815] dark:text-white">
-              Admin Login
+        {/* Center: Editorial copy */}
+        <div className="relative z-10 space-y-6">
+          <div className="w-14 h-14 border border-red-500/40 bg-red-600/10 flex items-center justify-center">
+            <FiShield className="w-7 h-7 text-red-400" />
+          </div>
+          <div className="space-y-3">
+            <p className="text-[11px] font-mono font-bold uppercase tracking-[0.3em] text-red-400">
+              PLATFORM CONTROL CENTER
+            </p>
+            <h1 className="text-4xl lg:text-5xl font-medium tracking-tight leading-[1.06] text-white font-display">
+              Authorised<br />Personnel<br />Only.
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Platform Ad Moderation &amp; Listing Approval Center
+            <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
+              Ad moderation, listing approvals, and user status management for the KopaWee platform.
+            </p>
+          </div>
+
+          {/* Security notices */}
+          <div className="space-y-2 pt-2">
+            {[
+              "All sessions are logged and audited",
+              "Unauthorised access is a criminal offence",
+              "2FA enforcement coming in v2.0",
+            ].map((notice) => (
+              <div key={notice} className="flex items-center gap-2.5 text-[11px] text-slate-500 font-mono">
+                <span className="w-1 h-1 bg-red-500 rounded-full shrink-0" />
+                {notice}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom: Version stamp */}
+        <div className="relative z-10 flex items-center justify-between text-[10px] font-mono text-slate-600 border-t border-red-900/20 pt-5">
+          <span>KOPAWEE ADMIN v1.0</span>
+          <span className="text-red-700">⬤ SECURE CHANNEL</span>
+        </div>
+      </div>
+
+      {/* ── RIGHT PANEL: Login form ─────────────────────────────────────── */}
+      <div className="flex flex-col justify-between p-8 sm:p-12 lg:p-14 bg-[#0a0f0d]">
+
+        {/* Mobile top bar */}
+        <div className="flex items-center justify-between lg:hidden mb-10">
+          <Link href="/" className="font-bold text-xl tracking-widest uppercase font-display text-white">
+            KOPA<span className="text-red-500 font-extrabold">&apos;WEE</span>
+          </Link>
+          <span className="text-[10px] font-mono font-bold text-red-400 uppercase tracking-widest">
+            ADMIN PORTAL
+          </span>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full space-y-8">
+
+          {/* Form header */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 border border-red-500/40 bg-red-600/10 flex items-center justify-center">
+                <FiLock className="w-4 h-4 text-red-400" />
+              </div>
+              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-red-400">
+                ADMIN ACCESS
+              </span>
+            </div>
+            <h2 className="text-3xl font-medium text-white font-display tracking-tight">
+              Sign in to Control Center
+            </h2>
+            <p className="text-xs text-slate-500">
+              Credentials are issued to platform administrators only.
             </p>
           </div>
 
           {/* Error */}
           {errorMsg && (
-            <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 text-xs font-semibold text-center">
-              {errorMsg}
+            <div className="flex items-center gap-3 p-3.5 bg-red-900/20 border border-red-700/60 text-red-400 text-xs font-semibold">
+              <FiAlertTriangle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
             </div>
           )}
 
           {/* Form */}
           <form onSubmit={handleAdminLogin} className="space-y-5">
+
+            {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-display">
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-display">
                 Admin Email
               </label>
               <div className="relative">
-                <FiMail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <FiMail className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@kopawee.ng"
-                  className="w-full pl-10 pr-4 py-3 bg-[#dcece1] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-600 transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-[#121815] border border-slate-800 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>
             </div>
 
+            {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-display">
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-display">
                 Admin Password
               </label>
               <div className="relative">
-                <FiLock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <FiLock className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
-                  placeholder="••••••••"
+                  placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-[#dcece1] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-600 transition-colors"
+                  className="w-full pl-10 pr-10 py-3 bg-[#121815] border border-slate-800 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 font-display"
+              disabled={loading || !email.trim() || !password.trim()}
+              className="w-full py-4 bg-red-700 hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 font-display mt-2"
             >
               {loading ? (
-                <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>AUTHENTICATING...</span></>
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>AUTHENTICATING...</span>
+                </>
               ) : (
-                <><span>ENTER ADMIN DASHBOARD</span><FiArrowRight className="w-4 h-4" /></>
+                <>
+                  <span>ACCESS CONTROL CENTER</span>
+                  <FiArrowRight className="w-4 h-4" />
+                </>
               )}
             </button>
           </form>
 
-          <div className="text-center text-[10px] text-slate-400 dark:text-slate-500 font-mono pt-2 border-t border-slate-200 dark:border-slate-800">
-            STRICTLY FOR KOPAWEE PLATFORM ADMINISTRATORS
+          {/* Footer note */}
+          <div className="flex items-center gap-2 text-[10px] text-slate-700 font-mono pt-2 border-t border-slate-900">
+            <FiShield className="w-3 h-3 text-red-900" />
+            <span>STRICTLY FOR KOPAWEE PLATFORM ADMINISTRATORS & MODERATORS</span>
           </div>
         </div>
-      </main>
+
+        {/* Bottom link */}
+        <div className="mt-8 lg:mt-0">
+          <Link
+            href="/"
+            className="text-[11px] font-mono text-slate-700 hover:text-slate-500 uppercase tracking-widest transition-colors"
+          >
+            ← Return to KopaWee
+          </Link>
+        </div>
+      </div>
+
     </div>
   );
 }

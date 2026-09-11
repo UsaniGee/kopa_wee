@@ -138,7 +138,6 @@ export default function CompanionPage() {
         </div>
       </div>
 
-      <CampEssentialsChecklist />
     </div>
   );
 }
