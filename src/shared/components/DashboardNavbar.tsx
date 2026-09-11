@@ -289,7 +289,7 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
               {profileOpen && (
                 <div className="absolute right-0 top-full mt-2 w-64 bg-[#121815] border border-slate-700 shadow-2xl z-50 py-1 divide-y divide-slate-800">
                   {/* Header Info */}
-                  <div className="px-4 py-3 bg-slate-900/50">
+                  <div className="md:hidden px-4 py-3 bg-slate-900/50">
                     <p className="text-xs font-bold text-white font-display">{userName || "Corps Member"}</p>
                     <p className="text-[10px] text-emerald-400 font-mono mt-0.5">{stateCode ? `State Code: ${stateCode}` : "Mobilized Corps Member"}</p>
                     <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-950 text-emerald-300 text-[9px] font-bold font-mono uppercase tracking-wider border border-emerald-800/80">
@@ -317,7 +317,7 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
                         setProfileOpen(false);
                         handleLogout();
                       }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-950/40 transition-colors text-left"
+                      className="md:hidden w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-950/40 transition-colors text-left"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>

@@ -415,3 +415,17 @@ model FormOption {
   @@unique([category, value])
   @@index([category])
 }
+
+model AdminInvite {
+  id        String          @id @default(cuid())
+  email     String          @unique
+  token     String          @unique
+  role      ApplicationRole @default(USER)
+  invitedBy String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime        @default(now())
+
+  @@index([token])
+  @@index([email])
+}

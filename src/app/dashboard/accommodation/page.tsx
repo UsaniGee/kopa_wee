@@ -49,52 +49,6 @@ interface Roommate {
   matchScore: number;
 }
 
-const SAMPLE_LODGES: Lodge[] = [
-  { 
-    id: "1", 
-    name: "Greenfield Corper Lodge", 
-    price: "₦180,000 / year", 
-    location: "Ikeja LGA, Lagos (Near Secretariat)", 
-    lga: "Ikeja", 
-    distanceKm: 2.3, 
-    badgeType: "verified", 
-    features: ["24/7 Water", "Security Gate", "Fitted Kitchen", "Individual Meters"], 
-    split: "2-Person Roommate Split (₦90,000 each)",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80",
-    forRoles: ["pcm", "serving"]
-  },
-  { 
-    id: "2", 
-    name: "Transit Corper Haven", 
-    price: "₦3,500 / night", 
-    location: "Surulere LGA, Lagos", 
-    lga: "Surulere", 
-    distanceKm: 1.1, 
-    badgeType: "corps_member", 
-    features: ["Fully Furnished", "Free WiFi", "Power Backup", "Close to Bus Stop"], 
-    split: "Nightly Transit Stay",
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80",
-    forRoles: ["pcm", "serving"]
-  },
-  { 
-    id: "3", 
-    name: "Alumni Relocation Apartment", 
-    price: "₦350,000 / year", 
-    location: "Lekki Phase 1, Lagos", 
-    lga: "Eti-Osa", 
-    distanceKm: 4.5, 
-    badgeType: "property_owner", 
-    features: ["Gated Estate", "Air Conditioned", "Parking Space", "Prepaid Meter"], 
-    split: "Post-POP Full Apartment",
-    image: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=600&q=80",
-    forRoles: ["alumni"]
-  },
-];
-
-const SAMPLE_ROOMMATES: Roommate[] = [
-  { id: "1", name: "Tunde Bakare", gender: "Male", ppa: "Grace High School (Opebi)", lga: "Ikeja", budget: "₦100,000/yr", preference: "Non-smoker, Quiet, Tech worker", distanceKm: 1.5, matchScore: 94 },
-  { id: "2", name: "Chioma Nwosu", gender: "Female", ppa: "Lagos State Secretariat", lga: "Ikeja", budget: "₦120,000/yr", preference: "Clean, Early riser", distanceKm: 2.0, matchScore: 88 },
-];
 
 export default function AccommodationPage() {
   const { currentRole } = useRole();

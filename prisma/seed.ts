@@ -92,6 +92,24 @@ async function main() {
     `✅ Default packing items reference seeded: ${defaultPackingItems.length} items`
   );
 
+  // ─── Super Admin Seed ─────────────────────────────────────────────────────
+  const { hashPassword: hashPwd } = await import("../src/shared/lib/auth");
+  const adminPasswordHash = await hashPwd("KopaWeeAdmin2026!");
+  await prisma.user.upsert({
+    where: { email: "admin@kopawee.ng" },
+    update: { applicationRole: "ADMIN", isVerified: true, passwordHash: adminPasswordHash },
+    create: {
+      name: "KopaWee Admin",
+      email: "admin@kopawee.ng",
+      passwordHash: adminPasswordHash,
+      role: "PCM",
+      applicationRole: "ADMIN",
+      nyscStatus: "PCM",
+      isVerified: true,
+    },
+  });
+  console.log("✅ Super-admin seeded: admin@kopawee.ng / KopaWeeAdmin2026!");
+
   console.log("🎉 Database seeding complete!");
 }
 
