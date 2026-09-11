@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import {
   FiShield,
+  FiMail,
   FiCheckCircle,
   FiXCircle,
   FiShoppingBag,
@@ -65,11 +66,17 @@ interface PendingLodge {
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [activeTab, setActiveTab] = useState<"marketplace" | "accommodation" | "users">("marketplace");
+  const [activeTab, setActiveTab] = useState<"marketplace" | "accommodation" | "users" | "invites">("marketplace");
   const [loading, setLoading] = useState(true);
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [pendingLodges, setPendingLodges] = useState<PendingLodge[]>([]);
   const [actionMsg, setActionMsg] = useState("");
+
+  // Invite state
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"ADMIN" | "USER">("USER");
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState<any[]>([]);
 
   // User status management state
   const [userSearch, setUserSearch] = useState("");
@@ -86,16 +93,19 @@ export default function AdminDashboardPage() {
   const fetchPendingData = async () => {
     setLoading(true);
     try {
-      const [itemsRes, lodgesRes] = await Promise.all([
+      const [itemsRes, lodgesRes, invitesRes] = await Promise.all([
         fetch("/api/marketplace?status=PENDING_APPROVAL"),
         fetch("/api/accommodation?status=PENDING_APPROVAL"),
+        fetch("/api/admin/invite"),
       ]);
 
       const itemsData = await itemsRes.json();
       const lodgesData = await lodgesRes.json();
+      const invitesData = await invitesRes.json();
 
       if (itemsData.success) setPendingItems(itemsData.data || []);
       if (lodgesData.success) setPendingLodges(lodgesData.data || []);
+      if (invitesData.success) setPendingInvites(invitesData.data || []);
     } catch (err) {
       console.error("Failed to load admin pending listings", err);
     } finally {
@@ -145,6 +155,30 @@ export default function AdminDashboardPage() {
       }
     } catch (err) {
       setActionMsg("❌ Failed to reject listing");
+    }
+  };
+
+  const handleSendInvite = async () => {
+    if (!inviteEmail.trim()) return;
+    setInviteLoading(true);
+    try {
+      const res = await fetch("/api/admin/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActionMsg(`✅ Invite sent to ${inviteEmail}`);
+        setInviteEmail("");
+        fetchPendingData();
+      } else {
+        setActionMsg(`❌ ${data.error}`);
+      }
+    } catch {
+      setActionMsg("❌ Failed to send invite");
+    } finally {
+      setInviteLoading(false);
     }
   };
 
@@ -563,6 +597,89 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Admin Invites Tab */}
+        {activeTab === "invites" && (
+          <div className="space-y-6">
+            {/* Send Invite */}
+            <div className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-5">
+              <div>
+                <h3 className="text-sm font-bold font-display text-[#121815] dark:text-white uppercase tracking-widest">
+                  Send Admin Invite
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Invite someone to set up an admin or moderator account. They will receive an email with a secure setup link valid for 48 hours.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="relative sm:col-span-2">
+                  <FiMail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendInvite()}
+                    placeholder="Email address to invite..."
+                    className="w-full pl-10 pr-4 py-3 text-xs bg-[#dcece1] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-red-600 transition-colors"
+                  />
+                </div>
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value as "ADMIN" | "USER")}
+                  className="px-4 py-3 text-xs bg-[#dcece1] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-red-600 transition-colors"
+                >
+                  <option value="USER">Moderator (USER)</option>
+                  <option value="ADMIN">Administrator (ADMIN)</option>
+                </select>
+              </div>
+              <button
+                onClick={handleSendInvite}
+                disabled={inviteLoading || !inviteEmail.trim()}
+                className="px-6 py-3 bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {inviteLoading ? (
+                  <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>SENDING...</span></>
+                ) : (
+                  <><FiMail className="w-4 h-4" /><span>SEND INVITE EMAIL</span></>
+                )}
+              </button>
+            </div>
+
+            {/* Pending Invites */}
+            <div className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+              <h3 className="text-sm font-bold font-display text-[#121815] dark:text-white uppercase tracking-widest">
+                Pending Invites ({pendingInvites.length})
+              </h3>
+              {pendingInvites.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-500 dark:text-slate-400 font-mono">
+                  No pending invites. Send an invite above to get started.
+                </div>
+              ) : (
+                <div className="space-y-0 divide-y divide-slate-200 dark:divide-slate-800">
+                  {pendingInvites.map((inv: any) => (
+                    <div key={inv.id} className="flex items-center justify-between py-3 text-xs">
+                      <div className="space-y-0.5">
+                        <p className="font-semibold text-[#121815] dark:text-white font-mono">{inv.email}</p>
+                        <p className="text-slate-500 dark:text-slate-400">
+                          Invited as{" "}
+                          <span className={`font-bold ${inv.role === "ADMIN" ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                            {inv.role}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="text-right space-y-0.5">
+                        <p className="text-slate-400 dark:text-slate-500 font-mono text-[10px] uppercase tracking-wider">Expires</p>
+                        <p className="text-slate-600 dark:text-slate-300 font-mono">
+                          {new Date(inv.expiresAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </main>
