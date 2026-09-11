@@ -37,4 +37,4 @@
 - [x] **Pathway: Theme FOUC, System Default, Admin Design, Dropdown Fix & Serving Tracker** *Link: [index.md](./pathways/theme_fouc_admin_design_ux_fixes_20260910/index.md)*
 - [x] **Pathway: Serving Companion Checklist Removal & Admin Login Redesign** *Link: [index.md](./pathways/serving_companion_fix_admin_login_redesign_20260910/index.md)*
 - [x] **Pathway: Purge Hardcoded Serving Dashboard Banner Data & Dynamic User Fetching** *Link: [index.md](./pathways/dynamic_serving_dashboard_data_20260911/index.md)*
-- [ ] **Pathway: Dynamic Clearance Metric Card & Responsive SCM Role Badge** *Link: [index.md](./pathways/dynamic_clearance_metric_scm_badge_20260911/index.md)*
+- [x] **Pathway: Dynamic Clearance Metric Card & Responsive SCM Role Badge** *Link: [index.md](./pathways/dynamic_clearance_metric_scm_badge_20260911/index.md)*
