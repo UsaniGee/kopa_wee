@@ -37,10 +37,9 @@ interface Notification {
 
 interface DashboardNavbarProps {
   currentRole: string;
-  onRoleChange: (roleId: string) => void;
 }
 
-export default function DashboardNavbar({ currentRole, onRoleChange }: DashboardNavbarProps) {
+export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
   const activeRoleObj = DASHBOARD_ROLES.find((r) => r.id === currentRole) || DASHBOARD_ROLES[1];
 
   const [userName, setUserName] = useState<string>("");

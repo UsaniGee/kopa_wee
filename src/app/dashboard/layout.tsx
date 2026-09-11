@@ -64,7 +64,7 @@ import { useSession } from "next-auth/react";
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentRole, setRole } = useRole();
+  const { currentRole } = useRole();
   const { status } = useSession();
 
   const activeNavItems = ROLE_NAV_ITEMS[currentRole] || ROLE_NAV_ITEMS.serving;
@@ -86,19 +86,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [status, currentRole, pathname, activeNavItems, router]);
 
-  const handleRoleChange = (newRole: string) => {
-    setRole(newRole as any);
-    const newRoleItems = ROLE_NAV_ITEMS[newRole] || ROLE_NAV_ITEMS.serving;
-    const firstTabHref = newRoleItems[0]?.href || "/dashboard";
-    router.push(firstTabHref);
-  };
-
   return (
     <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-slate-100 flex flex-col font-sans transition-colors duration-500">
       {/* Top Navbar */}
       <DashboardNavbar 
         currentRole={currentRole} 
-        onRoleChange={handleRoleChange} 
       />
 
       {/* Module Sub-Navigation Bar */}
