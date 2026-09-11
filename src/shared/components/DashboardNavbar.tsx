@@ -20,7 +20,7 @@ export interface RoleOption {
 
 export const DASHBOARD_ROLES: RoleOption[] = [
   { id: "pcm", label: "Prospective Corper", badge: "PCM", subtitle: "Mobilization & Orientation Camp" },
-  { id: "serving", label: "Serving Corps Member", badge: "Serving", subtitle: "Daily PPA, Clearance & CDS" },
+  { id: "serving", label: "Serving Corps Member", badge: "SCM", subtitle: "Daily PPA, Clearance & CDS" },
   { id: "alumni", label: "Ex-Corps Member", badge: "POP", subtitle: "Career, Gigs & Alumni Network" },
   { id: "cds_exec", label: "CDS Executive", badge: "CDS Exec", subtitle: "Attendance, Projects & Dues" },
   { id: "ppa", label: "PPA Representative", badge: "Employer", subtitle: "Staff Attendance & Leave Requests" },
@@ -177,10 +177,11 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
           {/* Right controls */}
           <div className="flex items-center gap-4">
 
-            {/* Role badge */}
+            {/* Role badge — full label on sm+, short code on mobile */}
             <div className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs font-bold font-mono uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{activeRoleObj.label}</span>
+              <span className="hidden sm:inline">{activeRoleObj.label}</span>
+              <span className="sm:hidden">{activeRoleObj.badge}</span>
             </div>
 
             {/* ── Notification Bell ── */}
