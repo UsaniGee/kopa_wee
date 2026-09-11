@@ -58,26 +58,22 @@ export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon:
   ],
 };
 
-import { isUserAuthenticated } from "@/shared/utils/authNav";
 import { useSession } from "next-auth/react";
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentRole } = useRole();
+  const { currentRole, roleStatus } = useRole();
   const { status } = useSession();
 
   const activeNavItems = ROLE_NAV_ITEMS[currentRole] || ROLE_NAV_ITEMS.serving;
 
-  // Route protection: redirect unauthenticated users (middleware handles this too — belt & braces)
   useEffect(() => {
-    if (status === "loading") return; // Wait for session to resolve
+    if (status === "loading") return;
     if (status === "unauthenticated") {
       router.push(`/auth?mode=signin&redirect=${encodeURIComponent(pathname)}`);
       return;
     }
-
-    // settings is universally accessible across all roles
     const isSettingsPage = pathname === "/dashboard/settings";
     const isPathValidForRole = isSettingsPage || activeNavItems.some(item => item.href === pathname);
     if (!isPathValidForRole) {
@@ -86,12 +82,24 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [status, currentRole, pathname, activeNavItems, router]);
 
+  // Render skeleton while session resolves — prevents PCM nav flash for SCM users
+  if (roleStatus === "loading") {
+    return (
+      <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] flex flex-col font-sans">
+        {/* Dark navbar shell — matches real navbar height so layout doesn't jump */}
+        <div className="h-16 bg-[#121815] border-b border-slate-800 sticky top-0 z-40" />
+        {/* Sub-nav shell */}
+        <div className="h-12 bg-[#dcece1] dark:bg-[#121a16] border-b border-slate-300/60 dark:border-slate-800 sticky top-16 z-30" />
+        {/* Blank content — no flash of wrong role */}
+        <div className="flex-1" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-slate-100 flex flex-col font-sans transition-colors duration-500">
       {/* Top Navbar */}
-      <DashboardNavbar 
-        currentRole={currentRole} 
-      />
+      <DashboardNavbar currentRole={currentRole} />
 
       {/* Module Sub-Navigation Bar */}
       <div className="bg-[#dcece1] dark:bg-[#121a16] border-b border-slate-300/60 dark:border-slate-800 sticky top-16 z-30 overflow-x-auto">
