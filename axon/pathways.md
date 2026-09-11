@@ -29,10 +29,11 @@
 - [x] **Pathway: Cascading Backend States/LGAs & Clean Placeholders** *Link: [index.md](./pathways/cascading_states_lgas_clean_placeholders_20260902/index.md)*
 - [x] **Pathway: Prisma Connection Pool Timeout, React Render Warning & Image Sizes Fix** *Link: [index.md](./pathways/bug_fixes_prisma_react_images_20260902/index.md)*
 - [x] **Pathway: NYSC Platform — Clearance, Packing Checklist, Role Status & Subscription Implementation** *Link: [index.md](./pathways/clearance_checklist_role_subscription_20260904/index.md)*
-- [ ] **Pathway: NYSC Platform — Final Updates to Dashboard, Account Settings & Subscription** *Link: [index.md](./pathways/dashboard_settings_subscription_20260904/index.md)*
+- [x] **Pathway: NYSC Platform — Final Updates to Dashboard, Account Settings & Subscription** *Link: [index.md](./pathways/dashboard_settings_subscription_20260904/index.md)*
 - [x] **Pathway: Security Hardening, Unified Auth & Platform Completion** *Link: [index.md](./pathways/security_hardening_unified_auth_20260910/index.md)*
 - [x] **Pathway: Auth Startup Crash & Onboarding Name Pre-fill Bug** *Link: [index.md](./pathways/auth_startup_onboarding_name_fix_20260910/index.md)*
 
 
 - [x] **Pathway: Theme FOUC, System Default, Admin Design, Dropdown Fix & Serving Tracker** *Link: [index.md](./pathways/theme_fouc_admin_design_ux_fixes_20260910/index.md)*
 - [x] **Pathway: Serving Companion Checklist Removal & Admin Login Redesign** *Link: [index.md](./pathways/serving_companion_fix_admin_login_redesign_20260910/index.md)*
+- [ ] **Pathway: Purge Hardcoded Serving Dashboard Banner Data & Dynamic User Fetching** *Link: [index.md](./pathways/dynamic_serving_dashboard_data_20260911/index.md)*
