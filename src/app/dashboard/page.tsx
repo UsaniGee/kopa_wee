@@ -843,23 +843,11 @@ export default function DashboardOverviewPage() {
               <Link key={i} href={card.href} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 transition-all space-y-3">
                 <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">{card.title}</h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{card.text}</p>
-                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block pt-1">{card.action}</span>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{card.action}</span>
               </Link>
             ))}
           </div>
         </div>
-
-        {/* Status Update Modal */}
-        {showStatusModal && (
-          <StatusUpdateModal
-            fromStatus="Prospective Corps Member (PCM)"
-            toStatus="Serving Corps Member"
-            campExitDate={journeyInfo?.campExitDate}
-            onConfirm={handleStatusUpdate}
-            onCancel={() => setShowStatusModal(false)}
-            isLoading={statusUpdating}
-          />
-        )}
       </div>
     );
   }
@@ -870,9 +858,9 @@ export default function DashboardOverviewPage() {
   if (currentRole === "serving") {
     // Dynamic State Code & Role
     const displayStateCode = userInfo?.stateCode || (session?.user as any)?.stateCode || null;
-    const roleBadgeText = displayStateCode
-      ? `ROLE: SERVING CORPS MEMBER (${displayStateCode})`
-      : "ROLE: SERVING CORPS MEMBER";
+    const stateCodeSuffix = displayStateCode ? `(${displayStateCode})` : "";
+    const desktopRoleText = `ROLE: SERVING CORPS MEMBER ${stateCodeSuffix}`.trim();
+    const mobileRoleText = `ROLE: SCM ${stateCodeSuffix}`.trim();
 
     // Dynamic Corper Name
     const rawName = session?.user?.name || userInfo?.name || "";
@@ -881,27 +869,39 @@ export default function DashboardOverviewPage() {
       ? (firstName.toLowerCase().startsWith("corper") ? firstName : `Corper ${firstName}`)
       : "Corper";
 
-    // Dynamic Hub Location
-    const lgaText = userInfo?.lga ? `${userInfo.lga} LGA Hub` : "LGA Hub";
-    const stateText = userInfo?.deployedState || "State";
-    const hubLocation = `${lgaText}, ${stateText}`;
+    // Dynamic Hub Location — from userInfo (state + LGA set at sign-up or profile)
+    const hubName = userInfo?.lga ? `${userInfo.lga} Hub` : "LGA Hub";
+    const stateText = userInfo?.deployedState || userInfo?.state || "State";
+    const lgaLabel = userInfo?.lga ? `${userInfo.lga} LGA Hub` : "LGA Hub";
+    const hubLocation = `${lgaLabel}, ${stateText}`;
 
-    // Dynamic Clearance Notice & Days Count
+    // Dynamic Clearance Notice & Metric Card Data
     let clearanceNotice = `Monthly LGA Clearance (${hubLocation}).`;
+    let clearanceVal = "Available";
+    let nextDateStr = "Schedule Set";
+
     if (clearanceInfo?.nextEligibleAt) {
       const now = Date.now();
-      const nextDate = new Date(clearanceInfo.nextEligibleAt).getTime();
-      const diffDays = Math.ceil((nextDate - now) / (1000 * 60 * 60 * 24));
+      const nextDate = new Date(clearanceInfo.nextEligibleAt);
+      nextDateStr = nextDate.toLocaleDateString("en-NG", { month: "short", day: "numeric" });
+      const diffDays = Math.ceil((nextDate.getTime() - now) / (1000 * 60 * 60 * 24));
+
       if (diffDays > 0) {
         clearanceNotice = `Monthly LGA Clearance in ${diffDays} day${diffDays === 1 ? "" : "s"} (${hubLocation}).`;
+        clearanceVal = `${diffDays} Day${diffDays === 1 ? "" : "s"} Left`;
       } else if (clearanceInfo.isEligible) {
         clearanceNotice = `Monthly LGA Clearance window is OPEN NOW (${hubLocation}).`;
+        clearanceVal = "Open Now";
       } else {
         clearanceNotice = `Monthly LGA Clearance completed for this window (${hubLocation}).`;
+        clearanceVal = "Completed";
       }
     } else if (clearanceInfo?.hasCleared && clearanceInfo?.isEligible === false) {
       clearanceNotice = `Monthly LGA Clearance completed for this window (${hubLocation}).`;
+      clearanceVal = "Completed";
     }
+
+    const clearanceSub = `${nextDateStr} · ${hubName}`;
 
     return (
       <div className="space-y-8 font-sans">
@@ -909,7 +909,8 @@ export default function DashboardOverviewPage() {
           <div className="space-y-2 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>{roleBadgeText}</span>
+              <span className="hidden sm:inline">{desktopRoleText}</span>
+              <span className="sm:hidden">{mobileRoleText}</span>
             </div>
             <h1 className="text-3xl font-medium text-white tracking-tight font-display">
               Welcome back, {greetingName}
@@ -964,7 +965,7 @@ export default function DashboardOverviewPage() {
         {/* Metric Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: "Next Clearance", val: "4 Days Left", sub: "Aug 25 · Ikeja Hub", icon: Clock },
+            { label: "Next Clearance", val: clearanceVal, sub: clearanceSub, icon: Clock },
             { label: "Allawee Savings", val: "₦77,000", sub: "Saved via P2P Market", icon: TrendingUp },
             { label: "CDS Attendance", val: "92% Rate", sub: "Education CDS Group", icon: Users },
             { label: "Safety Status", val: "Active & Safe", sub: "Last check-in: 2h ago", icon: ShieldAlert },
