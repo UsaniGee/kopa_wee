@@ -47,3 +47,4 @@
 
 
 
+- [~] **Pathway: Change Password, Role Flash Fix, Admin Invite UI & Roommate Engagement Tracking** *Link: [index.md](./pathways/password_flash_invite_roommate_20260911/index.md)*
