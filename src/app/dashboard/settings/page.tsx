@@ -62,7 +62,7 @@ export default function AccountSettingsPage() {
   const fetchJourney = useCallback(async () => {
     if (!userId) return;
     try {
-      const res = await fetch(`/api/users/journey?userId=${userId}`);
+      const res = await fetch(`/api/users/journey`);
       const data = await res.json();
       if (data.success) {
         if (data.data.user?.nyscStatus) {

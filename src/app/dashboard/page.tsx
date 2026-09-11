@@ -645,17 +645,27 @@ export default function DashboardOverviewPage() {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [journeyInfo, setJourneyInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [clearanceInfo, setClearanceInfo] = useState<any>(null);
 
   const userId = session?.user?.id || "";
 
   React.useEffect(() => {
     if (!userId) return;
-    fetch(`/api/users/journey?userId=${userId}`)
+    fetch(`/api/users/journey`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.data?.journey) {
-          setJourneyInfo(data.data.journey);
+        if (data.success) {
+          if (data.data?.journey) setJourneyInfo(data.data.journey);
+          if (data.data?.user) setUserInfo(data.data.user);
         }
+      })
+      .catch(() => {});
+
+    fetch(`/api/clearance?userId=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setClearanceInfo(data.data);
       })
       .catch(() => {});
   }, [userId]);
@@ -858,19 +868,54 @@ export default function DashboardOverviewPage() {
      2. SERVING CORPS MEMBER VIEW
      ========================================================================= */
   if (currentRole === "serving") {
+    // Dynamic State Code & Role
+    const displayStateCode = userInfo?.stateCode || (session?.user as any)?.stateCode || null;
+    const roleBadgeText = displayStateCode
+      ? `ROLE: SERVING CORPS MEMBER (${displayStateCode})`
+      : "ROLE: SERVING CORPS MEMBER";
+
+    // Dynamic Corper Name
+    const rawName = session?.user?.name || userInfo?.name || "";
+    const firstName = rawName ? rawName.trim().split(" ")[0] : "";
+    const greetingName = firstName
+      ? (firstName.toLowerCase().startsWith("corper") ? firstName : `Corper ${firstName}`)
+      : "Corper";
+
+    // Dynamic Hub Location
+    const lgaText = userInfo?.lga ? `${userInfo.lga} LGA Hub` : "LGA Hub";
+    const stateText = userInfo?.deployedState || "State";
+    const hubLocation = `${lgaText}, ${stateText}`;
+
+    // Dynamic Clearance Notice & Days Count
+    let clearanceNotice = `Monthly LGA Clearance (${hubLocation}).`;
+    if (clearanceInfo?.nextEligibleAt) {
+      const now = Date.now();
+      const nextDate = new Date(clearanceInfo.nextEligibleAt).getTime();
+      const diffDays = Math.ceil((nextDate - now) / (1000 * 60 * 60 * 24));
+      if (diffDays > 0) {
+        clearanceNotice = `Monthly LGA Clearance in ${diffDays} day${diffDays === 1 ? "" : "s"} (${hubLocation}).`;
+      } else if (clearanceInfo.isEligible) {
+        clearanceNotice = `Monthly LGA Clearance window is OPEN NOW (${hubLocation}).`;
+      } else {
+        clearanceNotice = `Monthly LGA Clearance completed for this window (${hubLocation}).`;
+      }
+    } else if (clearanceInfo?.hasCleared && clearanceInfo?.isEligible === false) {
+      clearanceNotice = `Monthly LGA Clearance completed for this window (${hubLocation}).`;
+    }
+
     return (
       <div className="space-y-8 font-sans">
         <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
           <div className="space-y-2 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>ROLE: SERVING CORPS MEMBER (LA/24A/1042)</span>
+              <span>{roleBadgeText}</span>
             </div>
             <h1 className="text-3xl font-medium text-white tracking-tight font-display">
-              Welcome back, Corper Chidi
+              Welcome back, {greetingName}
             </h1>
             <p className="text-xs text-slate-300">
-              Monthly LGA Clearance in <strong className="text-white">4 days</strong> (Ikeja LGA Hub, Lagos State).
+              {clearanceNotice}
             </p>
           </div>
 

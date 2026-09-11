@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 
-// GET /api/users/journey?userId=...
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+// GET /api/users/journey — scoped to session user
+export async function GET() {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
 
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "userId parameter required" },
-        { status: 400 }
-      );
-    }
+  try {
+    const userId = auth.user!.id;
 
     const journey = await prisma.nYSCJourney.findUnique({
       where: { userId },
@@ -50,7 +46,6 @@ export async function GET(req: NextRequest) {
 }
 
 const updateJourneySchema = z.object({
-  userId: z.string().min(1),
   // PCM camp dates
   campEntryDate: z.string().datetime({ offset: true }).nullable().optional(),
   campExitDate: z.string().datetime({ offset: true }).nullable().optional(),
@@ -64,13 +59,16 @@ const updateJourneySchema = z.object({
   courseOfStudy: z.string().nullable().optional(),
 });
 
-// PATCH /api/users/journey — upsert journey dates and info
+// PATCH /api/users/journey — upsert journey dates and info (scoped to session user)
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
-    const data = updateJourneySchema.parse(body);
+    const journeyData = updateJourneySchema.parse(body);
 
-    const { userId, ...journeyData } = data;
+    const userId = auth.user!.id;
 
     // Verify user exists
     const user = await prisma.user.findUnique({

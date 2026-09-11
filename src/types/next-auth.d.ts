@@ -12,6 +12,9 @@ declare module "next-auth" {
       applicationRole: string;
       nyscStatus: string;
       isVerified: boolean;
+      stateCode?: string | null;
+      deployedState?: string | null;
+      lga?: string | null;
     };
   }
 
