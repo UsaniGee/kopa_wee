@@ -39,3 +39,5 @@
 - [x] **Pathway: Purge Hardcoded Serving Dashboard Banner Data & Dynamic User Fetching** *Link: [index.md](./pathways/dynamic_serving_dashboard_data_20260911/index.md)*
 - [x] **Pathway: Dynamic Clearance Metric Card & Responsive SCM Role Badge** *Link: [index.md](./pathways/dynamic_clearance_metric_scm_badge_20260911/index.md)*
 - [x] **Pathway: Navbar Role Badge — Responsive Mobile Abbreviation (SCM)** *Link: [index.md](./pathways/navbar_role_badge_mobile_20260911/index.md)*
+- [x] **Pathway: Clear Test Packing Items & DB Pre-Production Clean slate** *Link: [index.md](./pathways/clear_test_packing_items_20260911/index.md)*
+
