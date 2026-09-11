@@ -43,6 +43,8 @@
 - [x] **Pathway: Remove Duplicate Mode Switcher from Admin Dashboard** *Link: [index.md](./pathways/remove_duplicate_admin_theme_switcher_20260911/index.md)*
 - [x] **Pathway: Admin Dashboard Responsive Header — Icon-Only Buttons on Mobile** *Link: [index.md](./pathways/admin_navbar_mobile_icons_20260911/index.md)*
 - [x] **Pathway: User-Adjustable Draggable Theme Toggle for Mobile Navigation** *Link: [index.md](./pathways/draggable_user_adjustable_theme_toggle_20260911/index.md)*
+- [x] **Pathway: User Navigation Clean-Up — Hide Mobile Top Sub-Nav & Move Account Settings to User Profile Icon** *Link: [index.md](./pathways/navbar_mobile_cleanup_profile_settings_20260911/index.md)*
+
 
 
 

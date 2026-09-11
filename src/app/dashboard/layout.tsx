@@ -22,7 +22,6 @@ export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon:
     { href: "/dashboard/companion", label: "Camp Guide & Packing", icon: CalendarCheck },
     { href: "/dashboard/marketplace", label: "Pre-Camp Gear Market", icon: ShoppingBag },
     { href: "/dashboard/safety", label: "Travel & Route Safety", icon: ShieldAlert },
-    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   serving: [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -32,29 +31,24 @@ export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon:
     { href: "/dashboard/safety", label: "Safety SOS", icon: ShieldAlert },
     { href: "/dashboard/workplace", label: "PPA Logbook", icon: Briefcase },
     { href: "/dashboard/community", label: "CDS Hub", icon: Users },
-    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   cds_exec: [
     { href: "/dashboard", label: "CDS Executive Hub", icon: LayoutDashboard },
     { href: "/dashboard/community", label: "Attendance, Projects & Dues", icon: Users },
     { href: "/dashboard/safety", label: "Group Safety SOS", icon: ShieldAlert },
-    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   ppa: [
     { href: "/dashboard", label: "PPA Employer Portal", icon: LayoutDashboard },
     { href: "/dashboard/workplace", label: "Corper Staff & Leave Requests", icon: Briefcase },
-    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   nysc_official: [
     { href: "/dashboard", label: "LGA Inspector Portal", icon: LayoutDashboard },
     { href: "/dashboard/companion", label: "Biometric Clearance Portal", icon: CalendarCheck },
-    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
   alumni: [
     { href: "/dashboard", label: "Ex-Corper Hub", icon: LayoutDashboard },
     { href: "/dashboard/marketplace", label: "POP Household Deals", icon: ShoppingBag },
     { href: "/dashboard/workplace", label: "Career & Gigs", icon: Briefcase },
-    { href: "/dashboard/settings", label: "Account Settings", icon: Settings },
   ],
 };
 
@@ -89,7 +83,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         {/* Dark navbar shell — matches real navbar height so layout doesn't jump */}
         <div className="h-16 bg-[#121815] border-b border-slate-800 sticky top-0 z-40" />
         {/* Sub-nav shell */}
-        <div className="h-12 bg-[#dcece1] dark:bg-[#121a16] border-b border-slate-300/60 dark:border-slate-800 sticky top-16 z-30" />
+        <div className="hidden md:block h-12 bg-[#dcece1] dark:bg-[#121a16] border-b border-slate-300/60 dark:border-slate-800 sticky top-16 z-30" />
         {/* Blank content — no flash of wrong role */}
         <div className="flex-1" />
       </div>
@@ -101,8 +95,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Top Navbar */}
       <DashboardNavbar currentRole={currentRole} />
 
-      {/* Module Sub-Navigation Bar */}
-      <div className="bg-[#dcece1] dark:bg-[#121a16] border-b border-slate-300/60 dark:border-slate-800 sticky top-16 z-30 overflow-x-auto">
+      {/* Module Sub-Navigation Bar (Hidden on Mobile, Visible on Desktop md+) */}
+      <div className="hidden md:block bg-[#dcece1] dark:bg-[#121a16] border-b border-slate-300/60 dark:border-slate-800 sticky top-16 z-30 overflow-x-auto">
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
           <nav className="flex items-center gap-2 py-3 overflow-x-auto no-scrollbar">
             {activeNavItems.map((item) => {

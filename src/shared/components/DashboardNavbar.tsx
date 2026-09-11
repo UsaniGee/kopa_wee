@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { FiBell, FiSearch, FiUser, FiLogOut, FiX } from "react-icons/fi";
+import { FiBell, FiSearch, FiUser, FiLogOut, FiX, FiSettings, FiChevronDown } from "react-icons/fi";
 
 const Bell = FiBell;
 const Search = FiSearch;
@@ -75,11 +75,18 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
     };
   }, [fetchNotifications]);
 
-  // Close dropdown on outside click
+  // Profile dropdown state
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotifOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -248,25 +255,76 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
               )}
             </div>
 
-            {/* Logout */}
+            {/* Logout (Desktop shortcut) */}
             <button
               type="button"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-2 text-xs font-bold text-slate-300 uppercase tracking-wider transition-colors hover:bg-slate-800 hover:text-white cursor-pointer"
+              className="hidden md:flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-2 text-xs font-bold text-slate-300 uppercase tracking-wider transition-colors hover:bg-slate-800 hover:text-white cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
             </button>
 
-            {/* Profile Avatar */}
-            <div className="flex items-center gap-3 pl-2 border-l border-slate-800">
-              <div className="w-8 h-8 bg-emerald-800 text-white flex items-center justify-center font-bold text-xs">
-                <User className="w-4 h-4 text-white" />
-              </div>
-              <div className="hidden xl:flex flex-col text-left">
-                <span className="text-xs font-bold text-white leading-tight font-display">{userName || "Corps Member"}</span>
-                <span className="text-[10px] text-emerald-400 font-mono">{stateCode || "—"}</span>
-              </div>
+            {/* Profile Avatar & Interactive Menu */}
+            <div className="relative" ref={profileRef}>
+              <button
+                type="button"
+                onClick={() => setProfileOpen((prev) => !prev)}
+                className="flex items-center gap-2 pl-2 border-l border-slate-800 cursor-pointer group text-left focus:outline-none"
+                aria-label="User account menu"
+              >
+                <div className="w-8 h-8 bg-emerald-800 group-hover:bg-emerald-700 text-white flex items-center justify-center font-bold text-xs transition-colors">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+                <div className="hidden xl:flex flex-col text-left">
+                  <span className="text-xs font-bold text-white leading-tight font-display group-hover:text-emerald-300 transition-colors">
+                    {userName || "Corps Member"}
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-mono">{stateCode || "—"}</span>
+                </div>
+                <FiChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-transform ${profileOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* Profile Dropdown */}
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-[#121815] border border-slate-700 shadow-2xl z-50 py-1 divide-y divide-slate-800">
+                  {/* Header Info */}
+                  <div className="px-4 py-3 bg-slate-900/50">
+                    <p className="text-xs font-bold text-white font-display">{userName || "Corps Member"}</p>
+                    <p className="text-[10px] text-emerald-400 font-mono mt-0.5">{stateCode ? `State Code: ${stateCode}` : "Mobilized Corps Member"}</p>
+                    <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-950 text-emerald-300 text-[9px] font-bold font-mono uppercase tracking-wider border border-emerald-800/80">
+                      {activeRoleObj.badge} • {activeRoleObj.label}
+                    </span>
+                  </div>
+
+                  {/* Account Settings link */}
+                  <div className="py-1">
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-200 hover:text-white hover:bg-emerald-950/40 transition-colors"
+                    >
+                      <FiSettings className="w-4 h-4 text-emerald-400" />
+                      <span>Account Settings</span>
+                    </Link>
+                  </div>
+
+                  {/* Logout Action */}
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-950/40 transition-colors text-left"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
