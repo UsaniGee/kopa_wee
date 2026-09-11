@@ -13,8 +13,8 @@ export default auth((req) => {
     return NextResponse.redirect(signInUrl);
   }
 
-  // Admin guard — only applicationRole ADMIN may access /admin/*
-  if (pathname.startsWith("/admin")) {
+  // Admin guard — only applicationRole ADMIN may access /admin (dashboard)
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     const appRole = (session.user as any)?.applicationRole;
     if (appRole !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
@@ -27,7 +27,9 @@ export default auth((req) => {
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/admin/:path*",
+    // Protect /admin but NOT /admin/login (public login page)
+    "/admin",
+    "/admin/((?!login).*)",
     "/onboarding/:path*",
   ],
 };
