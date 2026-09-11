@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import {
   FiCalendar, FiShield, FiShoppingBag, FiHome, FiAlertOctagon,
@@ -633,6 +634,7 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function DashboardOverviewPage() {
   const { currentRole, setRole } = useRole();
+  const { data: session } = useSession();
 
   const [leaveRequests, setLeaveRequests] = useState([
     { id: 1, name: "John Okoh", role: "ICT Assistant", reason: "Medical Leave (3 Days)", status: "pending" },
@@ -642,25 +644,21 @@ export default function DashboardOverviewPage() {
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
-  const [activeUserId, setActiveUserId] = useState<string>("demo_user_id");
   const [journeyInfo, setJourneyInfo] = useState<any>(null);
 
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const id = localStorage.getItem("kopawee_user_id") || "demo_user_id";
-      setActiveUserId(id);
-      fetch(`/api/users/journey?userId=${id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success && data.data?.journey) {
-            setJourneyInfo(data.data.journey);
-          }
-        })
-        .catch(() => {});
-    }
-  }, []);
+  const userId = session?.user?.id || "";
 
-  const userId = activeUserId;
+  React.useEffect(() => {
+    if (!userId) return;
+    fetch(`/api/users/journey?userId=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data?.journey) {
+          setJourneyInfo(data.data.journey);
+        }
+      })
+      .catch(() => {});
+  }, [userId]);
 
   const handleLeaveAction = (id: number, status: "approved" | "rejected") => {
     setLeaveRequests((prev) => prev.map((req) => req.id === id ? { ...req, status } : req));

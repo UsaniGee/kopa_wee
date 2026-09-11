@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import { FiBriefcase, FiCheckCircle, FiStar, FiCalendar, FiFileText, FiClock, FiAlertCircle, FiBox, FiUserCheck, FiUserX, FiPackage, FiAward, FiExternalLink, FiX } from "react-icons/fi";
 
@@ -21,12 +22,13 @@ const X = FiX;
 
 export default function WorkplacePage() {
   const { currentRole } = useRole();
+  const { data: session } = useSession();
   const [loggedToday, setLoggedToday] = useState(false);
   const [logSummary, setLogSummary] = useState("");
   const [logging, setLogging] = useState(false);
 
   const handleLogTodaySubmit = async () => {
-    const userId = localStorage.getItem("kopawee_user_id") || "cl_guest_corps";
+    const userId = session?.user?.id || "";
     setLogging(true);
 
     try {
@@ -83,7 +85,7 @@ export default function WorkplacePage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   React.useEffect(() => {
-    const userId = localStorage.getItem("kopawee_user_id") || "cl_guest_corps";
+    const userId = session?.user?.id || "";
     fetch(`/api/workplace/logbook?userId=${userId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -98,7 +100,7 @@ export default function WorkplacePage() {
         }
       })
       .catch(() => {});
-  }, [loggedToday]);
+  }, [loggedToday, session]);
 
   if (currentRole === "pcm") {
     return (

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import { FiHome, FiUsers, FiMapPin, FiCheckCircle, FiShield, FiHeart, FiPlus, FiPackage, FiAlertTriangle, FiCompass, FiNavigation, FiFlag, FiX, FiSearch, FiFilter } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
@@ -97,6 +98,7 @@ const SAMPLE_ROOMMATES: Roommate[] = [
 
 export default function AccommodationPage() {
   const { currentRole } = useRole();
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<"lodges" | "roommates">("lodges");
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [states, setStates] = useState<{ id: string; name: string; code: string }[]>([]);
@@ -110,7 +112,7 @@ export default function AccommodationPage() {
   const [badgeFilter, setBadgeFilter] = useState<string>("all");
   const [lgaFilter, setLgaFilter] = useState<string>("all");
 
-  const userId = typeof window !== "undefined" ? localStorage.getItem("kopawee_user_id") || "user_demo_123" : "user_demo_123";
+  const userId = session?.user?.id || "";
 
   const fetchRoommatesData = () => {
     fetch("/api/roommates")
@@ -520,6 +522,7 @@ function PostLodgeModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  const { data: session } = useSession();
   const [title, setTitle] = useState("");
   const [rent, setRent] = useState("");
   const [state, setState] = useState("");
@@ -554,7 +557,7 @@ function PostLodgeModal({
     setSubmitting(true);
     setErrorMsg("");
 
-    const userId = localStorage.getItem("kopawee_user_id") || "user_demo_123";
+    const userId = session?.user?.id || "";
 
     try {
       const res = await fetch("/api/accommodation", {

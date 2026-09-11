@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { FiSave, FiLoader, FiCalendar, FiInfo, FiCheck, FiAlertTriangle, FiBook, FiPackage, FiLock } from "react-icons/fi";
 
 import { useRole } from "@/shared/context/RoleContext";
@@ -28,17 +29,10 @@ interface UserData {
 
 export default function AccountSettingsPage() {
   const { currentRole } = useRole();
-  const [activeUserId, setActiveUserId] = useState<string>("demo_user_id");
+  const { data: session } = useSession();
   const [userStatus, setUserStatus] = useState<string>("PCM");
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedId = localStorage.getItem("kopawee_user_id") || "demo_user_id";
-      setActiveUserId(storedId);
-    }
-  }, []);
-
-  const userId = activeUserId;
+  const userId = session?.user?.id || "";
 
   const [journeyData, setJourneyData] = useState<JourneyData>({
     campEntryDate: "",

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import { FiShoppingBag, FiPlus, FiFilter, FiMapPin, FiTag, FiMessageSquare, FiCheckCircle, FiX, FiPackage, FiAward, FiCompass, FiNavigation, FiAlertTriangle, FiFlag } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
@@ -53,6 +54,7 @@ const NIGERIAN_STATES = ["All States", "Lagos", "Kaduna", "FCT - Abuja", "Oyo", 
 
 export default function MarketplacePage() {
   const { currentRole } = useRole();
+  const { data: session } = useSession();
   const [listings, setListings] = useState<Listing[]>([]);
   const [states, setStates] = useState<{ id: string; name: string; code: string }[]>([]);
   const [selectedState, setSelectedState] = useState("All States");
@@ -116,7 +118,7 @@ export default function MarketplacePage() {
     if (!itemTitle || !itemPrice) return;
 
     setPosting(true);
-    const userId = localStorage.getItem("kopawee_user_id") || "cl_guest_corps";
+    const userId = session?.user?.id || "";
 
     try {
       const res = await fetch("/api/marketplace", {
@@ -318,6 +320,7 @@ export default function MarketplacePage() {
 }
 
 function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const { data: session } = useSession();
   const [postingMode, setPostingMode] = useState<"manual" | "ai">("manual");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
@@ -425,7 +428,7 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
     setSubmitting(true);
     setErrorMsg("");
 
-    const userId = localStorage.getItem("kopawee_user_id") || "user_demo_123";
+    const userId = session?.user?.id || "";
 
     try {
       const res = await fetch("/api/marketplace", {

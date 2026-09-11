@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import { FiAlertOctagon, FiMapPin, FiPhone, FiAlertTriangle, FiCheckCircle, FiRadio, FiUserCheck, FiPackage, FiPlus, FiTrash2, FiLock, FiClock, FiX, FiShield } from "react-icons/fi";
 
@@ -28,6 +29,7 @@ interface TrustedContact {
 
 export default function SafetyPage() {
   const { currentRole } = useRole();
+  const { data: session } = useSession();
   const [sosActive, setSosActive] = useState(false);
   const [tripActive, setTripActive] = useState(true);
   
@@ -48,7 +50,7 @@ export default function SafetyPage() {
   const [pingInterval, setPingInterval] = useState("2 Hours");
 
   const handleTriggerSos = async () => {
-    const userId = localStorage.getItem("kopawee_user_id") || "cl_guest_corps";
+    const userId = session?.user?.id || "";
     setSosActive(true);
 
     try {
