@@ -207,32 +207,36 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-white font-sans transition-colors duration-300">
       {/* Admin Top Navbar */}
-      <nav className="bg-[#121815] border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Shield className="w-6 h-6 text-emerald-400" />
+      <nav className="bg-[#121815] border-b border-slate-800 px-4 sm:px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400 shrink-0" />
           <div>
-            <h1 className="font-bold text-base font-display uppercase tracking-wider text-white dark:text-white">
-              KopaWee Platform Owner Control Center
+            <h1 className="font-bold text-xs sm:text-base font-display uppercase tracking-wider text-white dark:text-white">
+              KopaWee Control Center
             </h1>
-            <p className="text-[10px] text-emerald-400 font-mono">CLASSIFIED AD MODERATION & APPROVAL PORTAL</p>
+            <p className="text-[9px] sm:text-[10px] text-emerald-400 font-mono">MODERATION & APPROVAL PORTAL</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={fetchPendingData}
-            className="px-3 py-2 bg-white/10 dark:bg-slate-900 border border-slate-600 dark:border-slate-800 hover:border-emerald-400 text-xs font-bold flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white transition-colors"
+            title="Refresh Feed"
+            aria-label="Refresh Feed"
+            className="px-2.5 sm:px-3 py-2 bg-white/10 dark:bg-slate-900 border border-slate-600 dark:border-slate-800 hover:border-emerald-400 text-xs font-bold flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white transition-colors"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Refresh Feed</span>
+            <RefreshCw className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">Refresh Feed</span>
           </button>
 
           <button
             onClick={handleLogout}
-            className="px-3.5 py-2 bg-red-950/60 border border-red-800/80 hover:bg-red-900 text-red-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+            title="Logout Admin"
+            aria-label="Logout Admin"
+            className="px-2.5 sm:px-3.5 py-2 bg-red-950/60 border border-red-800/80 hover:bg-red-900 text-red-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Logout Admin</span>
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">Logout Admin</span>
           </button>
         </div>
       </nav>
