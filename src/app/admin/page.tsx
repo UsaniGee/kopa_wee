@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 import ThemeToggle from "@/shared/components/ThemeToggle";
 import {
   FiShield,
@@ -64,6 +65,7 @@ interface PendingLodge {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState<"marketplace" | "accommodation" | "users">("marketplace");
   const [loading, setLoading] = useState(true);
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
@@ -80,7 +82,7 @@ export default function AdminDashboardPage() {
   const [revertLoading, setRevertLoading] = useState(false);
 
   // TODO: get real admin userId from auth session
-  const adminUserId = typeof window !== "undefined" ? (localStorage.getItem("kopawee_admin_user_id") || "admin_user_id") : "admin_user_id";
+  const adminUserId = session?.user?.id;
 
   const fetchPendingData = async () => {
     setLoading(true);
@@ -103,13 +105,13 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    const adminToken = localStorage.getItem("kopawee_admin_token");
-    if (!adminToken) {
+    if (status === "loading") return;
+    if (status === "unauthenticated" || (session && (session.user as any)?.applicationRole !== "ADMIN")) {
       router.push("/admin/login");
       return;
     }
     fetchPendingData();
-  }, [router]);
+  }, [router, status, session]);
 
   const handleApproveItem = async (id: string, type: "marketplace" | "accommodation") => {
     try {
@@ -148,8 +150,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("kopawee_admin_token");
-    router.push("/admin/login");
+    signOut({ callbackUrl: "/admin/login" });
   };
 
   const searchUserById = async () => {

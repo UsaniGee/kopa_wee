@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import {
   FiShield,
   FiLock,
@@ -21,7 +22,7 @@ export default function AdminLoginPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
       setErrorMsg("Please enter admin credentials");
@@ -29,16 +30,32 @@ export default function AdminLoginPage() {
     }
     setLoading(true);
     setErrorMsg("");
-    setTimeout(() => {
-      if (password === "admin123" || password.length >= 4) {
-        localStorage.setItem("kopawee_admin_token", "admin_auth_session_" + Date.now());
-        localStorage.setItem("kopawee_admin_email", email);
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (!result?.ok) {
+        setErrorMsg("Invalid credentials.");
+        setLoading(false);
+        return;
+      }
+      // Check if user has ADMIN applicationRole
+      const res = await fetch("/api/users/me");
+      const data = await res.json();
+      if (data.success && data.data?.applicationRole === "ADMIN") {
         router.push("/admin");
       } else {
-        setErrorMsg("Invalid platform admin credentials");
+        // Sign them out — authenticated but not admin
+        await fetch("/api/auth/signout", { method: "POST" });
+        setErrorMsg("Access denied. This portal is for platform administrators only.");
         setLoading(false);
       }
-    }, 800);
+    } catch {
+      setErrorMsg("Authentication failed. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
