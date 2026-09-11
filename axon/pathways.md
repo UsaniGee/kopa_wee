@@ -40,4 +40,6 @@
 - [x] **Pathway: Dynamic Clearance Metric Card & Responsive SCM Role Badge** *Link: [index.md](./pathways/dynamic_clearance_metric_scm_badge_20260911/index.md)*
 - [x] **Pathway: Navbar Role Badge — Responsive Mobile Abbreviation (SCM)** *Link: [index.md](./pathways/navbar_role_badge_mobile_20260911/index.md)*
 - [x] **Pathway: Clear Test Packing Items & DB Pre-Production Clean slate** *Link: [index.md](./pathways/clear_test_packing_items_20260911/index.md)*
+- [x] **Pathway: Remove Duplicate Mode Switcher from Admin Dashboard** *Link: [index.md](./pathways/remove_duplicate_admin_theme_switcher_20260911/index.md)*
+
 

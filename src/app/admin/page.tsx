@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import ThemeToggle from "@/shared/components/ThemeToggle";
 import {
   FiShield,
   FiCheckCircle,
@@ -228,7 +227,6 @@ export default function AdminDashboardPage() {
             <span>Refresh Feed</span>
           </button>
 
-          <ThemeToggle size="11px" />
           <button
             onClick={handleLogout}
             className="px-3.5 py-2 bg-red-950/60 border border-red-800/80 hover:bg-red-900 text-red-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
