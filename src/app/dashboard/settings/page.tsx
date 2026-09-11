@@ -404,6 +404,118 @@ export default function AccountSettingsPage() {
           </div>
         </div>
       </form>
+
+      {/* ── Security — Change Password ─────────────────────────────────── */}
+      <ChangePasswordSection />
+    </div>
+  );
+}
+
+// ─── Change Password Section ──────────────────────────────────────────────────
+function ChangePasswordSection() {
+  const [currentPassword, setCurrentPassword] = React.useState("");
+  const [newPassword, setNewPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setError("New password must be at least 8 characters.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/users/password", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setError(data.error || "Failed to update password.");
+      } else {
+        setSuccess(true);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => setSuccess(false), 4000);
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700 space-y-6">
+      <div className="flex items-center gap-2">
+        <FiLock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+        <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display">
+          Security — Change Password
+        </h2>
+      </div>
+
+      <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+        {error && (
+          <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-400 text-xs font-semibold">
+            <FiAlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+        {success && (
+          <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
+            <FiCheck className="w-4 h-4" />
+            <span>Password updated successfully.</span>
+          </div>
+        )}
+
+        {[
+          { label: "Current Password", value: currentPassword, setter: setCurrentPassword, placeholder: "Enter current password" },
+          { label: "New Password", value: newPassword, setter: setNewPassword, placeholder: "Min. 8 characters" },
+          { label: "Confirm New Password", value: confirmPassword, setter: setConfirmPassword, placeholder: "Repeat new password" },
+        ].map(({ label, value, setter, placeholder }) => (
+          <div key={label} className="space-y-1.5">
+            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider font-display">
+              {label}
+            </label>
+            <div className="relative">
+              <FiLock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="password"
+                required
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                placeholder={placeholder}
+                className="w-full pl-10 pr-4 py-3 text-xs bg-white dark:bg-[#0a0f0d] border border-slate-300 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 transition-colors placeholder-slate-400"
+              />
+            </div>
+          </div>
+        ))}
+
+        <button
+          type="submit"
+          disabled={saving || !currentPassword || !newPassword || !confirmPassword}
+          className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider transition-all font-display"
+        >
+          {saving ? (
+            <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>UPDATING...</span></>
+          ) : (
+            <><FiSave className="w-4 h-4" /><span>UPDATE PASSWORD</span></>
+          )}
+        </button>
+      </form>
     </div>
   );
 }
