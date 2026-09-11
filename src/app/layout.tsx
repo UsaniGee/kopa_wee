@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import ThemeToggle from "@/shared/components/ThemeToggle";
+import DraggableThemeToggle from "@/shared/components/DraggableThemeToggle";
 import { SessionProvider } from "next-auth/react";
 
 const outfit = Outfit({
@@ -56,14 +56,8 @@ export default function RootLayout({
         <SessionProvider>
           {children}
         </SessionProvider>
-        {/* Global floating theme toggle — fixed bottom-right on every page */}
-        <div
-          className="fixed bottom-6 right-6 z-[9999]"
-          style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.25))" }}
-          aria-label="Theme toggle"
-        >
-          <ThemeToggle size="13px" />
-        </div>
+        {/* Global floating theme toggle — draggable on mobile & desktop */}
+        <DraggableThemeToggle />
       </body>
     </html>
   );

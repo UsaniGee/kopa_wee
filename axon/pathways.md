@@ -42,6 +42,8 @@
 - [x] **Pathway: Clear Test Packing Items & DB Pre-Production Clean slate** *Link: [index.md](./pathways/clear_test_packing_items_20260911/index.md)*
 - [x] **Pathway: Remove Duplicate Mode Switcher from Admin Dashboard** *Link: [index.md](./pathways/remove_duplicate_admin_theme_switcher_20260911/index.md)*
 - [x] **Pathway: Admin Dashboard Responsive Header — Icon-Only Buttons on Mobile** *Link: [index.md](./pathways/admin_navbar_mobile_icons_20260911/index.md)*
+- [x] **Pathway: User-Adjustable Draggable Theme Toggle for Mobile Navigation** *Link: [index.md](./pathways/draggable_user_adjustable_theme_toggle_20260911/index.md)*
+
 
 
 
