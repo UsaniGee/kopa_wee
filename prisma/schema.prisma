@@ -112,6 +112,7 @@ model User {
   approvedLogbooks    PPALogbookEntry[]      @relation("EmployerApprovals")
   sosAlerts           SOSAlert[]
   roommateRequests    RoommateRequest[]
+  roommateInterests   RoommateInterest[]   @relation("UserRoommateInterests")
   monthlyClearances   MonthlyClearance[]
   statusHistory       UserStatusHistory[]    @relation("StatusHistoryUser")
   adminStatusChanges  UserStatusHistory[]    @relation("StatusHistoryAdmin")
@@ -315,9 +316,33 @@ model RoommateRequest {
   status             RoommateRequestStatus @default(ACTIVE)
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
+  interests          RoommateInterest[]
 
   @@index([userId, status])
   @@index([state, lga])
+}
+
+enum RoommateInterestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model RoommateInterest {
+  id               String                 @id @default(cuid())
+  requestId        String
+  interestedUserId String
+  status           RoommateInterestStatus @default(PENDING)
+  message          String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  request        RoommateRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  interestedUser User            @relation("UserRoommateInterests", fields: [interestedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, interestedUserId])
+  @@index([requestId])
+  @@index([interestedUserId])
 }
 
 model AccommodationListing {
