@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { FiArrowRight, FiLock, FiMail, FiUser, FiArrowLeft, FiShield } from "react-icons/fi";
+import { FiArrowRight, FiLock, FiMail, FiUser, FiArrowLeft, FiShield, FiCheckCircle } from "react-icons/fi";
 import { getRouteForRole } from "@/shared/utils/authNav";
 
 function AuthPageContent() {
@@ -13,6 +13,7 @@ function AuthPageContent() {
   const searchParams = useSearchParams();
   const initialMode = searchParams.get("mode") === "signin" ? "signin" : "signup";
   const redirectUrl = searchParams.get("redirect");
+  const justVerified = searchParams.get("verified") === "true";
 
   const [mode, setMode] = useState<"signup" | "signin" | "forgot">(initialMode);
 
@@ -26,6 +27,11 @@ function AuthPageContent() {
   const [loading, setLoading] = useState(false);
   const [showVerificationNotice, setShowVerificationNotice] = useState(false);
   const [showForgotSuccess, setShowForgotSuccess] = useState(false);
+  const [showUnverifiedNotice, setShowUnverifiedNotice] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,12 +77,21 @@ function AuthPageContent() {
         });
 
         if (!result?.ok) {
+          // NextAuth v5: specific error is in result.code, result.error is always "CredentialsSignin"
+          const errorCode = result?.code ?? result?.error ?? "";
+          if (errorCode === "EMAIL_NOT_VERIFIED") {
+            // Show resend verification screen instead of inline error
+            setUnverifiedEmail(email);
+            setShowUnverifiedNotice(true);
+            setLoading(false);
+            return;
+          }
           const errorMap: Record<string, string> = {
-            EMAIL_NOT_VERIFIED: "Please verify your email before signing in. Check your inbox for the verification link.",
-            INVALID_CREDENTIALS: "Invalid email or password.",
+            INVALID_CREDENTIALS: "Incorrect email or password. Please try again.",
             EMAIL_AND_PASSWORD_REQUIRED: "Email and password are required.",
+            CredentialsSignin: "Incorrect email or password. Please try again.",
           };
-          setErrorMsg(errorMap[result?.error ?? ""] || "Invalid email or password.");
+          setErrorMsg(errorMap[errorCode] || "Incorrect email or password. Please try again.");
           setLoading(false);
           return;
         }
@@ -109,6 +124,33 @@ function AuthPageContent() {
     }
   };
 
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: unverifiedEmail }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setResendSuccess(true);
+        // Start 60-second cooldown
+        setResendCooldown(60);
+        const timer = setInterval(() => {
+          setResendCooldown((prev) => {
+            if (prev <= 1) { clearInterval(timer); return 0; }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } catch {
+      // Non-fatal
+    } finally {
+      setResendLoading(false);
+    }
+  };
   const handleGoogleAuth = () => {
     setLoading(true);
     const callbackUrl = mode === "signup"
@@ -232,6 +274,45 @@ function AuthPageContent() {
             </div>
 
           /* ── FORGOT PASSWORD SUCCESS ── */
+          ) : showUnverifiedNotice ? (
+            <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-amber-400/60 dark:border-amber-500/40 space-y-5 text-center animate-fadeIn">
+              <div className="w-12 h-12 bg-amber-500/10 border border-amber-400/30 rounded-full flex items-center justify-center mx-auto text-amber-600 dark:text-amber-400">
+                <FiMail className="w-6 h-6" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold font-display text-[#121815] dark:text-white">
+                  Email Not Verified
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Your account for <strong className="text-[#121815] dark:text-white font-mono">{unverifiedEmail}</strong> exists but hasn&apos;t been verified yet. Check your inbox for the original link or resend it below.
+                </p>
+              </div>
+
+              {resendSuccess ? (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
+                  ✓ Verification email sent! Check your inbox.
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading || resendCooldown > 0}
+                  className="w-full py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-wider transition-all"
+                >
+                  {resendLoading ? "Sending..." : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => { setShowUnverifiedNotice(false); setResendSuccess(false); setResendCooldown(0); }}
+                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white uppercase tracking-wider"
+              >
+                ← Back to Sign In
+              </button>
+            </div>
+
+          /* ── FORGOT SUCCESS ── */
           ) : showForgotSuccess ? (
             <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-emerald-600/60 space-y-5 text-center">
               <div className="w-12 h-12 bg-emerald-600/10 border border-emerald-600/30 rounded-full flex items-center justify-center mx-auto text-emerald-600">
@@ -315,6 +396,12 @@ function AuthPageContent() {
                 <h2 className="text-3xl sm:text-4xl font-medium text-[#121815] dark:text-white font-display tracking-tight">
                   {mode === "signup" ? "Create Account" : "Sign In"}
                 </h2>
+                {justVerified && mode === "signin" && (
+                  <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold mt-2">
+                    <FiCheckCircle className="w-4 h-4 shrink-0" />
+                    <span>Email verified successfully! You can now sign in.</span>
+                  </div>
+                )}
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                   {mode === "signup" ? "Already registered?" : "Need an account?"}{" "}
                   <button

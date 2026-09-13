@@ -145,3 +145,53 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: false, message: "Failed to cancel roommate request", code: "INTERNAL_ERROR" }, { status: 500 });
   }
 }
+
+const updateRoommateSchema = z.object({
+  id: z.string().min(1),
+  state: z.string().optional(),
+  lga: z.string().optional(),
+  area: z.string().optional(),
+  budget: z.string().optional(),
+  accommodationType: z.string().optional(),
+  moveInDate: z.string().optional(),
+  preferences: z.string().optional(),
+});
+
+export async function PATCH(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
+  try {
+    const body = await req.json();
+    const { id, ...updates } = updateRoommateSchema.parse(body);
+
+    // Verify ownership
+    const existing = await prisma.roommateRequest.findFirst({
+      where: { id, userId: auth.user!.id, status: "ACTIVE" },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, message: "Request not found or not editable.", code: "NOT_FOUND" },
+        { status: 404 }
+      );
+    }
+
+    const updated = await prisma.roommateRequest.update({
+      where: { id },
+      data: updates,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: "Roommate request updated successfully.",
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ success: false, message: error.errors[0].message, code: "VALIDATION_ERROR" }, { status: 400 });
+    }
+    console.error("[PATCH /api/roommates]", error);
+    return NextResponse.json({ success: false, message: "Failed to update roommate request", code: "INTERNAL_ERROR" }, { status: 500 });
+  }
+}

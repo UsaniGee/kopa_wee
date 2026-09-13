@@ -59,6 +59,7 @@ export default function AccommodationPage() {
   const [roommateRequests, setRoommateRequests] = useState<any[]>([]);
   const [activeUserRequest, setActiveUserRequest] = useState<any | null>(null);
   const [roommateModalOpen, setRoommateModalOpen] = useState(false);
+  const [editingRequest, setEditingRequest] = useState<any | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
   // Filters
@@ -391,9 +392,11 @@ export default function AccommodationPage() {
         <RequestRoommateModal
           states={states}
           userId={userId}
-          onClose={() => setRoommateModalOpen(false)}
+          initialData={editingRequest}
+          onClose={() => { setRoommateModalOpen(false); setEditingRequest(null); }}
           onSuccess={() => {
             setRoommateModalOpen(false);
+            setEditingRequest(null);
             fetchRoommatesData();
           }}
         />
@@ -725,22 +728,25 @@ function PostLodgeModal({
 function RequestRoommateModal({
   states,
   userId,
+  initialData,
   onClose,
   onSuccess,
 }: {
   states: { id: string; name: string; code: string; lgas?: string[] }[];
   userId: string;
+  initialData?: any;
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [selectedState, setSelectedState] = useState("");
+  const isEditing = !!initialData;
+  const [selectedState, setSelectedState] = useState(initialData?.state || "");
   const [availableLgas, setAvailableLgas] = useState<string[]>([]);
-  const [lga, setLga] = useState("");
-  const [area, setArea] = useState("");
+  const [lga, setLga] = useState(initialData?.lga || "");
+  const [area, setArea] = useState(initialData?.area || "");
   const [street, setStreet] = useState("");
-  const [budget, setBudget] = useState("");
-  const [accommodationType, setAccommodationType] = useState("");
-  const [preferences, setPreferences] = useState("");
+  const [budget, setBudget] = useState(initialData?.budget?.replace(/[^0-9]/g, "") || "");
+  const [accommodationType, setAccommodationType] = useState(initialData?.accommodationType || "");
+  const [preferences, setPreferences] = useState(initialData?.preferences || "");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -766,15 +772,26 @@ function RequestRoommateModal({
     setErrorMsg("");
 
     try {
+      const budgetFormatted = budget.trim().startsWith("₦")
+        ? budget
+        : `₦${Number(budget.replace(/[^0-9]/g, "")).toLocaleString()}/yr`;
       const res = await fetch("/api/roommates", {
-        method: "POST",
+        method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: JSON.stringify(isEditing ? {
+          id: initialData.id,
+          state: selectedState,
+          lga,
+          area: [area, street].filter(Boolean).join(", ") || undefined,
+          budget: budgetFormatted,
+          accommodationType: accommodationType || "Shared Apartment",
+          preferences,
+        } : {
           userId,
           state: selectedState,
           lga,
           area: [area, street].filter(Boolean).join(", "),
-          budget: `₦${Number(budget.replace(/[^0-9]/g, "")).toLocaleString()}/yr`,
+          budget: budgetFormatted,
           accommodationType: accommodationType || "Shared Apartment",
           preferences,
         }),
@@ -799,7 +816,7 @@ function RequestRoommateModal({
         <div className="flex items-center justify-between border-b border-slate-300/60 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-emerald-600" />
-            <h2 className="text-lg font-bold font-display uppercase tracking-wider">Request a Roommate</h2>
+            <h2 className="text-lg font-bold font-display uppercase tracking-wider">{isEditing ? "Edit Roommate Request" : "Request a Roommate"}</h2>
           </div>
           <button onClick={onClose} className="p-1 hover:text-red-500 cursor-pointer">
             <X className="w-5 h-5" />
@@ -937,7 +954,7 @@ function RequestRoommateModal({
               disabled={submitting}
               className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-[11px] flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {submitting ? "POSTING REQUEST..." : "POST ROOMMATE REQUEST ➔"}
+              {submitting ? (isEditing ? "SAVING..." : "POSTING REQUEST...") : (isEditing ? "SAVE CHANGES ➔" : "POST ROOMMATE REQUEST ➔")}
             </button>
           </div>
         </form>
