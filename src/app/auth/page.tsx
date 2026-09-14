@@ -54,6 +54,21 @@ function AuthPageContent() {
 
         const data = await res.json();
         if (!data.success) {
+          // If email already exists, check verification status and redirect appropriately
+          if (data.code === "EMAIL_EXISTS_VERIFIED") {
+            // Already verified — send to sign in
+            setMode("signin");
+            setErrorMsg("An account with this email already exists. Please sign in.");
+            setLoading(false);
+            return;
+          }
+          if (data.code === "EMAIL_EXISTS_UNVERIFIED") {
+            // Exists but not verified — show resend screen
+            setUnverifiedEmail(email);
+            setShowUnverifiedNotice(true);
+            setLoading(false);
+            return;
+          }
           setErrorMsg(data.error || "Failed to create account");
           setLoading(false);
           return;

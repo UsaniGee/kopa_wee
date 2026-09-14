@@ -28,13 +28,26 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "An account with this email already exists. Try signing in instead.",
-        },
-        { status: 400 }
-      );
+      // Return different codes depending on verification status
+      if (existingUser.isVerified) {
+        return NextResponse.json(
+          {
+            success: false,
+            code: "EMAIL_EXISTS_VERIFIED",
+            error: "An account with this email already exists. Please sign in.",
+          },
+          { status: 400 }
+        );
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            code: "EMAIL_EXISTS_UNVERIFIED",
+            error: "An account with this email exists but hasn't been verified. Please check your inbox or request a new verification email.",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const passwordHash = await hashPassword(validatedData.password);
