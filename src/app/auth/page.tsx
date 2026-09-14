@@ -92,21 +92,20 @@ function AuthPageContent() {
         });
 
         if (!result?.ok) {
-          // NextAuth v5: specific error is in result.code, result.error is always "CredentialsSignin"
-          const errorCode = result?.code ?? result?.error ?? "";
+          // NextAuth v5: result.code contains the CredentialsSignin subclass code
+          const errorCode = (result as any)?.code ?? result?.error ?? "";
           if (errorCode === "EMAIL_NOT_VERIFIED") {
-            // Show resend verification screen instead of inline error
             setUnverifiedEmail(email);
             setShowUnverifiedNotice(true);
             setLoading(false);
             return;
           }
           const errorMap: Record<string, string> = {
-            INVALID_CREDENTIALS: "Incorrect email or password. Please try again.",
+            INVALID_CREDENTIALS: "No account found with this email, or your password is incorrect.",
             EMAIL_AND_PASSWORD_REQUIRED: "Email and password are required.",
-            CredentialsSignin: "Incorrect email or password. Please try again.",
+            CredentialsSignin: "No account found with this email, or your password is incorrect.",
           };
-          setErrorMsg(errorMap[errorCode] || "Incorrect email or password. Please try again.");
+          setErrorMsg(errorMap[errorCode] || "No account found with this email, or your password is incorrect.");
           setLoading(false);
           return;
         }

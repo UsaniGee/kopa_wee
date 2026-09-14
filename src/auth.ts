@@ -1,8 +1,20 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { CredentialsSignin } from "next-auth";
 import { prisma } from "@/shared/lib/prisma";
 import { verifyPassword } from "@/shared/lib/auth";
+
+// Custom error classes — the `code` property IS forwarded to the client via result.code
+class InvalidCredentialsError extends CredentialsSignin {
+  code = "INVALID_CREDENTIALS";
+}
+class EmailNotVerifiedError extends CredentialsSignin {
+  code = "EMAIL_NOT_VERIFIED";
+}
+class MissingCredentialsError extends CredentialsSignin {
+  code = "EMAIL_AND_PASSWORD_REQUIRED";
+}
 
 if (!process.env.NEXTAUTH_SECRET?.trim()) {
   throw new Error(
@@ -33,7 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials?.password as string | undefined;
 
         if (!email || !password) {
-          throw new Error("EMAIL_AND_PASSWORD_REQUIRED");
+          throw new MissingCredentialsError();
         }
 
         const user = await prisma.user.findUnique({
@@ -51,16 +63,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user || !user.passwordHash) {
-          throw new Error("INVALID_CREDENTIALS");
+          throw new InvalidCredentialsError();
         }
 
         const isValid = await verifyPassword(password, user.passwordHash);
         if (!isValid) {
-          throw new Error("INVALID_CREDENTIALS");
+          throw new InvalidCredentialsError();
         }
 
         if (!user.isVerified) {
-          throw new Error("EMAIL_NOT_VERIFIED");
+          throw new EmailNotVerifiedError();
         }
 
         return {
