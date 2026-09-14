@@ -205,19 +205,19 @@ function AuthPageContent() {
         <div className="relative z-10 flex items-center justify-between">
           <button
             onClick={() => router.push("/")}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-xs font-bold text-white border border-white/20 transition-all flex items-center gap-2 cursor-pointer uppercase tracking-widest font-display"
+            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-xs font-semibold text-white border border-white/20 transition-all flex items-center gap-2 cursor-pointer font-display"
           >
             <FiArrowLeft className="w-4 h-4" />
-            <span>Back to Home</span>
+            <span>Back to home</span>
           </button>
-          <span className="text-xs font-mono font-bold uppercase tracking-[0.25em] text-emerald-400">
-            KOPA&apos;WEE AUTH
+          <span className="text-xs font-mono font-semibold text-emerald-400">
+            Kopa&apos;Wee Auth
           </span>
         </div>
 
         <div className="relative z-10 space-y-6 my-auto max-w-lg">
-          <p className="text-xs font-bold text-emerald-400 uppercase tracking-[0.25em] font-display">
-            NYSC COMPANION PLATFORM
+          <p className="text-xs font-semibold text-emerald-400 font-display">
+            NYSC companion platform
           </p>
           <h1 className="text-4xl lg:text-6xl font-medium tracking-tight leading-[1.04] text-white font-display">
             {mode === "signup"
@@ -232,10 +232,10 @@ function AuthPageContent() {
         </div>
 
         <div className="relative z-10 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-400 font-mono">
-          <span>SUPPORTING 36 STATES + FCT</span>
+          <span>Supporting 36 states + FCT</span>
           <div className="flex items-center gap-2">
             <FiShield className="w-4 h-4 text-emerald-400" />
-            <span>ENCRYPTED VAULT</span>
+            <span>Encrypted vault</span>
           </div>
         </div>
       </div>
@@ -272,9 +272,9 @@ function AuthPageContent() {
               <button
                 type="button"
                 onClick={() => { setShowVerificationNotice(false); setMode("signin"); }}
-                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white uppercase tracking-wider"
+                className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white"
               >
-                Back to Sign In
+                Back to sign in
               </button>
             </div>
 
@@ -308,18 +308,18 @@ function AuthPageContent() {
                   type="button"
                   onClick={handleResendVerification}
                   disabled={resendLoading || resendCooldown > 0}
-                  className="w-full py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-wider transition-all"
+                  className="w-full py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs transition-all"
                 >
-                  {resendLoading ? "Sending..." : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
+                  {resendLoading ? "Sending..." : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend verification email"}
                 </button>
               )}
 
               <button
                 type="button"
                 onClick={() => { setShowUnverifiedNotice(false); setResendSuccess(false); setResendCooldown(0); setResendErrorMsg(""); }}
-                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white uppercase tracking-wider"
+                className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white"
               >
-                ← Back to Sign In
+                ← Back to sign in
               </button>
             </div>
 
@@ -340,9 +340,9 @@ function AuthPageContent() {
               <button
                 type="button"
                 onClick={() => { setShowForgotSuccess(false); setMode("signin"); }}
-                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white uppercase tracking-wider"
+                className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white"
               >
-                Back to Sign In
+                Back to sign in
               </button>
             </div>
 
@@ -364,8 +364,8 @@ function AuthPageContent() {
                   </div>
                 )}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-display">
-                    Email Address
+                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 font-display">
+                    Email address
                   </label>
                   <div className="relative">
                     <FiMail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -382,21 +382,21 @@ function AuthPageContent() {
                 <button
                   type="submit"
                   disabled={!forgotEmail.trim() || loading}
-                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs transition-all flex items-center justify-center gap-2"
                 >
                   {loading ? (
-                    <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>SENDING...</span></>
+                    <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>Sending...</span></>
                   ) : (
-                    <><span>SEND RESET LINK</span><FiArrowRight className="w-4 h-4" /></>
+                    <><span>Send reset link</span><FiArrowRight className="w-4 h-4" /></>
                   )}
                 </button>
               </form>
               <button
                 type="button"
                 onClick={() => setMode("signin")}
-                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white uppercase tracking-wider"
+                className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white"
               >
-                ← Back to Sign In
+                ← Back to sign in
               </button>
             </div>
 
@@ -418,9 +418,9 @@ function AuthPageContent() {
                   <button
                     type="button"
                     onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setErrorMsg(""); }}
-                    className="font-bold text-emerald-700 dark:text-emerald-400 underline hover:text-emerald-800 transition-colors uppercase tracking-wider text-xs ml-1 cursor-pointer"
+                    className="font-semibold text-emerald-700 dark:text-emerald-400 underline hover:text-emerald-800 transition-colors text-xs ml-1 cursor-pointer"
                   >
-                    {mode === "signup" ? "Sign In Here" : "Sign Up Free"}
+                    {mode === "signup" ? "Sign in here" : "Sign up free"}
                   </button>
                 </p>
               </div>
@@ -429,7 +429,7 @@ function AuthPageContent() {
                 type="button"
                 onClick={handleGoogleAuth}
                 disabled={loading}
-                className="w-full py-3.5 px-4 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white font-semibold text-xs uppercase tracking-wider hover:border-emerald-600 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-4 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white font-semibold text-xs hover:border-emerald-600 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
@@ -442,8 +442,8 @@ function AuthPageContent() {
 
               <div className="relative flex items-center justify-center">
                 <div className="border-t border-slate-300/60 dark:border-slate-800 w-full" />
-                <span className="bg-[#eaf5ed] dark:bg-[#0a0f0d] px-3 text-[10px] uppercase font-bold text-slate-500 tracking-widest absolute">
-                  OR EMAIL
+                <span className="bg-[#eaf5ed] dark:bg-[#0a0f0d] px-3 text-[10px] font-semibold text-slate-500 absolute">
+                  or email
                 </span>
               </div>
 
@@ -455,8 +455,8 @@ function AuthPageContent() {
                 )}
                 {mode === "signup" && (
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-display">
-                      Full Name
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 font-display">
+                      Full name
                     </label>
                     <div className="relative">
                       <FiUser className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -473,8 +473,8 @@ function AuthPageContent() {
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-display">
-                    Email Address
+                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 font-display">
+                    Email address
                   </label>
                   <div className="relative">
                     <FiMail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -491,16 +491,16 @@ function AuthPageContent() {
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-display">
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 font-display">
                       Password
                     </label>
                     {mode === "signin" && (
                       <button
                         type="button"
                         onClick={() => { setMode("forgot"); setErrorMsg(""); }}
-                        className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline uppercase tracking-wider"
+                        className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline"
                       >
-                        Forgot Password?
+                        Forgot password?
                       </button>
                     )}
                   </div>
@@ -525,16 +525,16 @@ function AuthPageContent() {
                     <button
                       type="submit"
                       disabled={!isValid || loading}
-                      className={`w-full py-4 text-white font-bold text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 font-display ${
+                      className={`w-full py-4 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 font-display ${
                         isValid && !loading
                           ? "bg-emerald-600 hover:bg-emerald-700 cursor-pointer shadow-md shadow-emerald-900/20"
                           : "bg-emerald-600/50 opacity-50 cursor-not-allowed"
                       }`}
                     >
                       {loading ? (
-                        <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>{mode === "signup" ? "CREATING ACCOUNT..." : "AUTHENTICATING..."}</span></>
+                        <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>{mode === "signup" ? "Creating account..." : "Authenticating..."}</span></>
                       ) : (
-                        <><span>{mode === "signup" ? "CREATE FREE ACCOUNT" : "SIGN IN TO DASHBOARD"}</span><FiArrowRight className="w-4 h-4" /></>
+                        <><span>{mode === "signup" ? "Create free account" : "Sign in to dashboard"}</span><FiArrowRight className="w-4 h-4" /></>
                       )}
                     </button>
                   );
@@ -545,7 +545,7 @@ function AuthPageContent() {
         </div>
 
         <div className="text-center text-xs text-slate-500 pt-8 border-t border-slate-300/50 dark:border-slate-800 font-mono">
-          BY CONTINUING, YOU AGREE TO KOPA&apos;WEE TERMS &amp; PRIVACY POLICY.
+          By continuing, you agree to Kopa&apos;Wee terms &amp; privacy policy.
         </div>
       </div>
     </div>

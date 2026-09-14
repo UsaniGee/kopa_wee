@@ -208,10 +208,12 @@ export default function MarketplacePage() {
 
         <button
           onClick={() => setShowModal(true)}
-          className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer shrink-0"
+          className="px-4 sm:px-6 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shrink-0"
+          title="Post Item for Sale"
         >
           <Plus className="w-4 h-4" />
-          <span>Post Item for Sale</span>
+          <span className="hidden sm:inline">Post Item for Sale</span>
+          <span className="sm:hidden">Post Item</span>
         </button>
       </div>
 
@@ -222,7 +224,7 @@ export default function MarketplacePage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider whitespace-nowrap cursor-pointer transition-colors border ${
+              className={`px-4 py-2 text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors border ${
                 selectedCategory === cat
                   ? "bg-emerald-700 text-white border-emerald-700"
                   : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800 hover:border-slate-400"
@@ -236,11 +238,11 @@ export default function MarketplacePage() {
         <select
           value={selectedState}
           onChange={(e) => setSelectedState(e.target.value)}
-          className="px-4 py-2 text-xs font-bold bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white uppercase tracking-wider focus:outline-none"
+          className="px-4 py-2 text-xs font-semibold bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
         >
-          <option value="All States">ALL STATES</option>
+          <option value="All States">All States</option>
           {states.map((s) => (
-            <option key={s.id} value={s.name}>{s.name.toUpperCase()}</option>
+            <option key={s.id} value={s.name}>{s.name}</option>
           ))}
         </select>
       </div>
@@ -259,10 +261,11 @@ export default function MarketplacePage() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-2 cursor-pointer"
+            className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors inline-flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Post First Item for Sale</span>
+            <span className="hidden sm:inline">Post First Item for Sale</span>
+            <span className="sm:hidden">Post Item</span>
           </button>
         </div>
       ) : (
@@ -271,7 +274,7 @@ export default function MarketplacePage() {
             <div key={item.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
               <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
                 <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold uppercase px-2.5 py-1">
+                <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold px-2.5 py-1">
                   {item.roleBadge}
                 </span>
               </div>
@@ -287,7 +290,7 @@ export default function MarketplacePage() {
               <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
                 <button
                   onClick={() => setContactedListing(item.id)}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer"
                 >
                   {contactedListing === item.id ? "WhatsApp Opened" : "Contact Seller ➔"}
                 </button>

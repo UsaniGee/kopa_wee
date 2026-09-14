@@ -78,7 +78,7 @@ export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps
             {authenticated ? (
               <Link
                 href="/dashboard"
-                className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white tracking-widest uppercase transition-all flex items-center gap-2 group rounded-none"
+                className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all flex items-center gap-2 group rounded-none"
               >
                 <span>Dashboard</span>
                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
@@ -87,15 +87,15 @@ export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps
               <>
                 <Link
                   href="/auth?mode=signin"
-                  className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-white hover:text-emerald-600 transition-colors uppercase tracking-wider"
+                  className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-white hover:text-emerald-600 transition-colors"
                 >
-                  Sign In
+                  Sign in
                 </Link>
                 <Link
                   href="/auth?mode=signup"
-                  className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white tracking-widest uppercase transition-all flex items-center gap-2 group rounded-none"
+                  className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all flex items-center gap-2 group rounded-none"
                 >
-                  <span>Get Started</span>
+                  <span>Get started</span>
                   <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </>
@@ -141,25 +141,25 @@ export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-3 text-sm font-bold text-center text-white bg-emerald-600 active:bg-emerald-700 cursor-pointer uppercase tracking-wider block"
+                  className="w-full py-3 text-sm font-bold text-center text-white bg-emerald-600 active:bg-emerald-700 cursor-pointer block"
                 >
-                  Go to Dashboard →
+                  Go to dashboard →
                 </Link>
               ) : (
                 <>
                   <Link
                     href="/auth?mode=signup"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full py-3 text-sm font-bold text-center text-white bg-emerald-600 active:bg-emerald-700 cursor-pointer uppercase tracking-wider block"
+                    className="w-full py-3 text-sm font-bold text-center text-white bg-emerald-600 active:bg-emerald-700 cursor-pointer block"
                   >
-                    Get Started Free →
+                    Get started free →
                   </Link>
                   <Link
                     href="/auth?mode=signin"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full py-3 text-sm font-bold text-center text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 cursor-pointer uppercase tracking-wider block"
+                    className="w-full py-3 text-sm font-bold text-center text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 cursor-pointer block"
                   >
-                    Sign In to Account
+                    Sign in to account
                   </Link>
                 </>
               )}

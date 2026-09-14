@@ -185,7 +185,7 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
           <div className="flex items-center gap-4">
 
             {/* Role badge — full label on sm+, short code on mobile */}
-            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs font-bold font-mono uppercase tracking-wider">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs font-medium font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="hidden sm:inline">{activeRoleObj.label}</span>
               <span className="sm:hidden">{activeRoleObj.badge}</span>
@@ -212,13 +212,13 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
                 <div className="absolute right-0 top-full mt-2 w-80 bg-[#121815] border border-slate-700 shadow-2xl z-50">
                   {/* Header */}
                   <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-                    <span className="text-xs font-bold text-white uppercase tracking-wider">Notifications</span>
+                    <span className="text-xs font-bold text-white">Notifications</span>
                     <div className="flex items-center gap-3">
                       {unreadCount > 0 && (
                         <button
                           type="button"
                           onClick={handleMarkAllRead}
-                          className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 uppercase tracking-wider"
+                          className="text-[10px] font-semibold text-emerald-400 hover:text-emerald-300"
                         >
                           Mark all read
                         </button>
@@ -259,7 +259,8 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
             <button
               type="button"
               onClick={handleLogout}
-              className="hidden md:flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-2 text-xs font-bold text-slate-300 uppercase tracking-wider transition-colors hover:bg-slate-800 hover:text-white cursor-pointer"
+              className="hidden md:flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-2 text-xs font-semibold text-slate-300 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer"
+              title="Logout"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>

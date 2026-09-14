@@ -106,7 +106,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2.5 px-4 py-2 text-xs font-bold font-display uppercase tracking-wider whitespace-nowrap transition-all border ${
+                  className={`flex items-center gap-2.5 px-4 py-2 text-xs font-semibold font-display whitespace-nowrap transition-all border ${
                     isActive
                       ? "bg-emerald-700 text-white border-emerald-700 shadow-xs"
                       : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800 hover:border-emerald-600"
@@ -135,12 +135,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center py-1 px-2 text-[10px] font-bold font-display tracking-wider ${
+              className={`flex flex-col items-center py-1 px-2 text-[10px] font-semibold font-display ${
                 isActive ? "text-emerald-400 font-extrabold" : "text-slate-400"
               }`}
             >
               <IconComp className="w-4 h-4 mb-0.5" />
-              <span className="truncate max-w-[72px] text-[9px] uppercase">{item.label.split(" ")[0]}</span>
+              <span className="truncate max-w-[72px] text-[9px]">{item.label.split(" ")[0]}</span>
             </Link>
           );
         })}

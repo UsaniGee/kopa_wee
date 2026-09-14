@@ -175,10 +175,12 @@ export default function AccommodationPage() {
 
         <button
           onClick={() => setAddModalOpen(true)}
-          className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer shrink-0"
+          className="px-4 sm:px-6 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shrink-0"
+          title="List Lodge / Post Profile"
         >
           <Plus className="w-4 h-4" />
-          <span>List Lodge / Post Profile</span>
+          <span className="hidden sm:inline">List Lodge / Post Profile</span>
+          <span className="sm:hidden">Post Listing</span>
         </button>
       </div>
 
@@ -188,7 +190,7 @@ export default function AccommodationPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab("lodges")}
-              className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${
+              className={`px-4 sm:px-5 py-2.5 text-xs font-semibold transition-all cursor-pointer border ${
                 activeTab === "lodges"
                   ? "bg-emerald-700 text-white border-emerald-700"
                   : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800"
@@ -199,18 +201,18 @@ export default function AccommodationPage() {
 
             <button
               onClick={() => setActiveTab("roommates")}
-              className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border ${
+              className={`px-4 sm:px-5 py-2.5 text-xs font-semibold transition-all cursor-pointer border ${
                 activeTab === "roommates"
                   ? "bg-emerald-700 text-white border-emerald-700"
                   : "bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-800"
               }`}
             >
-              Roommate Compatibility Matcher
+              Roommate Matcher
             </button>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider font-display hidden sm:inline">
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 font-display hidden sm:inline">
               Max Distance:
             </span>
             <input
@@ -241,10 +243,11 @@ export default function AccommodationPage() {
             </div>
             <button
               onClick={() => setAddModalOpen(true)}
-              className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-2 cursor-pointer"
+              className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors inline-flex items-center gap-2 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>List First Lodge</span>
+              <span className="hidden sm:inline">List First Lodge</span>
+              <span className="sm:hidden">List Lodge</span>
             </button>
           </div>
         ) : (
@@ -253,15 +256,15 @@ export default function AccommodationPage() {
               <div key={lodge.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
                 <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
                   <img src={lodge.image} alt={lodge.name} className="w-full h-full object-cover" />
-                  <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold uppercase px-2.5 py-1">
+                  <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold px-2.5 py-1">
                     {lodge.lga} LGA · {lodge.distanceKm}km from PPA
                   </span>
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/40 text-amber-700 dark:text-amber-400 text-[10px] font-mono font-bold uppercase flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> UNVERIFIED
+                    <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/40 text-amber-700 dark:text-amber-400 text-[10px] font-mono font-semibold flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> Unverified
                     </span>
                   </div>
                   <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">{lodge.name}</h3>

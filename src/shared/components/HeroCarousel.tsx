@@ -131,7 +131,7 @@ export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
               {/* Minimalist Metadata Overline */}
               <div className="flex items-center gap-3 mb-3">
                 <span className="h-px w-8 bg-emerald-600 dark:bg-emerald-400" />
-                <p className="text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase text-emerald-800 dark:text-emerald-300 font-display">
+                <p className="text-xs sm:text-sm font-semibold text-emerald-800 dark:text-emerald-300 font-display">
                   {slide.storyChapter} · {slide.category}
                 </p>
               </div>
@@ -147,22 +147,26 @@ export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
               </p>
 
               {/* Direct Action Buttons (No Popups/Modals) */}
-              <div className="flex flex-wrap items-center gap-4 pt-1">
-                {/* Primary CTA: GET STARTED -> Sign Up directly */}
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1">
+                {/* Primary CTA: Get started -> Sign Up directly */}
                 <Link
                   href="/auth?mode=signup"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm tracking-[0.18em] uppercase px-8 sm:px-10 py-4 sm:py-4.5 flex items-center justify-center gap-3 transition-all duration-300 shadow-md hover:shadow-lg group rounded-none"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-5 sm:px-10 py-3.5 sm:py-4.5 flex items-center justify-center gap-2.5 transition-all duration-300 shadow-md hover:shadow-lg group rounded-none"
+                  title="Get started"
                 >
-                  <span>GET STARTED</span>
+                  <span className="hidden sm:inline">Get started</span>
+                  <span className="sm:hidden">Start</span>
                   <FiArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Link>
 
-                {/* Secondary CTA: EXPLORE FEATURES -> Smooth scroll */}
+                {/* Secondary CTA: Explore features -> Smooth scroll */}
                 <button
                   onClick={scrollToNextSection}
-                  className="border border-[#121815]/30 dark:border-white/30 hover:border-emerald-600 dark:hover:border-emerald-400 text-[#121815] dark:text-white hover:text-emerald-700 font-semibold text-xs sm:text-sm tracking-[0.15em] uppercase px-7 sm:px-8 py-4 sm:py-4.5 flex items-center justify-center gap-2.5 transition-all duration-300 rounded-none cursor-pointer"
+                  className="border border-[#121815]/30 dark:border-white/30 hover:border-emerald-600 dark:hover:border-emerald-400 text-[#121815] dark:text-white hover:text-emerald-700 font-semibold text-xs sm:text-sm px-4 sm:px-8 py-3.5 sm:py-4.5 flex items-center justify-center gap-2 transition-all duration-300 rounded-none cursor-pointer"
+                  title="Explore features"
                 >
-                  <span>EXPLORE FEATURES</span>
+                  <span className="hidden sm:inline">Explore features</span>
+                  <span className="sm:hidden">Explore</span>
                   <FiArrowDown className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -236,7 +240,7 @@ export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
           onClick={scrollToNextSection}
           className="flex items-center gap-3 group cursor-pointer text-left"
         >
-          <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-700 transition-colors">
+          <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 group-hover:text-emerald-700 transition-colors">
             Scroll to explore
           </span>
           <FiArrowDown className="w-3.5 h-3.5 text-emerald-600 group-hover:translate-y-0.5 transition-transform" />
@@ -263,7 +267,7 @@ export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
           <button
             onClick={() => setIsPaused((p) => !p)}
             aria-label={isPaused ? "Resume autoplay" : "Pause autoplay"}
-            className="ml-3 text-[10px] uppercase font-bold tracking-widest text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+            className="ml-3 text-[10px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
           >
             {isPaused ? "Play" : "Pause"}
           </button>
@@ -272,7 +276,7 @@ export default function HeroCarousel({ onSlideChange }: HeroCarouselProps) {
         {/* Right: Functional Platform Tag */}
         <div className="flex items-center gap-2 font-mono text-[11px]">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>NYSC COMPANION · ACTIVE</span>
+          <span>NYSC Companion · Active</span>
         </div>
 
       </div>

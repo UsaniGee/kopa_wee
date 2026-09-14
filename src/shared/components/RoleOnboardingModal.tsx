@@ -158,8 +158,8 @@ export default function RoleOnboardingModal({
             <span className="font-bold text-xl tracking-widest uppercase font-display text-white">
               KOPA<span className="text-emerald-500 font-extrabold">'WEE</span>
             </span>
-            <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
-              · ROLE EXPERIENCE
+            <span className="text-xs font-mono font-bold text-slate-400">
+              · Role experience
             </span>
           </div>
 
@@ -174,8 +174,8 @@ export default function RoleOnboardingModal({
 
         <div className="space-y-6">
           <div className="text-center space-y-2">
-            <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-[0.25em]">
-              DYNAMIC PLATFORM ADAPTATION
+            <span className="text-xs font-mono font-semibold text-emerald-400">
+              Dynamic platform adaptation
             </span>
             <h2 className="text-3xl sm:text-4xl font-medium text-white font-display">Select Your Active NYSC Role</h2>
             <p className="text-xs text-slate-400 max-w-xl mx-auto">
@@ -197,7 +197,7 @@ export default function RoleOnboardingModal({
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-slate-800 text-emerald-400 uppercase tracking-wider">
+                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 bg-slate-800 text-emerald-400">
                       {role.badge}
                     </span>
                     {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
@@ -214,9 +214,9 @@ export default function RoleOnboardingModal({
           <Link
             href="/auth?mode=signup"
             onClick={onClose}
-            className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-2 cursor-pointer font-display"
+            className="px-6 sm:px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer font-display"
           >
-            <span>Launch Role Experience</span>
+            <span>Launch role experience</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

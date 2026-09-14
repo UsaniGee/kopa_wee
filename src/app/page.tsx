@@ -400,16 +400,18 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link
                 href="/auth?mode=signup"
-                className="w-full sm:w-auto px-10 py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-3 group"
+                className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-3 group"
+                title="Get started free"
               >
-                <span>GET STARTED FREE</span>
+                <span className="hidden sm:inline">Get started free</span>
+                <span className="sm:hidden">Get started</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/auth?mode=signin"
-                className="w-full sm:w-auto px-10 py-4.5 border border-white/30 hover:border-white text-white font-bold text-xs uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-4.5 border border-white/30 hover:border-white text-white font-bold text-xs transition-colors flex items-center justify-center gap-2"
               >
-                <span>SIGN IN</span>
+                <span>Sign in</span>
               </Link>
             </div>
           </div>

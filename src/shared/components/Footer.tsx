@@ -37,7 +37,7 @@ export default function Footer() {
 
           {/* Mini-Products */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-xs font-bold text-white uppercase tracking-[0.2em] font-display">App Modules</h4>
+            <h4 className="text-xs font-bold text-white font-display">App Modules</h4>
             <ul className="flex flex-col gap-2.5 text-xs">
               {[
                 { label: "Main Dashboard", href: "/dashboard" },
@@ -67,7 +67,7 @@ export default function Footer() {
 
           {/* User Roles */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-xs font-bold text-white uppercase tracking-[0.2em] font-display">Supported Roles</h4>
+            <h4 className="text-xs font-bold text-white font-display">Supported Roles</h4>
             <ul className="flex flex-col gap-2.5 text-xs text-slate-400">
               <li>Prospective Corps Member</li>
               <li>Serving Corps Member</li>
@@ -80,7 +80,7 @@ export default function Footer() {
 
           {/* Infrastructure */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-xs font-bold text-white uppercase tracking-[0.2em] font-display">Core Platform</h4>
+            <h4 className="text-xs font-bold text-white font-display">Core Platform</h4>
             <ul className="flex flex-col gap-2.5 text-xs text-slate-400">
               <li>Single Sign-On Auth</li>
               <li>Push Notification Engine</li>
