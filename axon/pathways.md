@@ -52,5 +52,6 @@
 - [x] **Pathway: Change Password, Role Flash Fix, Admin Invite UI & Roommate Engagement Tracking** *Link: [index.md](./pathways/password_flash_invite_roommate_20260911/index.md)*
 - [x] **Pathway: Admin Invites Tab — Missing Navigation Button** *Link: [index.md](./pathways/admin_invite_tab_missing_20260914/index.md)*
 - [x] **Pathway: Email Delivery Fix, Admin Invite 400 & Auth Error UX Polish** *Link: [index.md](./pathways/email_invite_auth_errors_20260914/index.md)*
-- [ ] **Pathway: Roommate Request Cancel Alert & Missing Edit UI Fix, Document Upload, & Calendar Sync** *Link: [index.md](./pathways/roommate_cancel_edit_fix_20260914/index.md)*
+- [~] **Pathway: Roommate Request Cancel Alert & Missing Edit UI Fix, Document Upload, & Calendar Sync** *Link: [index.md](./pathways/roommate_cancel_edit_fix_20260914/index.md)*
+
 
