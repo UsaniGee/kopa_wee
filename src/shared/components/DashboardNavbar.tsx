@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { FiBell, FiSearch, FiUser, FiLogOut, FiX, FiSettings, FiChevronDown } from "react-icons/fi";
 
 const Bell = FiBell;
@@ -108,7 +108,9 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
     }
   };
 
-  // ── User profile from localStorage ────────────────────────────────────────
+  // ── User profile from localStorage + live sync ────────────────────────────
+  const { data: navSession } = useSession();
+
   useEffect(() => {
     const storedName = localStorage.getItem("kopawee_user_name");
     const storedEmail = localStorage.getItem("kopawee_user_email");
@@ -119,7 +121,9 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
       setUserName(`Corper ${storedEmail.split("@")[0].replace(".", " ")}`);
     }
 
-    // Fetch live profile
+    // Only fetch live profile once session is authenticated — avoids 401 during hydration
+    if (!navSession?.user?.id) return;
+
     fetch("/api/users/me")
       .then((res) => res.json())
       .then((data) => {
@@ -134,7 +138,7 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [navSession?.user?.id]);
 
   const handleLogout = () => {
     localStorage.removeItem("kopawee_active_role");
