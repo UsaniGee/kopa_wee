@@ -353,7 +353,20 @@ export default function AdminDashboardPage() {
             <Users className="w-4 h-4" />
             <span>User Status Management</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab("invites")}
+            className={`px-5 py-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 border ${
+              activeTab === "invites"
+                ? "bg-emerald-600 text-white border-emerald-500"
+                : "bg-[#eaf5ed] dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 hover:text-[#121815] dark:hover:text-white"
+            }`}
+          >
+            <FiMail className="w-4 h-4" />
+            <span>Admin Invites ({pendingInvites.length})</span>
+          </button>
         </div>
+
 
         {/* Listings Moderation List */}
         {loading ? (
