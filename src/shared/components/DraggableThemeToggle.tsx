@@ -42,12 +42,10 @@ export default function DraggableThemeToggle() {
       // Ignore JSON parse errors
     }
 
-    // Default positioning:
-    // Mobile (<640px): bottom-20 (80px), right-4 (16px) — safely above mobile bottom navbars
-    // Desktop (>=640px): bottom-6 (24px), right-6 (24px)
+    // Default positioning: bottom right on all screens
     const isMobile = window.innerWidth < 640;
     const defaultRight = isMobile ? 16 : 24;
-    const defaultBottom = isMobile ? 80 : 24;
+    const defaultBottom = isMobile ? 16 : 24;
 
     const initialX = window.innerWidth - 65 - defaultRight;
     const initialY = window.innerHeight - 38 - defaultBottom;
@@ -170,11 +168,12 @@ export default function DraggableThemeToggle() {
       }
     : {
         position: "fixed",
-        bottom: "5rem", // ~80px mobile default
-        right: "1rem",  // ~16px mobile default
+        bottom: "1.5rem", // ~24px default bottom right
+        right: "1.5rem",  // ~24px default bottom right
         zIndex: 9999,
         filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.25))",
       };
+
 
   return (
     <div
