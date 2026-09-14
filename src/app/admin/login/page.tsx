@@ -37,12 +37,24 @@ export default function AdminLoginPage() {
         redirect: false,
       });
       if (!result?.ok) {
-        setErrorMsg("Invalid credentials.");
+        const errorCode = result?.code ?? result?.error ?? "";
+        if (errorCode === "EMAIL_NOT_VERIFIED") {
+          setErrorMsg("Your admin account email has not been verified yet.");
+        } else if (errorCode === "FetchError" || result?.status === 500) {
+          setErrorMsg("Network or server error. Please try again.");
+        } else {
+          setErrorMsg("Invalid email or password. Please try again.");
+        }
         setLoading(false);
         return;
       }
       // Check if user has ADMIN applicationRole
       const res = await fetch("/api/users/me");
+      if (!res.ok) {
+        setErrorMsg("Failed to verify user permissions. Please try again.");
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       if (data.success && data.data?.applicationRole === "ADMIN") {
         router.push("/admin");
@@ -52,8 +64,8 @@ export default function AdminLoginPage() {
         setErrorMsg("Access denied. This portal is for platform administrators only.");
         setLoading(false);
       }
-    } catch {
-      setErrorMsg("Authentication failed. Please try again.");
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Network error. Please check your connection and try again.");
       setLoading(false);
     }
   };

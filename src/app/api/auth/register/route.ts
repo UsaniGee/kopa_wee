@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await hashPassword(validatedData.password);
-    const verificationToken = `vtok_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
+    const verificationToken = `vtok_${crypto.randomUUID().replace(/-/g, '')}_${Date.now()}`;
 
     const newUser = await prisma.user.create({
       data: {
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
     const verificationUrl = `${baseUrl}/auth/verify?token=${verificationToken}&email=${encodeURIComponent(newUser.email)}`;
 
-    await sendEmail({
+    const emailResult = await sendEmail({
       to: newUser.email,
       subject: "Verify your KopaWee email address",
       template: React.createElement(VerificationEmail, {
@@ -77,6 +77,13 @@ export async function POST(req: Request) {
         verificationUrl,
       }),
     });
+
+    if (!emailResult.success) {
+      // Log for debugging — user can still verify via resend flow
+      console.warn(
+        `[register] Email send failed for ${newUser.email}: ${emailResult.error}\nDev verification URL: ${verificationUrl}`
+      );
+    }
 
     return NextResponse.json(
       {

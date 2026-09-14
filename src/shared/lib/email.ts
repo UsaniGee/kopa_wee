@@ -36,7 +36,7 @@ export async function sendEmail({ to, subject, template }: SendEmailOptions): Pr
     const html = await render(template);
 
     const { data, error } = await resend.emails.send({
-      from: "KopaWee <no-reply@kopawee.ng>",
+      from: "KopaWee <onboarding@resend.dev>",
       to,
       subject,
       html,

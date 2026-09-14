@@ -125,8 +125,11 @@ function AuthPageContent() {
   };
 
 
+  const [resendErrorMsg, setResendErrorMsg] = useState("");
+
   const handleResendVerification = async () => {
     setResendLoading(true);
+    setResendErrorMsg("");
     try {
       const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
@@ -144,9 +147,11 @@ function AuthPageContent() {
             return prev - 1;
           });
         }, 1000);
+      } else {
+        setResendErrorMsg(data.error || "Failed to resend verification email.");
       }
     } catch {
-      // Non-fatal
+      setResendErrorMsg("Network error. Please try again.");
     } finally {
       setResendLoading(false);
     }
@@ -288,6 +293,12 @@ function AuthPageContent() {
                 </p>
               </div>
 
+              {resendErrorMsg && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-semibold">
+                  {resendErrorMsg}
+                </div>
+              )}
+
               {resendSuccess ? (
                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
                   ✓ Verification email sent! Check your inbox.
@@ -305,7 +316,7 @@ function AuthPageContent() {
 
               <button
                 type="button"
-                onClick={() => { setShowUnverifiedNotice(false); setResendSuccess(false); setResendCooldown(0); }}
+                onClick={() => { setShowUnverifiedNotice(false); setResendSuccess(false); setResendCooldown(0); setResendErrorMsg(""); }}
                 className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white uppercase tracking-wider"
               >
                 ← Back to Sign In

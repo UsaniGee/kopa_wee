@@ -63,6 +63,16 @@ interface PendingLodge {
   owner?: { name: string; email: string; phone: string; stateCode: string };
 }
 
+interface AdminInvite {
+  id: string;
+  email: string;
+  role: string;
+  invitedBy: string;
+  status: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -76,6 +86,7 @@ export default function AdminDashboardPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"ADMIN" | "USER">("USER");
   const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteError, setInviteError] = useState("");
   const [pendingInvites, setPendingInvites] = useState<AdminInvite[]>([]);
 
   // User status management state
@@ -161,6 +172,7 @@ export default function AdminDashboardPage() {
   const handleSendInvite = async () => {
     if (!inviteEmail.trim()) return;
     setInviteLoading(true);
+    setInviteError("");
     try {
       const res = await fetch("/api/admin/invite", {
         method: "POST",
@@ -171,12 +183,13 @@ export default function AdminDashboardPage() {
       if (data.success) {
         setActionMsg(`✅ Invite sent to ${inviteEmail}`);
         setInviteEmail("");
+        setInviteError("");
         fetchPendingData();
       } else {
-        setActionMsg(`❌ ${data.error}`);
+        setInviteError(data.error || "Failed to send invite.");
       }
     } catch {
-      setActionMsg("❌ Failed to send invite");
+      setInviteError("Network error. Please try again.");
     } finally {
       setInviteLoading(false);
     }
@@ -658,6 +671,12 @@ export default function AdminDashboardPage() {
                   <><FiMail className="w-4 h-4" /><span>SEND INVITE EMAIL</span></>
                 )}
               </button>
+              {inviteError && (
+                <p className="text-xs text-red-500 font-mono mt-1 flex items-center gap-1.5">
+                  <FiAlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                  {inviteError}
+                </p>
+              )}
             </div>
 
             {/* Pending Invites */}
