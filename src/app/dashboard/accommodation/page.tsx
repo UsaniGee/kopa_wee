@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
-import { FiHome, FiUsers, FiMapPin, FiCheckCircle, FiShield, FiHeart, FiPlus, FiPackage, FiAlertTriangle, FiCompass, FiNavigation, FiFlag, FiX, FiSearch, FiFilter } from "react-icons/fi";
+import { FiHome, FiUsers, FiMapPin, FiCheckCircle, FiShield, FiHeart, FiPlus, FiPackage, FiAlertTriangle, FiCompass, FiNavigation, FiFlag, FiX, FiSearch, FiFilter, FiEdit2, FiTrash2, FiLoader } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
 
 const Home = FiHome;
@@ -22,6 +22,9 @@ const X = FiX;
 const Sparkles = HiSparkles;
 const Search = FiSearch;
 const Filter = FiFilter;
+const Edit = FiEdit2;
+const Trash2 = FiTrash2;
+const Loader2 = FiLoader;
 
 interface Lodge {
   id: string;
@@ -61,6 +64,8 @@ export default function AccommodationPage() {
   const [roommateModalOpen, setRoommateModalOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [cancellingRequest, setCancellingRequest] = useState(false);
 
   // Filters
   const [distanceKmFilter, setDistanceKmFilter] = useState<number>(10);
@@ -79,7 +84,7 @@ export default function AccommodationPage() {
       })
       .catch(() => {});
 
-    fetch(`/api/roommates?userId=${userId}`)
+    fetch("/api/roommates?my=true")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -294,10 +299,10 @@ export default function AccommodationPage() {
       {activeTab === "roommates" && (
         <div className="space-y-6">
           {/* Active Request Bar / Create Action */}
-          <div className="p-4 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-4 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-0.5">
-              <h4 className="font-bold text-xs uppercase tracking-wider text-[#121815] dark:text-white font-display">
-                {activeUserRequest ? "Active Roommate Request" : "Looking for a Roommate?"}
+              <h4 className="font-bold text-xs tracking-wider text-[#121815] dark:text-white font-display">
+                {activeUserRequest ? "Active roommate request" : "Looking for a roommate?"}
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
                 {activeUserRequest
@@ -307,27 +312,39 @@ export default function AccommodationPage() {
             </div>
 
             {activeUserRequest ? (
-              <button
-                onClick={() => {
-                  if (confirm("Cancel your active roommate request?")) {
-                    fetch(`/api/roommates?id=${activeUserRequest.id}`, { method: "DELETE" })
-                      .then(() => fetchRoommatesData());
-                  }
-                }}
-                className="px-4 py-2 bg-red-950/80 hover:bg-red-900 text-red-300 border border-red-800 text-xs font-bold uppercase tracking-wider cursor-pointer"
-              >
-                Cancel Active Request
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setEditingRequest(activeUserRequest);
+                    setRoommateModalOpen(true);
+                  }}
+                  className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold tracking-wider flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>Edit request</span>
+                </button>
+                <button
+                  onClick={() => setCancelConfirmOpen(true)}
+                  className="px-3.5 py-2 bg-red-950/80 hover:bg-red-900 text-red-300 border border-red-800 text-xs font-semibold tracking-wider flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Cancel request</span>
+                </button>
+              </div>
             ) : (
               <button
-                onClick={() => setRoommateModalOpen(true)}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
+                onClick={() => {
+                  setEditingRequest(null);
+                  setRoommateModalOpen(true);
+                }}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold tracking-wider flex items-center gap-1.5 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                <span>Request a Roommate</span>
+                <span>Request a roommate</span>
               </button>
             )}
           </div>
+
 
           {roommateRequests.length === 0 ? (
             <div className="p-12 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-center space-y-3">
@@ -404,6 +421,55 @@ export default function AccommodationPage() {
           }}
         />
       )}
+
+      {/* Custom Cancel Confirmation Modal */}
+      {cancelConfirmOpen && activeUserRequest && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 max-w-md w-full p-6 space-y-4 text-[#121815] dark:text-white font-sans">
+            <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+              <AlertTriangle className="w-6 h-6 shrink-0" />
+              <h3 className="text-base font-bold font-display">Cancel roommate request?</h3>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Are you sure you want to cancel your active roommate request in <strong className="text-emerald-700 dark:text-emerald-400">{activeUserRequest.lga}, {activeUserRequest.state}</strong>? Other corps members will no longer be able to discover or send roommate interest to your profile.
+            </p>
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-300/60 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setCancelConfirmOpen(false)}
+                className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold cursor-pointer transition-colors"
+              >
+                Keep request
+              </button>
+              <button
+                type="button"
+                disabled={cancellingRequest}
+                onClick={async () => {
+                  setCancellingRequest(true);
+                  try {
+                    const res = await fetch(`/api/roommates?id=${activeUserRequest.id}`, { method: "DELETE" });
+                    const data = await res.json();
+                    if (data.success) {
+                      setActiveUserRequest(null);
+                      fetchRoommatesData();
+                    }
+                  } catch (e) {
+                    console.error("Failed to cancel roommate request", e);
+                  } finally {
+                    setCancellingRequest(false);
+                    setCancelConfirmOpen(false);
+                  }
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold cursor-pointer disabled:opacity-50 flex items-center gap-2 transition-colors"
+              >
+                {cancellingRequest && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Yes, cancel request</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {reportModalOpen && (
         <div className="fixed inset-0 z-50 bg-[#0a0f0d]/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#121815] text-white p-8 max-w-md w-full border border-slate-800 space-y-6">

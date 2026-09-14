@@ -1,7 +1,7 @@
 {
   "id": "roommate_cancel_edit_fix_20260914",
   "type": "bug",
-  "status": "new",
+  "status": "completed",
   "created_at": "2026-09-14T10:35:00+01:00",
   "updated_at": "2026-09-14T10:35:00+01:00",
   "title": "Roommate Request Cancel Alert & Missing Edit UI Fix, Document Upload, & Calendar Sync"
