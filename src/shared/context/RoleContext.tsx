@@ -31,8 +31,8 @@ export const RoleProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { data: session, status } = useSession();
 
   const currentRole = deriveRole(
-    (session?.user as any)?.nyscStatus,
-    (session?.user as any)?.role
+    (session?.user as Record<string, string | undefined>)?.nyscStatus,
+    (session?.user as Record<string, string | undefined>)?.role
   );
 
   const roleStatus: RoleStatus = status === "loading" ? "loading" : "ready";

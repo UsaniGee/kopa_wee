@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"ADMIN" | "USER">("USER");
   const [inviteLoading, setInviteLoading] = useState(false);
-  const [pendingInvites, setPendingInvites] = useState<any[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<AdminInvite[]>([]);
 
   // User status management state
   const [userSearch, setUserSearch] = useState("");
@@ -389,7 +389,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <p className="text-xs text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-900/60 p-3 border border-slate-200 dark:border-slate-800 leading-relaxed">
-                    "{item.description}"
+                    &quot;{item.description}&quot;
                   </p>
 
                   {item.seller && (
@@ -446,7 +446,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <p className="text-xs text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-900/60 p-3 border border-slate-200 dark:border-slate-800 leading-relaxed">
-                  "{lodge.description}"
+                  &quot;{lodge.description}&quot;
                 </p>
 
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono border-t border-slate-200/80 dark:border-slate-800/80 pt-2 flex items-center justify-between">
@@ -567,7 +567,7 @@ export default function AdminDashboardPage() {
                       <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 font-display">New Status</label>
                       <select
                         value={revertStatus}
-                        onChange={(e) => setRevertStatus(e.target.value as any)}
+                        onChange={(e) => setRevertStatus(e.target.value as "PCM" | "SERVING" | "ALUMNI")}
                         className="w-full px-3 py-3 text-xs bg-[#dcece1] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-700 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600 transition-colors"
                       >
                         <option value="PCM">PCM</option>
@@ -658,7 +658,7 @@ export default function AdminDashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-0 divide-y divide-slate-200 dark:divide-slate-800">
-                  {pendingInvites.map((inv: any) => (
+                  {pendingInvites.map((inv) => (
                     <div key={inv.id} className="flex items-center justify-between py-3 text-xs">
                       <div className="space-y-0.5">
                         <p className="font-semibold text-[#121815] dark:text-white font-mono">{inv.email}</p>

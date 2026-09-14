@@ -9,7 +9,8 @@ const schema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
-// Simple in-memory rate limiter: email -> last sent timestamp
+// NOTE: In-memory rate limiter — resets on cold starts/serverless restarts.
+// For production at scale, replace with a persistent store (e.g., Upstash Redis / KV).
 const rateLimitMap = new Map<string, number>();
 const COOLDOWN_MS = 60 * 1000; // 60 seconds
 
@@ -47,8 +48,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate a fresh token
-    const newToken = `vtok_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
+    // Generate a cryptographically secure fresh token
+    const newToken = `vtok_${crypto.randomUUID().replace(/-/g, '')}_${Date.now()}`;
 
     await prisma.user.update({
       where: { id: user.id },

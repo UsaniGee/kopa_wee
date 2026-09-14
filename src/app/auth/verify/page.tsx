@@ -17,15 +17,23 @@ function VerifyContent() {
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!token) {
-      setVerifying(false);
-      setErrorMsg("Invalid verification link — token is missing. Please request a new verification email.");
-      return;
+      // Batch state update via a microtask to avoid synchronous setState-in-effect
+      Promise.resolve().then(() => {
+        if (!cancelled) {
+          setVerifying(false);
+          setErrorMsg("Invalid verification link — token is missing. Please request a new verification email.");
+        }
+      });
+      return () => { cancelled = true; };
     }
 
     fetch(`/api/auth/verify?token=${encodeURIComponent(token)}`)
       .then((res) => res.json())
       .then((data) => {
+        if (cancelled) return;
         setVerifying(false);
         if (data.success) {
           if (data.alreadyVerified) {
@@ -48,10 +56,14 @@ function VerifyContent() {
         }
       })
       .catch(() => {
+        if (cancelled) return;
         setVerifying(false);
         setErrorMsg("Network error. Please try again.");
       });
+
+    return () => { cancelled = true; };
   }, [token, router]);
+
 
   return (
     <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] flex items-center justify-center p-6 text-[#121815] dark:text-white font-sans">
