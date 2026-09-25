@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 
 const logbookSchema = z.object({
-  userId: z.string(),
   date: z.string(),
   summary: z.string().min(5),
   hoursWorked: z.number().default(8),
@@ -12,18 +12,11 @@ const logbookSchema = z.object({
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "userId parameter required" },
-        { status: 400 }
-      );
-    }
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
 
     const entries = await prisma.pPALogbookEntry.findMany({
-      where: { userId },
+      where: { userId: auth.user!.id },
       orderBy: { createdAt: "desc" },
     });
 
@@ -41,11 +34,14 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
+
     const body = await req.json();
     const validatedData = logbookSchema.parse(body);
 
     const newEntry = await prisma.pPALogbookEntry.create({
-      data: validatedData,
+      data: { ...validatedData, userId: auth.user!.id },
     });
 
     return NextResponse.json(

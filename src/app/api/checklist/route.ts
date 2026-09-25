@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "userId parameter required" },
-        { status: 400 }
-      );
-    }
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
 
     const checklist = await prisma.campChecklist.findUnique({
-      where: { userId },
+      where: { userId: auth.user!.id },
     });
 
     return NextResponse.json({
@@ -31,16 +25,20 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { userId, completedItems } = body;
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
 
-    if (!userId || !Array.isArray(completedItems)) {
+    const body = await req.json();
+    const { completedItems } = body;
+
+    if (!Array.isArray(completedItems)) {
       return NextResponse.json(
-        { success: false, error: "userId and completedItems array required" },
+        { success: false, error: "completedItems array required" },
         { status: 400 }
       );
     }
 
+    const userId = auth.user!.id;
     const checklist = await prisma.campChecklist.upsert({
       where: { userId },
       update: { completedItems },

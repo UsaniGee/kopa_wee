@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 
 const roleSchema = z.object({
-  userId: z.string(),
   role: z.enum(["PCM", "SERVING_CORPER", "CDS_EXEC", "EMPLOYER", "LGA_INSPECTOR", "ALUMNI"]),
   deployedState: z.string().optional(),
   lga: z.string().optional(),
@@ -13,11 +13,14 @@ const roleSchema = z.object({
 
 export async function PATCH(req: Request) {
   try {
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
+
     const body = await req.json();
     const validatedData = roleSchema.parse(body);
 
     const updatedUser = await prisma.user.update({
-      where: { id: validatedData.userId },
+      where: { id: auth.user!.id },
       data: {
         role: validatedData.role,
         ...(validatedData.deployedState && { deployedState: validatedData.deployedState }),

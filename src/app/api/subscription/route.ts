@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 
-// GET /api/subscription?userId=...
+// GET /api/subscription
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
 
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "userId parameter required" },
-        { status: 400 }
-      );
-    }
+    const userId = auth.user!.id;
 
     // Find or create user subscription (default: early access)
     let subscription = await prisma.userSubscription.findUnique({

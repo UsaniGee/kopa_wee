@@ -3,6 +3,7 @@ import { prisma } from "@/shared/lib/prisma";
 import { sendEmail } from "@/shared/lib/email";
 import VerificationEmail from "@/shared/emails/VerificationEmail";
 import { z } from "zod";
+import crypto from "crypto";
 import React from "react";
 
 const schema = z.object({
@@ -12,6 +13,7 @@ const schema = z.object({
 // Simple in-memory rate limiter: email -> last sent timestamp
 const rateLimitMap = new Map<string, number>();
 const COOLDOWN_MS = 60 * 1000; // 60 seconds
+const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,15 +50,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate a fresh token
-    const newToken = `vtok_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { verificationToken: newToken },
+      data: {
+        verificationToken: tokenHash,
+        verificationTokenExpiry: new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS),
+      },
     });
 
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const verificationUrl = `${baseUrl}/auth/verify?token=${newToken}&email=${encodeURIComponent(user.email)}`;
+    const verificationUrl = `${baseUrl}/auth/verify?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
 
     await sendEmail({
       to: user.email,

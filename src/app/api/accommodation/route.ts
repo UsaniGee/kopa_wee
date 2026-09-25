@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 
+const ADMIN_ONLY_STATUSES = ["ACTIVE", "AVAILABLE", "REJECTED"];
+
 const listingSchema = z.object({
-  ownerId: z.string(),
   title: z.string().min(3),
   description: z.string(),
   location: z.string(),
@@ -15,16 +17,27 @@ const listingSchema = z.object({
   images: z.array(z.string()).default([]),
 });
 
+const PUBLIC_STATUSES = ["ACTIVE", "AVAILABLE"];
+
 export async function GET(req: Request) {
   try {
+    // Listings include owner phone/email — require a session so the feed
+    // can't be scraped for PII by anonymous callers hitting the API directly.
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
+
     const { searchParams } = new URL(req.url);
     const state = searchParams.get("state");
     const lga = searchParams.get("lga");
     const statusParam = searchParams.get("status");
 
-    const statusFilter = statusParam 
-      ? (statusParam as any)
-      : { in: ["ACTIVE", "AVAILABLE"] };
+    // Non-public statuses (PENDING_APPROVAL, REJECTED, etc.) are only visible to admins.
+    let statusFilter: any = { in: PUBLIC_STATUSES };
+    if (statusParam && PUBLIC_STATUSES.includes(statusParam)) {
+      statusFilter = statusParam;
+    } else if (statusParam && auth.user!.applicationRole === "ADMIN") {
+      statusFilter = statusParam;
+    }
 
     const listings = await prisma.accommodationListing.findMany({
       where: {
@@ -54,12 +67,16 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
+
     const body = await req.json();
     const validatedData = listingSchema.parse(body);
 
     const newListing = await prisma.accommodationListing.create({
       data: {
         ...validatedData,
+        ownerId: auth.user!.id,
         status: "PENDING_APPROVAL",
       },
     });
@@ -84,6 +101,9 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
+    const auth = await requireAuth();
+    if (auth.error) return auth.error;
+
     const body = await req.json();
     const { id, status } = body;
 
@@ -91,6 +111,38 @@ export async function PATCH(req: Request) {
       return NextResponse.json(
         { success: false, error: "Listing ID and status are required" },
         { status: 400 }
+      );
+    }
+
+    const listing = await prisma.accommodationListing.findUnique({
+      where: { id },
+      select: { ownerId: true },
+    });
+
+    if (!listing) {
+      return NextResponse.json(
+        { success: false, error: "Listing not found" },
+        { status: 404 }
+      );
+    }
+
+    const isAdmin = auth.user!.applicationRole === "ADMIN";
+    const isOwner = listing.ownerId === auth.user!.id;
+
+    // Approval/rejection is a moderation action — only admins may set these.
+    if (ADMIN_ONLY_STATUSES.includes(status) && !isAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Admin access required for this status change" },
+        { status: 403 }
+      );
+    }
+
+    // Non-moderation transitions (e.g. marking as SOLD/RESERVED) are
+    // limited to the listing's owner or an admin.
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json(
+        { success: false, error: "You do not have permission to update this listing" },
+        { status: 403 }
       );
     }
 
