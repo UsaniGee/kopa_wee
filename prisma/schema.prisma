@@ -97,7 +97,8 @@ model User {
   stateCode         String?         @unique
   avatarUrl         String?
   isVerified        Boolean         @default(false)
-  verificationToken String?
+  verificationToken String?   @unique
+  verificationTokenExpiry DateTime?
   passwordResetToken  String?   @unique
   passwordResetExpiry DateTime?
   createdAt         DateTime        @default(now())

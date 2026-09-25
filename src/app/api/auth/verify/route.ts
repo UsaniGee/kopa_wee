@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import crypto from "crypto";
 
 export async function GET(req: Request) {
   try {
@@ -14,8 +15,10 @@ export async function GET(req: Request) {
       );
     }
 
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
     const user = await prisma.user.findFirst({
-      where: { verificationToken: token },
+      where: { verificationToken: tokenHash },
     });
 
     if (!user) {
@@ -34,9 +37,16 @@ export async function GET(req: Request) {
       });
     }
 
+    if (user.verificationTokenExpiry && user.verificationTokenExpiry.getTime() < Date.now()) {
+      return NextResponse.json(
+        { success: false, error: "Verification link has expired. Please request a new one." },
+        { status: 410 }
+      );
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
-      data: { isVerified: true, verificationToken: null },
+      data: { isVerified: true, verificationToken: null, verificationTokenExpiry: null },
     });
 
     return NextResponse.json({

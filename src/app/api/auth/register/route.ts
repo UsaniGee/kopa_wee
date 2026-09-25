@@ -4,7 +4,10 @@ import { hashPassword } from "@/shared/lib/auth";
 import { sendEmail } from "@/shared/lib/email";
 import VerificationEmail from "@/shared/emails/VerificationEmail";
 import { z } from "zod";
+import crypto from "crypto";
 import React from "react";
+
+const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -38,7 +41,9 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await hashPassword(validatedData.password);
-    const verificationToken = `vtok_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
+    const rawVerificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationTokenHash = crypto.createHash("sha256").update(rawVerificationToken).digest("hex");
+    const verificationTokenExpiry = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS);
 
     const newUser = await prisma.user.create({
       data: {
@@ -51,7 +56,8 @@ export async function POST(req: Request) {
         lga: validatedData.lga,
         ppaName: validatedData.ppaName,
         stateCode: validatedData.stateCode,
-        verificationToken,
+        verificationToken: verificationTokenHash,
+        verificationTokenExpiry,
         isVerified: false,
       },
       select: {
@@ -67,7 +73,7 @@ export async function POST(req: Request) {
     });
 
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const verificationUrl = `${baseUrl}/auth/verify?token=${verificationToken}&email=${encodeURIComponent(newUser.email)}`;
+    const verificationUrl = `${baseUrl}/auth/verify?token=${rawVerificationToken}&email=${encodeURIComponent(newUser.email)}`;
 
     await sendEmail({
       to: newUser.email,
