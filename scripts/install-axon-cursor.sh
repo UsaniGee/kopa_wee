@@ -10,7 +10,7 @@ AXON_REPO="https://github.com/atopwebtechnologies/axon.git"
 SKILLS=(axon-initialize axon-craft axon-immerse axon-compose axon-investigate axon-inspect axon-revert)
 
 mkdir -p "${ROOT}/.cursor/plugins" "${ROOT}/.cursor/skills" "${ROOT}/.cursor/rules"
-mkdir -p "${ROOT}/.agents/skills" "${ROOT}/.agents/plugins"
+mkdir -p "${ROOT}/.agents/skills" "${ROOT}/.agents/plugins" "${ROOT}/.claude/skills"
 
 if [[ -d "${AXON_DIR}/.git" ]]; then
   echo "Updating AXON plugin..."
@@ -23,12 +23,13 @@ fi
 for skill in "${SKILLS[@]}"; do
   ln -sfn "../plugins/axon/skills/${skill}" "${ROOT}/.cursor/skills/${skill}"
   ln -sfn "../../.cursor/plugins/axon/skills/${skill}" "${ROOT}/.agents/skills/${skill}"
+  ln -sfn "../../.cursor/plugins/axon/skills/${skill}" "${ROOT}/.claude/skills/${skill}"
 done
 
 ln -sfn ".cursor/plugins/axon" "${ROOT}/.agents/plugins/axon"
 
-echo "AXON installed for Cursor."
-echo "  Skills:  .cursor/skills/axon-*"
+echo "AXON installed for Cursor and Claude Code."
+echo "  Skills:  .cursor/skills/axon-*, .claude/skills/axon-*"
 echo "  Plugin:  .cursor/plugins/axon"
 echo "  Rule:    .cursor/rules/axon.mdc"
 echo ""
