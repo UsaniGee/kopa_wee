@@ -1,37 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAdmin } from "@/shared/lib/apiAuth";
 
 // GET /api/admin/users/[userId]/history
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
-    const { searchParams } = new URL(req.url);
-    const adminUserId = searchParams.get("adminUserId");
-
-    if (!adminUserId) {
-      return NextResponse.json(
-        { success: false, error: "adminUserId query parameter required" },
-        { status: 400 }
-      );
-    }
-
-    // Verify admin role
-    const admin = await prisma.user.findUnique({
-      where: { id: adminUserId },
-      select: { applicationRole: true },
-    });
-
-    if (!admin || admin.applicationRole !== "ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized. Admin access required." },
-        { status: 403 }
-      );
-    }
-
     const { userId } = await params;
-
 
     const [user, statusHistory] = await Promise.all([
       prisma.user.findUnique({

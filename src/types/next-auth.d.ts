@@ -33,5 +33,7 @@ declare module "next-auth/jwt" {
     applicationRole?: string;
     nyscStatus?: string;
     isVerified?: boolean;
+    /** Epoch ms when role fields were last read from the DB */
+    rolesRefreshedAt?: number;
   }
 }

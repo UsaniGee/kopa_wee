@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { FiCheckSquare, FiSquare, FiAlertTriangle, FiPlus, FiFileText, FiTag, FiMapPin, FiBox, FiShield, FiSearch, FiFilter, FiInfo } from "react-icons/fi";
 
 const CheckSquare = FiCheckSquare;
@@ -73,12 +74,13 @@ export default function CampEssentialsChecklist() {
   const [searchQuery, setSearchQuery] = useState("");
   const [newItemName, setNewItemName] = useState("");
   const [newItemCategory, setNewItemCategory] = useState<CampItem["category"]>("essentials");
+  const { status: sessionStatus } = useSession();
+  const isSignedIn = sessionStatus === "authenticated";
 
   useEffect(() => {
-    const userId = localStorage.getItem("kopawee_user_id");
-    if (!userId) return;
+    if (!isSignedIn) return;
 
-    fetch(`/api/checklist?userId=${userId}`)
+    fetch("/api/checklist")
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
@@ -89,18 +91,17 @@ export default function CampEssentialsChecklist() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [isSignedIn]);
 
   const syncChecklistToDatabase = (updatedItems: CampItem[]) => {
-    const userId = localStorage.getItem("kopawee_user_id");
-    if (!userId) return;
+    if (!isSignedIn) return;
 
     const packedIds = updatedItems.filter((i) => i.packed).map((i) => i.id);
 
     fetch("/api/checklist", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, completedItems: packedIds }),
+      body: JSON.stringify({ completedItems: packedIds }),
     }).catch(() => {});
   };
 

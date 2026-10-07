@@ -99,7 +99,6 @@ export default function AdminDashboardPage() {
   const [revertLoading, setRevertLoading] = useState(false);
 
   // TODO: get real admin userId from auth session
-  const adminUserId = session?.user?.id;
 
   const fetchPendingData = async () => {
     setLoading(true);
@@ -205,7 +204,7 @@ export default function AdminDashboardPage() {
     setUserSearchResult(null);
     setUserHistory([]);
     try {
-      const res = await fetch(`/api/admin/users/${userSearch.trim()}/history?adminUserId=${adminUserId}`);
+      const res = await fetch(`/api/admin/users/${encodeURIComponent(userSearch.trim())}/history`);
       const data = await res.json();
       if (data.success) {
         setUserSearchResult(data.data.user);
@@ -228,7 +227,6 @@ export default function AdminDashboardPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          adminUserId,
           targetUserId: userSearchResult.id,
           newStatus: revertStatus,
           reason: revertReason,

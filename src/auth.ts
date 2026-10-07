@@ -16,6 +16,8 @@ class MissingCredentialsError extends CredentialsSignin {
   code = "EMAIL_AND_PASSWORD_REQUIRED";
 }
 
+const ROLE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
 if (!process.env.NEXTAUTH_SECRET?.trim()) {
   throw new Error(
     "NEXTAUTH_SECRET is not set or is empty in .env.local. " +
@@ -93,16 +95,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Only run DB upsert for Google OAuth
       if (account?.provider === "google") {
         if (!user.email) return false;
+        const email = user.email.toLowerCase().trim();
         try {
+          const existing = await prisma.user.findUnique({
+            where: { email },
+            select: { isVerified: true },
+          });
+          // An unverified account's password was set by someone who never proved
+          // they own this inbox — drop it so Google verification can't hand them access
+          const dropUnprovenPassword = existing !== null && !existing.isVerified;
+
           await prisma.user.upsert({
-            where: { email: user.email.toLowerCase().trim() },
+            where: { email },
             update: {
               name: user.name ?? undefined,
               avatarUrl: user.image ?? undefined,
               isVerified: true,
+              ...(dropUnprovenPassword ? { passwordHash: null } : {}),
             },
             create: {
-              email: user.email.toLowerCase().trim(),
+              email,
               name: user.name ?? "Google Corper",
               avatarUrl: user.image ?? undefined,
               role: "PCM",
@@ -155,6 +167,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.nyscStatus = u.nyscStatus;
           token.isVerified = u.isVerified ?? false;
         }
+        token.rolesRefreshedAt = Date.now();
+        return token;
+      }
+
+      // Re-read role fields periodically so admin demotions and status changes
+      // reach live sessions without forcing a sign-out
+      const isStale = Date.now() - (token.rolesRefreshedAt ?? 0) > ROLE_REFRESH_INTERVAL_MS;
+      if (isStale && token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id },
+          select: { role: true, applicationRole: true, nyscStatus: true, isVerified: true },
+        });
+        // Deleted user — returning null invalidates the session
+        if (!dbUser) return null;
+        token.role = dbUser.role;
+        token.applicationRole = dbUser.applicationRole;
+        token.nyscStatus = dbUser.nyscStatus;
+        token.isVerified = dbUser.isVerified;
+        token.rolesRefreshedAt = Date.now();
       }
       return token;
     },

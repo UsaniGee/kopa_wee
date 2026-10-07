@@ -191,15 +191,12 @@ function OnboardingContent() {
       fieldOfStudy: finalFieldOfStudy,
     };
 
-    const userId = localStorage.getItem("kopawee_user_id");
-
-    if (userId) {
+    if (session?.user?.id) {
       try {
         await fetch("/api/users/role", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId,
             role: dbRole,
             deployedState: updatedFormData.deploymentState || updatedFormData.serviceState,
             lga: updatedFormData.ppaLGA,

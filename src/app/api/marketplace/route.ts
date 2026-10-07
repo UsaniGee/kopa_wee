@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { z } from "zod";
+import { ListingStatus } from "@prisma/client";
+import { requireAdmin, requireAuth } from "@/shared/lib/apiAuth";
 
 const itemSchema = z.object({
-  sellerId: z.string(),
   title: z.string().min(3),
   category: z.string(),
   price: z.string(),
@@ -20,9 +21,24 @@ export async function GET(req: Request) {
     const category = searchParams.get("category");
     const statusParam = searchParams.get("status");
 
-    const statusFilter = statusParam 
-      ? (statusParam as any)
-      : { in: ["ACTIVE", "AVAILABLE"] };
+    // Non-public statuses (pending, rejected, ...) expose unmoderated listings — admin only
+    let statusFilter: ListingStatus | { in: ListingStatus[] } = {
+      in: [ListingStatus.ACTIVE, ListingStatus.AVAILABLE],
+    };
+    if (statusParam) {
+      const parsed = z.nativeEnum(ListingStatus).safeParse(statusParam);
+      if (!parsed.success) {
+        return NextResponse.json(
+          { success: false, error: "Invalid status filter" },
+          { status: 400 }
+        );
+      }
+      if (parsed.data !== ListingStatus.ACTIVE && parsed.data !== ListingStatus.AVAILABLE) {
+        const auth = await requireAdmin();
+        if (auth.error) return auth.error;
+      }
+      statusFilter = parsed.data;
+    }
 
     const items = await prisma.marketplaceItem.findMany({
       where: {
@@ -51,6 +67,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
     const validatedData = itemSchema.parse(body);
@@ -58,6 +77,7 @@ export async function POST(req: Request) {
     const newItem = await prisma.marketplaceItem.create({
       data: {
         ...validatedData,
+        sellerId: auth.user.id,
         status: "PENDING_APPROVAL",
       },
     });
@@ -80,12 +100,17 @@ export async function POST(req: Request) {
   }
 }
 
+/** Moderation endpoint — approves or rejects a listing. Admin only. */
 export async function PATCH(req: Request) {
+  const auth = await requireAdmin();
+  if (auth.error) return auth.error;
+
   try {
     const body = await req.json();
-    const { id, status } = body;
+    const { id } = body;
+    const parsedStatus = z.nativeEnum(ListingStatus).safeParse(body.status);
 
-    if (!id || !status) {
+    if (!id || !parsedStatus.success) {
       return NextResponse.json(
         { success: false, error: "Listing ID and status are required" },
         { status: 400 }
@@ -94,13 +119,13 @@ export async function PATCH(req: Request) {
 
     const updatedItem = await prisma.marketplaceItem.update({
       where: { id },
-      data: { status: status as any },
+      data: { status: parsedStatus.data },
     });
 
     return NextResponse.json({
       success: true,
       data: updatedItem,
-      message: `Listing status updated to ${status}`,
+      message: `Listing status updated to ${parsedStatus.data}`,
     });
   } catch (error) {
     return NextResponse.json(

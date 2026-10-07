@@ -28,7 +28,6 @@ export default function WorkplacePage() {
   const [logging, setLogging] = useState(false);
 
   const handleLogTodaySubmit = async () => {
-    const userId = session?.user?.id || "";
     setLogging(true);
 
     try {
@@ -36,7 +35,6 @@ export default function WorkplacePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
           date: new Date().toISOString().split("T")[0],
           summary: logSummary || "Completed daily PPA duties & attendance clock-in.",
           hoursWorked: 8,
@@ -85,8 +83,8 @@ export default function WorkplacePage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   React.useEffect(() => {
-    const userId = session?.user?.id || "";
-    fetch(`/api/workplace/logbook?userId=${userId}`)
+    if (!session?.user?.id) return;
+    fetch("/api/workplace/logbook")
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {

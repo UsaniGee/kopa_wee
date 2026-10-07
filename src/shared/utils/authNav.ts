@@ -23,7 +23,7 @@ export function useIsAuthenticated(): boolean {
 /**
  * Legacy check kept for non-React contexts (e.g. redirect logic outside hooks).
  * Reads from localStorage UX state — NOT a security gate. Use useIsAuthenticated() for UI guards.
- * Real auth gating is handled by middleware.ts and getServerSession() in API routes.
+ * Real auth gating is handled by proxy.ts and requireAuth() in API routes.
  */
 export function isUserAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
