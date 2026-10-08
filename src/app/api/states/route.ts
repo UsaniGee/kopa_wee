@@ -1,88 +1,40 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
-import { NIGERIA_STATES_AND_LGAS } from "@/shared/data/nigeriaStatesLgas";
 
+const unavailable = (error: string) => NextResponse.json({ success: false, error }, { status: 503 });
+
+/**
+ * GET /api/states          → all states with their LGAs
+ * GET /api/states?state=X  → LGA names for state X
+ * Read-only: States and LGAs are seeded by `prisma db seed`.
+ */
 export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const stateName = searchParams.get("state");
+  const stateName = new URL(req.url).searchParams.get("state");
 
-    let states = await prisma.state.findMany({
-      include: { lgas: true },
+  try {
+    const states = await prisma.state.findMany({
+      include: { lgas: { select: { name: true } } },
       orderBy: { name: "asc" },
     });
 
     if (states.length === 0) {
-      // Seed States and LGAs in DB
-      for (const item of NIGERIA_STATES_AND_LGAS) {
-        const stateRecord = await prisma.state.upsert({
-          where: { code: item.code },
-          update: { name: item.state },
-          create: { name: item.state, code: item.code },
-        });
-
-        for (const lgaName of item.lgas) {
-          await prisma.lGA.upsert({
-            where: {
-              stateId_name: {
-                stateId: stateRecord.id,
-                name: lgaName,
-              },
-            },
-            update: {},
-            create: {
-              name: lgaName,
-              stateId: stateRecord.id,
-            },
-          });
-        }
-      }
-
-      states = await prisma.state.findMany({
-        include: { lgas: true },
-        orderBy: { name: "asc" },
-      });
+      console.error("[GET /api/states] No states in the database. Run `pnpm prisma db seed`.");
+      return unavailable("Location data is not available yet");
     }
+
+    const lgaNames = (lgas: { name: string }[]) => lgas.map((l) => l.name).sort();
 
     if (stateName) {
       const matched = states.find((s) => s.name.toLowerCase() === stateName.toLowerCase());
-      const lgas = matched ? matched.lgas.map((l) => l.name).sort() : [];
-      return NextResponse.json({
-        success: true,
-        data: lgas,
-      });
+      return NextResponse.json({ success: true, data: matched ? lgaNames(matched.lgas) : [] });
     }
 
     return NextResponse.json({
       success: true,
-      data: states.map((s) => ({
-        id: s.id,
-        name: s.name,
-        code: s.code,
-        lgas: s.lgas.map((l) => l.name).sort(),
-      })),
+      data: states.map((s) => ({ id: s.id, name: s.name, code: s.code, lgas: lgaNames(s.lgas) })),
     });
   } catch (error) {
-    // Fallback dictionary search
-    const { searchParams } = new URL(req.url);
-    const stateName = searchParams.get("state");
-
-    if (stateName) {
-      const item = NIGERIA_STATES_AND_LGAS.find((s) => s.state.toLowerCase() === stateName.toLowerCase());
-      return NextResponse.json({
-        success: true,
-        data: item ? item.lgas.sort() : [],
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: NIGERIA_STATES_AND_LGAS.map((s, idx) => ({
-        id: `state_${s.code.toLowerCase()}_${idx}`,
-        name: s.state,
-        code: s.code,
-        lgas: s.lgas.sort(),
-      })),
-    });
+    console.error("[GET /api/states] Error:", error);
+    return unavailable("Location data is temporarily unavailable");
   }
 }

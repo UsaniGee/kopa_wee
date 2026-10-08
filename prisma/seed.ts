@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
+import { seedAdmin, seedFieldsOfStudy, seedStatesAndLgas } from "../src/shared/lib/referenceSeed";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log("🌱 Seeding reference data...");
 
   // ─── Subscription Plans ───────────────────────────────────────────────────
   const earlyAccessPlan = await prisma.subscriptionPlan.upsert({
@@ -33,84 +34,24 @@ async function main() {
       ],
     },
   });
+  console.log(`✅ Subscription plan: ${earlyAccessPlan.name}`);
 
-  console.log(`✅ Subscription plan seeded: ${earlyAccessPlan.name}`);
+  // ─── States, LGAs and onboarding options (previously seeded lazily inside GET routes) ──
+  const { states, lgas } = await seedStatesAndLgas(prisma);
+  console.log(`✅ States: ${states}, LGAs: ${lgas}`);
 
-  // ─── Default Packing Items (shared template) ──────────────────────────────
-  // These are the standard NYSC camp items. They will be created per-user when 
-  // a user first accesses their checklist. This seed just defines the canonical list.
-  const defaultPackingItems = [
-    // Documents
-    { name: "Call-up Letter (3 colored copies)", category: "documents" },
-    { name: "Green Card & Statement of Result", category: "documents" },
-    { name: "Medical Fitness Certificate", category: "documents" },
-    { name: "Birth Certificate or Age Declaration", category: "documents" },
-    { name: "Passport Photographs (12 copies)", category: "documents" },
-    // Clothing
-    { name: "White Shorts (3 pairs)", category: "clothing" },
-    { name: "Plain White T-Shirts (3)", category: "clothing" },
-    { name: "NYSC Jungle Boot (white parade ground)", category: "clothing" },
-    { name: "Crocs / Rubber Slippers (hostel use)", category: "clothing" },
-    { name: "Vest / Singlet (5 pairs)", category: "clothing" },
-    { name: "Towels (2)", category: "clothing" },
-    // Toiletries
-    { name: "Toothbrush & Toothpaste", category: "toiletries" },
-    { name: "Soap & Body Wash", category: "toiletries" },
-    { name: "Deodorant / Roll-on", category: "toiletries" },
-    { name: "Shaving Stick / Razor", category: "toiletries" },
-    // Electronics
-    { name: "Power Bank (10,000mAh minimum)", category: "electronics" },
-    { name: "Torchlight & Batteries", category: "electronics" },
-    { name: "Extension Cable", category: "electronics" },
-    // Essentials
-    { name: "Waist Bag", category: "essentials" },
-    { name: "Water Bottle (1.5L)", category: "essentials" },
-    { name: "Padlock for locker", category: "essentials" },
-    { name: "Mosquito Net / Repellent", category: "essentials" },
-    { name: "First Aid Kit", category: "essentials" },
-  ];
+  const fields = await seedFieldsOfStudy(prisma);
+  console.log(`✅ Fields of study: ${fields}`);
 
-  // Store the canonical list in FormOption for reference
-  for (const item of defaultPackingItems) {
-    await prisma.formOption.upsert({
-      where: {
-        category_value: {
-          category: "default_packing_item",
-          value: item.name,
-        },
-      },
-      update: { label: item.name },
-      create: {
-        category: "default_packing_item",
-        value: item.name,
-        label: `${item.category}:${item.name}`,
-      },
-    });
-  }
+  // The packing template now lives in src/shared/data/referenceData.ts; drop the unused copy
+  const removed = await prisma.formOption.deleteMany({ where: { category: "default_packing_item" } });
+  if (removed.count > 0) console.log(`🧹 Removed ${removed.count} unused default_packing_item rows`);
 
-  console.log(
-    `✅ Default packing items reference seeded: ${defaultPackingItems.length} items`
-  );
+  // ─── Bootstrap admin (credentials from env only, never printed) ─────────────
+  const { SEED_ADMIN_EMAIL, SEED_ADMIN_PASSWORD, SEED_ADMIN_NAME } = process.env;
+  await seedAdmin(prisma, { SEED_ADMIN_EMAIL, SEED_ADMIN_PASSWORD, SEED_ADMIN_NAME }, (msg) => console.log(`✅ ${msg}`));
 
-  // ─── Super Admin Seed ─────────────────────────────────────────────────────
-  const { hashPassword: hashPwd } = await import("../src/shared/lib/auth");
-  const adminPasswordHash = await hashPwd("KopaWeeAdmin2026!");
-  await prisma.user.upsert({
-    where: { email: "admin@kopawee.ng" },
-    update: { applicationRole: "ADMIN", isVerified: true, passwordHash: adminPasswordHash },
-    create: {
-      name: "KopaWee Admin",
-      email: "admin@kopawee.ng",
-      passwordHash: adminPasswordHash,
-      role: "PCM",
-      applicationRole: "ADMIN",
-      nyscStatus: "PCM",
-      isVerified: true,
-    },
-  });
-  console.log("✅ Super-admin seeded: admin@kopawee.ng / KopaWeeAdmin2026!");
-
-  console.log("🎉 Database seeding complete!");
+  console.log("🎉 Seeding complete!");
 }
 
 main()
