@@ -33,7 +33,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Update `axon/index.md` to link the archive.
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 3: Backend Data Integrity (FR3, API side)
+## Phase 3: Backend Data Integrity (FR3, API side) [checkpoint: c6b005f]
 
 - [x] Task: Schema migration 455255d
   - [x] Write the Prisma migration: make `UserStatusHistory.changedBy` nullable (keep `changeType`); add `User.verificationTokenExpiry DateTime?`. All changes backward compatible.
@@ -92,13 +92,15 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - [x] Task: Honest SOS API wording (A5) c6b005f
   - [x] Write a failing test: the response message describes only what actually happened, and `latitude`/`longitude` are required numbers.
   - [x] Implement, then run the tests (Green).
-- [ ] Task: Apply migrations on the Neon dev branch (owner creates the branch; never production)
-  - [ ] Confirm `.env.local` `DATABASE_URL`/`DIRECT_URL` host differs from production (`ep-super-fire-aykwex2w`).
-  - [ ] Check for drift: `prisma migrate diff --from-url $DIRECT_URL --to-migrations prisma/migrations` (or `--to-schema-datamodel` of the pre-change schema) shows no difference before baselining.
-  - [ ] `prisma migrate resolve --applied 0_init`, then `prisma migrate deploy`.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- ⏭ Deferred: Apply migrations on the Neon dev branch. Both env files still pointed at production (`ep-super-fire-aykwex2w`), so no migration ran; the owner chose to move this to the start of Phase 4 (2026-10-08).
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4: Frontend Data Integrity (FR3, UI side)
+
+- [ ] Task: Apply migrations on the Neon dev branch (owner creates the branch; never production). Must run before any UI that saves `verificationTokenExpiry` or a null `changedBy` reaches a real database.
+  - [ ] Confirm `.env.local` `DATABASE_URL`/`DIRECT_URL` host differs from production (`ep-super-fire-aykwex2w`).
+  - [ ] Check for drift: `prisma migrate diff --from-url $DIRECT_URL --to-migrations prisma/migrations` (or `--to-schema-datamodel` of the pre-change schema) shows no difference before baselining.
+  - [ ] `prisma migrate resolve --applied 0_init`, then `prisma migrate deploy`, then `pnpm prisma db seed`.
 
 - [ ] Task: Rebuild onboarding saving (A1–A3)
   - [ ] Remove the hard-coded `stateCode`, the "Lagos"/"Ikeja" defaults and the fake form defaults.
