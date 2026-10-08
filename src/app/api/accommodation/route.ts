@@ -16,7 +16,13 @@ const listingSchema = z.object({
   images: z.array(z.string()).default([]),
 });
 
+// Contact details are for signed-in users only; visitors see who is listing, not how to reach them
+const PUBLIC_PERSON = { name: true, stateCode: true, avatarUrl: true } as const;
+const MEMBER_PERSON = { ...PUBLIC_PERSON, phone: true, email: true } as const;
+
 export async function GET(req: Request) {
+  const viewer = (await requireAuth()).user;
+
   try {
     const { searchParams } = new URL(req.url);
     const state = searchParams.get("state");
@@ -49,16 +55,14 @@ export async function GET(req: Request) {
         ...(lga && { lga }),
       },
       include: {
-        owner: {
-          select: { name: true, phone: true, stateCode: true, avatarUrl: true, email: true },
-        },
+        owner: { select: viewer ? MEMBER_PERSON : PUBLIC_PERSON },
       },
       orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json({
       success: true,
-      data: listings,
+      data: viewer ? listings : listings.map((l) => ({ ...l, contactPhone: null })),
     });
   } catch (error) {
     return NextResponse.json(

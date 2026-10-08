@@ -34,9 +34,21 @@ export async function GET(req: Request) {
       });
     }
 
+    // Links issued before expiries existed have a null expiry and stay valid
+    if (user.verificationTokenExpiry && user.verificationTokenExpiry < new Date()) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "VERIFICATION_LINK_EXPIRED",
+          message: "This verification link has expired. Request a new one from the sign-in page.",
+        },
+        { status: 410 }
+      );
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
-      data: { isVerified: true, verificationToken: null },
+      data: { isVerified: true, verificationToken: null, verificationTokenExpiry: null },
     });
 
     return NextResponse.json({

@@ -25,8 +25,8 @@ function ResetPasswordContent() {
       return;
     }
 
-    if (password.length < 6) {
-      setErrorMsg("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      setErrorMsg("Password must be at least 8 characters.");
       return;
     }
 
@@ -108,7 +108,7 @@ function ResetPasswordContent() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 6 characters..."
+                    placeholder="At least 8 characters..."
                     className="w-full pl-10 pr-4 py-3 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-600 transition-colors"
                   />
                 </div>

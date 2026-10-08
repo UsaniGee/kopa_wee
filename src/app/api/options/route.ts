@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
+import { z } from "zod";
 
 export async function GET(req: NextRequest) {
   try {
@@ -25,40 +27,32 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// Categories users may extend from the UI (e.g. "Other" on the onboarding field-of-study picker)
+const USER_EXTENSIBLE_CATEGORIES = ["field_of_study"] as const;
+
+const addOptionSchema = z.object({
+  category: z.enum(USER_EXTENSIBLE_CATEGORIES),
+  value: z.string().trim().min(1, "Value is required").max(80, "Keep it under 80 characters"),
+});
+
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
-    const body = await req.json();
-    const { category, value } = body;
-
-    if (!category || !value || !value.trim()) {
-      return NextResponse.json(
-        { success: false, error: "Category and value are required" },
-        { status: 400 }
-      );
-    }
-
-    const cleanValue = value.trim();
+    const { category, value } = addOptionSchema.parse(await req.json());
 
     const option = await prisma.formOption.upsert({
-      where: {
-        category_value: {
-          category,
-          value: cleanValue,
-        },
-      },
-      update: { label: cleanValue },
-      create: {
-        category,
-        value: cleanValue,
-        label: cleanValue,
-      },
+      where: { category_value: { category, value } },
+      update: { label: value },
+      create: { category, value, label: value },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: option,
-    });
+    return NextResponse.json({ success: true, data: option });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
+    }
     console.error("POST /api/options error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to save custom option" },

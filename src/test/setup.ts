@@ -12,4 +12,5 @@ vi.mock("@/shared/lib/apiAuth", async () => (await import("./authMock")).apiAuth
 afterEach(() => {
   signOut();
   prismaMock.$reset();
+  vi.unstubAllEnvs();
 });

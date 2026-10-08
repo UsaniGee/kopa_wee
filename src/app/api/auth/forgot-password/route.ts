@@ -5,6 +5,7 @@ import PasswordResetEmail from "@/shared/emails/PasswordResetEmail";
 import { z } from "zod";
 import crypto from "crypto";
 import React from "react";
+import { appBaseUrl } from "@/shared/lib/appUrl";
 
 const forgotSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -35,8 +36,7 @@ export async function POST(req: Request) {
         },
       });
 
-      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-      const resetUrl = `${baseUrl}/auth/reset-password?token=${rawToken}`;
+      const resetUrl = `${appBaseUrl()}/auth/reset-password?token=${rawToken}`;
 
       await sendEmail({
         to: user.email,

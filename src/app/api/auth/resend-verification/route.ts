@@ -4,6 +4,8 @@ import { sendEmail } from "@/shared/lib/email";
 import VerificationEmail from "@/shared/emails/VerificationEmail";
 import { z } from "zod";
 import React from "react";
+import { appBaseUrl } from "@/shared/lib/appUrl";
+import { newVerificationToken } from "@/shared/lib/verificationToken";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -48,16 +50,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate a cryptographically secure fresh token
-    const newToken = `vtok_${crypto.randomUUID().replace(/-/g, '')}_${Date.now()}`;
+    const { token: newToken, expiresAt } = newVerificationToken();
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { verificationToken: newToken },
+      data: { verificationToken: newToken, verificationTokenExpiry: expiresAt },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const verificationUrl = `${baseUrl}/auth/verify?token=${newToken}&email=${encodeURIComponent(user.email)}`;
+    const verificationUrl = `${appBaseUrl()}/auth/verify?token=${newToken}&email=${encodeURIComponent(user.email)}`;
 
     await sendEmail({
       to: user.email,

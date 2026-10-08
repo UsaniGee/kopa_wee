@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { appBaseUrl } from "@/shared/lib/appUrl";
 import { requireAdmin } from "@/shared/lib/apiAuth";
 import { sendEmail } from "@/shared/lib/email";
 import AdminInviteEmail from "@/shared/emails/AdminInviteEmail";
@@ -38,8 +39,7 @@ export async function POST(req: NextRequest) {
       create: { email: email.toLowerCase(), token: rawToken, role, invitedBy: auth.user!.id, expiresAt },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const inviteUrl = `${baseUrl}/auth/accept-invite?token=${rawToken}`;
+    const inviteUrl = `${appBaseUrl()}/auth/accept-invite?token=${rawToken}`;
 
     // Get inviter name
     const inviter = await prisma.user.findUnique({ where: { id: auth.user!.id }, select: { name: true } });

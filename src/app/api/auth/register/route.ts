@@ -5,17 +5,15 @@ import { sendEmail } from "@/shared/lib/email";
 import VerificationEmail from "@/shared/emails/VerificationEmail";
 import { z } from "zod";
 import React from "react";
+import { appBaseUrl } from "@/shared/lib/appUrl";
+import { newVerificationToken } from "@/shared/lib/verificationToken";
 
+// Sign-up only creates the account. Role and profile are set later through validated
+// endpoints (onboarding → PATCH /api/users/me); privileged roles are never self-assigned.
 const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.enum(["PCM", "SERVING_CORPER", "CDS_EXEC", "EMPLOYER", "LGA_INSPECTOR", "ALUMNI"]).default("PCM"),
-  stateOfOrigin: z.string().optional(),
-  deployedState: z.string().optional(),
-  lga: z.string().optional(),
-  ppaName: z.string().optional(),
-  stateCode: z.string().optional(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export async function POST(req: Request) {
@@ -51,20 +49,16 @@ export async function POST(req: Request) {
     }
 
     const passwordHash = await hashPassword(validatedData.password);
-    const verificationToken = `vtok_${crypto.randomUUID().replace(/-/g, '')}_${Date.now()}`;
+    const { token: verificationToken, expiresAt: verificationTokenExpiry } = newVerificationToken();
 
     const newUser = await prisma.user.create({
       data: {
         name: validatedData.name,
         email: validatedData.email.toLowerCase().trim(),
         passwordHash,
-        role: validatedData.role,
-        stateOfOrigin: validatedData.stateOfOrigin,
-        deployedState: validatedData.deployedState,
-        lga: validatedData.lga,
-        ppaName: validatedData.ppaName,
-        stateCode: validatedData.stateCode,
+        role: "PCM",
         verificationToken,
+        verificationTokenExpiry,
         isVerified: false,
       },
       select: {
@@ -79,8 +73,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const verificationUrl = `${baseUrl}/auth/verify?token=${verificationToken}&email=${encodeURIComponent(newUser.email)}`;
+    const verificationUrl = `${appBaseUrl()}/auth/verify?token=${verificationToken}&email=${encodeURIComponent(newUser.email)}`;
 
     const emailResult = await sendEmail({
       to: newUser.email,
@@ -92,10 +85,11 @@ export async function POST(req: Request) {
     });
 
     if (!emailResult.success) {
-      // Log for debugging — user can still verify via resend flow
-      console.warn(
-        `[register] Email send failed for ${newUser.email}: ${emailResult.error}\nDev verification URL: ${verificationUrl}`
-      );
+      // The user can still verify via the resend flow. The link (a live token) is logged in development only.
+      console.warn(`[register] Email send failed for ${newUser.email}: ${emailResult.error}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`[register] Dev verification URL: ${verificationUrl}`);
+      }
     }
 
     return NextResponse.json(
