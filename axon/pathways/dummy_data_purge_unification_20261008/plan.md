@@ -2,7 +2,7 @@
 
 Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2" point to spec requirements; codes like "A1" point to audit findings.
 
-## Phase 1: Testing Foundation & Workflow (FR2)
+## Phase 1: Testing Foundation & Workflow (FR2) [checkpoint: 14e6257]
 
 - [x] Task: Install and configure Vitest 4819880
   - [x] Add `vitest` as a dev dependency. Create `vitest.config.mts` with the `@/` path alias. (Deviation: Vite's built-in `resolve.alias` instead of `vite-tsconfig-paths`, one fewer dependency.)
@@ -12,7 +12,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - [x] Task: Rewrite `axon/workflow.md` for how the project actually works 14e6257
   - [x] TDD for API routes and logic; manual verification for UI.
   - [x] Drop the 80% coverage target. Fill in "Development Commands" with the real commands: `pnpm dev`, `pnpm test`, `pnpm lint`, `npx tsc --noEmit`, `pnpm build`, and the Prisma migrate/seed commands.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 2: AXON Records Unification (FR1)
 
