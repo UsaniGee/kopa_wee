@@ -18,7 +18,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 - [x] Task: Normalise all `metadata.json` statuses ed99720
   - [x] Use `new | in_progress | completed | superseded` for all 46. Create the missing `modal_carousel_fix_20260821/metadata.json`.
-- [~] Task: Mark superseded pathways
+- [x] Task: Mark superseded pathways 39bc5f3
   - [x] `flat_design_refactor_20260821`, `flat_borderless_sweep_20260821` and `rally_padel_refactor_20260821` are superseded by `soft_edge_bordered_design_20260827`. Add a note to each `index.md`.
   - [x] Add a note on the Resend tasks in `security_hardening_unified_auth_20260910` and `email_invite_auth_errors_20260914` saying they were superseded by `nodemailer_gmail_smtp_20260914`.
 - [ ] Task: Reconcile open tasks in finished pathways
