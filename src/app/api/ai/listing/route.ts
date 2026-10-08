@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
+import { getGeminiModel } from "@/shared/lib/gemini";
 
 const requestSchema = z.object({
   message: z.string().min(1).max(1000),
@@ -70,9 +71,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // API key check
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  const model = getGeminiModel({ systemInstruction: KOPAWEE_SYSTEM_PROMPT });
+  if (!model) {
     console.warn("[AI] GEMINI_API_KEY not set — returning AI_NOT_CONFIGURED");
     return NextResponse.json(
       { success: false, error: "AI_NOT_CONFIGURED" },
@@ -83,15 +83,6 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { message, context } = requestSchema.parse(body);
-
-    // Dynamic import to avoid build failure when package not yet installed
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-3.8-flash",
-      systemInstruction: KOPAWEE_SYSTEM_PROMPT,
-    });
 
     const userMessage = context
       ? `[User context: ${context}]\n\n${message}`

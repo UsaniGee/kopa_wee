@@ -43,3 +43,6 @@ export const DEFAULT_PACKING_ITEMS: ReadonlyArray<{ name: string; category: stri
   { name: "Mosquito Net / Repellent", category: "essentials" },
   { name: "First Aid Kit", category: "essentials" },
 ];
+
+/** Marketplace listing categories (filter chips, post form and AI extraction). */
+export const MARKETPLACE_CATEGORIES = ["Pre-Camp Gear", "Furniture", "Electronics", "Kitchenware", "Full House"] as const;
