@@ -54,4 +54,4 @@
 - [x] **Pathway: Email Delivery Fix, Admin Invite 400 & Auth Error UX Polish** *Link: [index.md](./pathways/email_invite_auth_errors_20260914/index.md)*
 - [x] **Pathway: Roommate Request Cancel Alert & Missing Edit UI Fix, Document Upload, & Calendar Sync** *Link: [index.md](./pathways/roommate_cancel_edit_fix_20260914/index.md)*
 - [~] **Pathway: Nodemailer Gmail SMTP Email Delivery Migration** *Link: [index.md](./pathways/nodemailer_gmail_smtp_20260914/index.md)*
-- [ ] **Pathway: Dummy Data Purge, Data Integrity & AXON Records Unification** *Link: [index.md](./pathways/dummy_data_purge_unification_20261008/index.md)*
+- [~] **Pathway: Dummy Data Purge, Data Integrity & AXON Records Unification** *Link: [index.md](./pathways/dummy_data_purge_unification_20261008/index.md)*
