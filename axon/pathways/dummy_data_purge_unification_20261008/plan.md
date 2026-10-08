@@ -51,14 +51,14 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
     - Protect the cron POST.
     - Add a `crons` entry to `vercel.json`.
   - [x] Run the tests (Green).
-- [ ] Task: Profile save endpoint for onboarding (A1–A3)
-  - [ ] Write failing tests:
+- [x] Task: Profile save endpoint for onboarding (A1–A3) c735888
+  - [x] Write failing tests:
     - PATCH saves `nyscStatus`, phone, institution, courseOfStudy, batch, stream, deployedState, lga and stateCode for the session user.
     - Rejects a malformed state code.
     - Returns 409 when the state code is already taken.
     - Rejects an LGA not in the chosen state.
-  - [ ] Implement it (extend `PATCH /api/users/role` or add `PATCH /api/users/me`), validating state and LGA against the States table.
-  - [ ] Run the tests (Green).
+  - [x] Implement it as `PATCH /api/users/me` (one profile endpoint for onboarding and settings), validating state and LGA against the States table. Also: Nigerian phone normalised to +234; call-up number format; NYSC status self-declared once (no history) and logged, otherwise 409 `STATUS_ALREADY_SET`.
+  - [x] Run the tests (Green).
 - [ ] Task: Seed and reference data (A7)
   - [ ] Write failing tests for the seed helpers: admin is created from env only, an existing admin password is not overwritten, and nothing is printed.
   - [ ] Implement:
@@ -104,6 +104,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [ ] Remove the hard-coded `stateCode`, the "Lagos"/"Ikeja" defaults and the fake form defaults.
   - [ ] Add state and LGA pickers from `/api/states` and an optional state-code input with a format hint.
   - [ ] Call the profile endpoint, check the response, show errors, then call `useSession().update()`.
+  - [ ] Delete `src/app/api/users/role/route.ts` once onboarding uses `PATCH /api/users/me` (it accepts client-chosen roles and the old field set).
   - [ ] Send email sign-ups to `/onboarding` after their first sign-in when the profile is incomplete.
   - [ ] Manual check: two new users complete onboarding with different states, and both are saved correctly.
 - [ ] Task: SOS location (A4)
