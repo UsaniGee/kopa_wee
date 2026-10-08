@@ -67,14 +67,14 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
     - `/api/states`, `/api/options` and `/api/packing-items` read from seeded data, with no lazy writes in GET handlers.
     - `/api/states` returns 503 on a DB error instead of fake IDs.
   - [x] Run the tests (Green).
-- [ ] Task: AI listing helper with real Gemini (A11)
-  - [ ] Write failing tests (Gemini client mocked):
+- [x] Task: AI listing helper with real Gemini (A11) 570c58f
+  - [x] Write failing tests (Gemini client mocked):
     - Returns 401 when signed out.
     - Returns `AI_NOT_CONFIGURED` with no key.
     - A state/LGA not in the States table comes back as `null`.
     - Never returns a stock image or default location.
-  - [ ] Implement `/api/ai/listing/analyse` with `gemini-3.8-flash` and a strict JSON response schema. Accept images as input.
-  - [ ] Run the tests (Green).
+  - [x] Implement `/api/ai/listing/analyse` with `gemini-3.8-flash` and a strict JSON response schema. Accept images as input. Shared `src/shared/lib/gemini.ts` (model overridable via `GEMINI_MODEL`), also used by the KopaBot assistant route (4 tests added). Category validated against `MARKETPLACE_CATEGORIES`; the route is marketplace-only (the old accommodation branch had no callers).
+  - [x] Run the tests (Green).
 - [ ] Task: Security leftovers (FR3.8)
   - [ ] Write failing tests:
     - `POST /api/options` returns 401 when signed out and 400 for oversized or unknown-category values.
