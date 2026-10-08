@@ -16,7 +16,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 ## Phase 2: AXON Records Unification (FR1)
 
-- [~] Task: Normalise all `metadata.json` statuses
+- [x] Task: Normalise all `metadata.json` statuses ed99720
   - [x] Use `new | in_progress | completed | superseded` for all 46. Create the missing `modal_carousel_fix_20260821/metadata.json`.
 - [ ] Task: Mark superseded pathways
   - [ ] `flat_design_refactor_20260821`, `flat_borderless_sweep_20260821` and `rally_padel_refactor_20260821` are superseded by `soft_edge_bordered_design_20260827`. Add a note to each `index.md`.
