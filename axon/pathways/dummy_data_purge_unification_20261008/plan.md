@@ -59,14 +59,14 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
     - Rejects an LGA not in the chosen state.
   - [x] Implement it as `PATCH /api/users/me` (one profile endpoint for onboarding and settings), validating state and LGA against the States table. Also: Nigerian phone normalised to +234; call-up number format; NYSC status self-declared once (no history) and logged, otherwise 409 `STATUS_ALREADY_SET`.
   - [x] Run the tests (Green).
-- [ ] Task: Seed and reference data (A7)
-  - [ ] Write failing tests for the seed helpers: admin is created from env only, an existing admin password is not overwritten, and nothing is printed.
-  - [ ] Implement:
+- [x] Task: Seed and reference data (A7) 4fe1d3d
+  - [x] Write failing tests for the seed helpers: admin is created from env only, an existing admin password is not overwritten, and nothing is printed.
+  - [x] Implement:
     - Admin from `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD`.
     - Seed States/LGAs, fields of study and the packing template.
     - `/api/states`, `/api/options` and `/api/packing-items` read from seeded data, with no lazy writes in GET handlers.
     - `/api/states` returns 503 on a DB error instead of fake IDs.
-  - [ ] Run the tests (Green).
+  - [x] Run the tests (Green).
 - [ ] Task: AI listing helper with real Gemini (A11)
   - [ ] Write failing tests (Gemini client mocked):
     - Returns 401 when signed out.
