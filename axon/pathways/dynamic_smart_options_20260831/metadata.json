@@ -1,8 +1,8 @@
 {
   "id": "dynamic_smart_options_20260831",
   "type": "Feature",
-  "status": "new",
+  "status": "completed",
+  "description": "Implement self-learning dynamic form dropdowns backed by Neon PostgreSQL (FormOption table and GET/POST /api/options endpoints), starting with disabled default placeholders and 'Other (Specify)' custom input.",
   "createdAt": "2026-08-31T17:22:00Z",
-  "updatedAt": "2026-08-31T17:22:00Z",
-  "description": "Implement self-learning dynamic form dropdowns backed by Neon PostgreSQL (FormOption table and GET/POST /api/options endpoints), starting with disabled default placeholders and 'Other (Specify)' custom input."
+  "updatedAt": "2026-10-08T00:00:00.000Z"
 }

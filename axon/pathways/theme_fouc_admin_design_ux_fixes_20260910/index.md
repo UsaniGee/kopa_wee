@@ -2,7 +2,7 @@
 
 **ID:** `theme_fouc_admin_design_ux_fixes_20260910`
 **Type:** Bug/Feature
-**Status:** in_progress
+**Status:** completed
 **Created:** 2026-09-10
 
 ## Documents

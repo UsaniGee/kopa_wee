@@ -2,7 +2,7 @@
 
 **ID:** `dummy_data_purge_unification_20261008`
 **Type:** Refactor/Chore
-**Status:** new
+**Status:** in_progress
 **Created:** 2026-10-08
 
 ## Documents

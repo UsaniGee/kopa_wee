@@ -2,7 +2,7 @@
 
 **ID:** `security_hardening_unified_auth_20260910`
 **Type:** Refactor/Security
-**Status:** new
+**Status:** completed
 **Created:** 2026-09-10
 
 ## Documents

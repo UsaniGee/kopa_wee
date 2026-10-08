@@ -1,7 +1,8 @@
 {
   "id": "admin_navbar_mobile_icons_20260911",
   "type": "bug",
-  "status": "in-progress",
-  "created_at": "2026-09-11T12:43:00+01:00",
-  "updated_at": "2026-09-11T12:43:00+01:00"
+  "status": "completed",
+  "description": "Admin Dashboard Responsive Header \u2014 Icon-Only Buttons on Mobile",
+  "createdAt": "2026-09-11T12:43:00+01:00",
+  "updatedAt": "2026-10-08T00:00:00.000Z"
 }

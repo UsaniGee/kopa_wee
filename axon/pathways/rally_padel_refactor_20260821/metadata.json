@@ -1,7 +1,9 @@
 {
   "id": "rally_padel_refactor_20260821",
   "type": "Chore / Refactor",
-  "status": "in_progress",
+  "status": "superseded",
+  "description": "Rally Padel Inspired Design Refactor",
   "createdAt": "2026-08-21T11:23:00Z",
-  "title": "Rally Padel Inspired Design Refactor"
+  "updatedAt": "2026-10-08T00:00:00.000Z",
+  "supersededBy": "soft_edge_bordered_design_20260827"
 }

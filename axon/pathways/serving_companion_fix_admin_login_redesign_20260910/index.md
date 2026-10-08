@@ -2,7 +2,7 @@
 
 **ID:** `serving_companion_fix_admin_login_redesign_20260910`
 **Type:** Bug/Feature
-**Status:** in_progress
+**Status:** completed
 
 ## Documents
 - [Spec](./spec.md)

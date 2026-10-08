@@ -1,7 +1,8 @@
 {
   "id": "navbar_role_badge_mobile_20260911",
   "type": "bug",
-  "status": "in-progress",
-  "created_at": "2026-09-11T09:54:00+01:00",
-  "updated_at": "2026-09-11T09:54:00+01:00"
+  "status": "completed",
+  "description": "Navbar Role Badge \u2014 Responsive Mobile Abbreviation (SCM)",
+  "createdAt": "2026-09-11T09:54:00+01:00",
+  "updatedAt": "2026-10-08T00:00:00.000Z"
 }

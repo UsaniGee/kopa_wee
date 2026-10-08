@@ -2,7 +2,7 @@
 
 **ID:** `auth_startup_onboarding_name_fix_20260910`
 **Type:** Bug
-**Status:** in_progress
+**Status:** completed
 **Created:** 2026-09-10
 
 ## Documents

@@ -1,7 +1,9 @@
 {
   "id": "flat_borderless_sweep_20260821",
-  "name": "Flat Borderless Design Sweep Across KopaWee+",
   "type": "refactor",
-  "status": "in_progress",
-  "createdAt": "2026-08-21T14:45:00Z"
+  "status": "superseded",
+  "description": "Flat Borderless Design Sweep Across KopaWee+",
+  "createdAt": "2026-08-21T14:45:00Z",
+  "updatedAt": "2026-10-08T00:00:00.000Z",
+  "supersededBy": "soft_edge_bordered_design_20260827"
 }

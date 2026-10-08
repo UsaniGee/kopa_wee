@@ -1,7 +1,8 @@
 {
   "id": "nodemailer_gmail_smtp_20260914",
   "type": "feature",
-  "status": "in-progress",
-  "created_at": "2026-09-14T17:00:00Z",
-  "updated_at": "2026-09-14T17:00:00Z"
+  "status": "in_progress",
+  "description": "Nodemailer Gmail SMTP Email Delivery Migration",
+  "createdAt": "2026-09-14T17:00:00Z",
+  "updatedAt": "2026-10-08T00:00:00.000Z"
 }

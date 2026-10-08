@@ -1,8 +1,8 @@
 {
   "id": "clearance_checklist_role_subscription_20260904",
-  "name": "NYSC Platform — Clearance, Packing Checklist, Role Status & Subscription Implementation",
   "type": "Feature",
-  "status": "in-progress",
+  "status": "completed",
+  "description": "NYSC Platform \u2014 Clearance, Packing Checklist, Role Status & Subscription Implementation",
   "createdAt": "2026-09-04T11:09:00Z",
-  "updatedAt": "2026-09-04T11:09:00Z"
+  "updatedAt": "2026-10-08T00:00:00.000Z"
 }
