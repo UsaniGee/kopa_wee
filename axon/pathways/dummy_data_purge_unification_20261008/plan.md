@@ -14,7 +14,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Drop the 80% coverage target. Fill in "Development Commands" with the real commands: `pnpm dev`, `pnpm test`, `pnpm lint`, `npx tsc --noEmit`, `pnpm build`, and the Prisma migrate/seed commands.
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 2: AXON Records Unification (FR1)
+## Phase 2: AXON Records Unification (FR1) [checkpoint: 220c8dc]
 
 - [x] Task: Normalise all `metadata.json` statuses ed99720
   - [x] Use `new | in_progress | completed | superseded` for all 46. Create the missing `modal_carousel_fix_20260821/metadata.json`.
@@ -31,7 +31,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Write `axon/archive/README.md`: one line per pathway with date, outcome and status. Note that the three "purge dummy data" pathways were incomplete and are finished by this pathway.
   - [x] Rewrite `axon/pathways.md` to hold only live pathways (Nodemailer, this one) plus an archive link. Every link points to `index.md`, with no stray blank lines.
   - [x] Update `axon/index.md` to link the archive.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Backend Data Integrity (FR3, API side)
 
