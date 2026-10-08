@@ -75,20 +75,20 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
     - Never returns a stock image or default location.
   - [x] Implement `/api/ai/listing/analyse` with `gemini-3.8-flash` and a strict JSON response schema. Accept images as input. Shared `src/shared/lib/gemini.ts` (model overridable via `GEMINI_MODEL`), also used by the KopaBot assistant route (4 tests added). Category validated against `MARKETPLACE_CATEGORIES`; the route is marketplace-only (the old accommodation branch had no callers).
   - [x] Run the tests (Green).
-- [ ] Task: Security leftovers (FR3.8)
-  - [ ] Write failing tests:
+- [x] Task: Security leftovers (FR3.8) 50cf503
+  - [x] Write failing tests:
     - `POST /api/options` returns 401 when signed out and 400 for oversized or unknown-category values.
     - `register` rejects any role other than PCM.
     - Listing GETs for signed-out users hide seller/owner email and phone.
     - Verification fails once the token has expired.
-  - [ ] Implement:
+  - [x] Implement:
     - Auth and validation on options.
     - Lock the role on register.
     - Select contact fields only when signed in.
     - Set and check `verificationTokenExpiry`.
     - One required-env helper for `NEXTAUTH_URL` (no localhost fallback in production).
     - Unify the minimum password length at 8.
-  - [ ] Run the tests (Green).
+  - [x] Run the tests (Green).
 - [ ] Task: Honest SOS API wording (A5)
   - [ ] Write a failing test: the response message describes only what actually happened, and `latitude`/`longitude` are required numbers.
   - [ ] Implement, then run the tests (Green).
