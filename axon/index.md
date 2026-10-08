@@ -13,7 +13,7 @@
 
 ## Capabilities
 
-- [VS Code Copilot Prompts](../.github/prompts/) — slash-command prompts for Copilot in VS Code
+- [Claude Code Skills](../.claude/skills/) — AXON skills linked for Claude Code (symlinks into the plugin; see CLAUDE.md)
 - [AXON Skills](../.cursor/skills/) — detailed instructions for AXON workflows
 - [AXON Plugin](../.cursor/plugins/axon/) — upstream plugin source (update via `scripts/install-axon-cursor.sh`)
 
@@ -21,3 +21,4 @@
 
 - [Pathways Registry](./pathways.md)
 - [Pathways Directory](./pathways/)
+- [Pathway Archive](./archive/README.md) — 45 finished/superseded pathways (2026-08-12 → 2026-09-14)

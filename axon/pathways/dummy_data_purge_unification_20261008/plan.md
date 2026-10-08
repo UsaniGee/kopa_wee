@@ -26,11 +26,11 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Check `soft_edge_bordered_design_20260827`'s 8 tasks against the code and tick what is done. Do the same for `role_dashboards_20260821` (5) and `hero_layout_fix_20260819` (1).
 - [x] Task: Fill the missing pathway files 4ddd0e6
   - [x] Write retroactive `plan.md` files from git history for `theme_fouc_admin_design_ux_fixes_20260910`, `serving_companion_fix_admin_login_redesign_20260910` and `password_flash_invite_roommate_20260911`. Add the missing `index.md`/`spec.md` stubs and `flat_borderless_sweep_20260821/index.md`.
-- [ ] Task: Archive and restructure the registry
-  - [ ] Move every completed or superseded pathway to `axon/archive/<id>/`.
-  - [ ] Write `axon/archive/README.md`: one line per pathway with date, outcome and status. Note that the three "purge dummy data" pathways were incomplete and are finished by this pathway.
-  - [ ] Rewrite `axon/pathways.md` to hold only live pathways (Nodemailer, this one) plus an archive link. Every link points to `index.md`, with no stray blank lines.
-  - [ ] Update `axon/index.md` to link the archive.
+- [~] Task: Archive and restructure the registry
+  - [x] Move every completed or superseded pathway to `axon/archive/<id>/`.
+  - [x] Write `axon/archive/README.md`: one line per pathway with date, outcome and status. Note that the three "purge dummy data" pathways were incomplete and are finished by this pathway.
+  - [x] Rewrite `axon/pathways.md` to hold only live pathways (Nodemailer, this one) plus an archive link. Every link points to `index.md`, with no stray blank lines.
+  - [x] Update `axon/index.md` to link the archive.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 3: Backend Data Integrity (FR3, API side)
