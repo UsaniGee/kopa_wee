@@ -5,9 +5,12 @@
 1.  **The Plan is the Source of Truth:** All work must be recorded in `plan.md`
 2.  **The Tech Stack is Deliberate:** Changes to the tech stack must be
     documented in `tech-stack.md` *before* implementation
-3.  **Test-Driven Development:** Write unit tests before implementing
-    functionality
-4.  **High Code Coverage:** Aim for >80% code coverage for all modules
+3.  **Test-Driven Development for Logic:** API route handlers and pure logic
+    get Vitest tests written *before* the implementation. UI components are
+    verified manually (see Phase Completion protocol).
+4.  **Meaningful Coverage, Not a Number:** Every API route a task touches is
+    tested for success, auth failure, and invalid input. There is no global
+    coverage percentage target for now.
 5.  **User Experience First:** Every decision should prioritize user experience
 6.  **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use
     `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
@@ -24,9 +27,12 @@ All tasks follow a strict lifecycle:
 2.  **Mark In Progress:** Before beginning work, edit `plan.md` and change the
     task from `[ ]` to `[~]`
 
-3.  **Write Failing Tests (Red Phase):**
+3.  **Write Failing Tests (Red Phase):** *(API routes and logic; UI-only tasks
+    skip to step 4 and are verified manually.)*
 
-    -   Create a new test file for the feature or bug fix.
+    -   Create or extend a co-located `*.test.ts` file (e.g.
+        `src/app/api/<route>/route.test.ts`). Use the shared mocks in
+        `src/test/` (`prismaMock`, `signInAs`/`signOut`) — never a real DB.
     -   Write one or more unit tests that clearly define the expected behavior
         and acceptance criteria for the task.
     -   **CRITICAL:** Run the tests and confirm that they fail as expected. This
@@ -46,10 +52,9 @@ All tasks follow a strict lifecycle:
         performance without changing the external behavior.
     -   Rerun tests to ensure they still pass after refactoring.
 
-6.  **Verify Coverage:** Run coverage reports using the project's chosen tools.
-    For example, in a Python project, this might look like: `bash pytest
-    --cov=app --cov-report=html` Target: >80% coverage for new code. The
-    specific tools and commands will vary by language and framework.
+6.  **Verify:** Run `pnpm test`, `npx tsc --noEmit`, and ESLint on the changed
+    files. The ESLint error count must not go up (the codebase has pre-existing
+    errors; new code must not add to them).
 
 7.  **Document Deviations:** If implementation differs from tech stack:
 
@@ -131,7 +136,12 @@ that also concludes a phase in `plan.md`.
     -   **Step 2.3: Verify and Create Tests:** For each file in the list:
         -   **CRITICAL:** First, check its extension. Exclude non-code files
             (e.g., `.json`, `.md`, `.yaml`).
-        -   For each remaining code file, verify a corresponding test file
+        -   Also exclude UI files (`page.tsx`, `layout.tsx`, components under
+            `src/shared/components/`); these are covered by the manual
+            verification plan in step 4.
+        -   For each remaining code file (API route handlers under
+            `src/app/api/`, and logic in `src/shared/lib/`, `src/shared/utils/`,
+            `src/auth.ts`, `src/proxy.ts`), verify a corresponding test file
             exists.
         -   If a test file is missing, you **must** create one. Before writing
             the test, **first, analyze other test files in the repository to
@@ -144,7 +154,7 @@ that also concludes a phase in `plan.md`.
     -   Before execution, you **must** announce the exact shell command you will
         use to run the tests.
     -   **Example Announcement:** "I will now run the automated test suite to
-        verify the phase. **Command:** `CI=true npm test`"
+        verify the phase. **Command:** `CI=true pnpm test`"
     -   Execute the announced command.
     -   If tests fail, you **must** inform the user and begin debugging. You may
         attempt to propose a fix a **maximum of two times**. If the tests still
@@ -220,69 +230,72 @@ that also concludes a phase in `plan.md`.
 
 Before marking any task complete, verify:
 
--   [ ] All tests pass
--   [ ] Code coverage meets requirements (>80%)
+-   [ ] All tests pass (`pnpm test`)
+-   [ ] Every API route touched has success, auth-failure and invalid-input tests
 -   [ ] Code follows project's code style guidelines (as defined in
     `code_styleguides/`)
 -   [ ] All public functions/methods are documented (e.g., docstrings, JSDoc,
     GoDoc)
 -   [ ] Type safety is enforced (e.g., type hints, TypeScript types, Go types)
--   [ ] No linting or static analysis errors (using the project's configured
-    tools)
+-   [ ] `npx tsc --noEmit` is clean and no new ESLint errors were introduced
 -   [ ] Works correctly on mobile (if applicable)
 -   [ ] Documentation updated if needed
 -   [ ] No security vulnerabilities introduced
 
 ## Development Commands
 
-**AI AGENT INSTRUCTION: This section should be adapted to the project's specific
-language, framework, and build tools.**
+Package manager is **pnpm**.
 
 ### Setup
 
 ```bash
-# Example: Commands to set up the development environment (e.g., install dependencies, configure database)
-# e.g., for a Node.js project: npm install
-# e.g., for a Go project: go mod tidy
+pnpm install
+cp .env.example .env        # then fill in values (never commit .env)
+pnpm prisma migrate dev     # apply migrations to your local database
+pnpm prisma db seed         # reference data + admin from SEED_ADMIN_* env vars
 ```
 
 ### Daily Development
 
 ```bash
-# Example: Commands for common daily tasks (e.g., start dev server, run tests, lint, format)
-# e.g., for a Node.js project: npm run dev, npm test, npm run lint
-# e.g., for a Go project: go run main.go, go test ./..., go fmt ./...
+pnpm dev                    # start Next.js on http://localhost:3000
+pnpm test                   # run Vitest once (vitest run)
+pnpm exec vitest            # Vitest in watch mode while writing tests
+pnpm lint                   # ESLint
+pnpm prisma studio          # inspect the database
 ```
 
 ### Before Committing
 
 ```bash
-# Example: Commands to run all pre-commit checks (e.g., format, lint, type check, run tests)
-# e.g., for a Node.js project: npm run check
-# e.g., for a Go project: make check (if a Makefile exists)
+pnpm test
+npx tsc --noEmit
+pnpm exec eslint <changed files>
+pnpm build                  # required at every phase checkpoint
 ```
 
 ## Testing Requirements
 
-### Unit Testing
+### API & Logic Tests (Vitest)
 
--   Every module must have corresponding tests.
--   Use appropriate test setup/teardown mechanisms (e.g., fixtures,
-    beforeEach/afterEach).
--   Mock external dependencies.
--   Test both success and failure cases.
+-   Tests live next to the code as `*.test.ts` and run in a Node environment.
+-   Prisma and `apiAuth` are mocked globally by `src/test/setup.ts`; stub only
+    the calls a test needs via `prismaMock` and control the session with
+    `signInAs()` / `signOut()`. Mocks reset after every test.
+-   Cover success, auth failure (401/403) and invalid input (400) for every
+    route handler touched. Mock external services (Gemini, SMTP).
 
-### Integration Testing
+### UI Verification (manual)
 
--   Test complete user flows
--   Verify database transactions
--   Test authentication and authorization
--   Check form submissions
+-   Follow the manual verification steps produced at each phase checkpoint.
+-   Check signed-in and signed-out states, error states, and form submissions
+    against the real dev database.
+-   Component tests (React Testing Library) may be added later; not required.
 
 ### Mobile Testing
 
--   Test on actual iPhone when possible
--   Use Safari developer tools
+-   Test on a real Android or iPhone when possible (most users are on Android)
+-   Use the browser's device emulation for quick checks
 -   Test touch interactions
 -   Verify responsive layouts
 -   Check performance on 3G/4G
@@ -308,9 +321,8 @@ Before requesting review:
 
 3.  **Testing**
 
-    -   Unit tests comprehensive
-    -   Integration tests pass
-    -   Coverage adequate (>80%)
+    -   API/logic tests cover success, auth failure and invalid input
+    -   All tests pass
 
 4.  **Security**
 
@@ -368,8 +380,8 @@ git commit -m "style(mobile): Improve button touch targets"
 A task is complete when:
 
 1.  All code implemented to specification
-2.  Unit tests written and passing
-3.  Code coverage meets project requirements
+2.  API/logic tests written first and passing (UI verified manually)
+3.  `tsc` clean, no new ESLint errors, `pnpm build` passes at phase checkpoints
 4.  Documentation complete (if applicable)
 5.  Code passes all configured linting and static analysis checks
 6.  Works beautifully on mobile (if applicable)
@@ -409,8 +421,8 @@ A task is complete when:
 ### Pre-Deployment Checklist
 
 -   [ ] All tests passing
--   [ ] Coverage >80%
--   [ ] No linting errors
+-   [ ] `pnpm build` succeeds
+-   [ ] No new linting errors
 -   [ ] Mobile testing complete
 -   [ ] Environment variables configured
 -   [ ] Database migrations ready
