@@ -25,7 +25,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] `security_hardening_unified_auth_20260910`: tick the tasks the 2026-10-06 review confirmed are built, citing `48f729f` and earlier commits. Move the remaining tasks (tests, clearance-due and logbook-approved email triggers) into the "Deferred" section of this plan.
   - [x] Check `soft_edge_bordered_design_20260827`'s 8 tasks against the code and tick what is done. Do the same for `role_dashboards_20260821` (5) and `hero_layout_fix_20260819` (1).
 - [~] Task: Fill the missing pathway files
-  - [ ] Write retroactive `plan.md` files from git history for `theme_fouc_admin_design_ux_fixes_20260910`, `serving_companion_fix_admin_login_redesign_20260910` and `password_flash_invite_roommate_20260911`. Add the missing `index.md`/`spec.md` stubs and `flat_borderless_sweep_20260821/index.md`.
+  - [x] Write retroactive `plan.md` files from git history for `theme_fouc_admin_design_ux_fixes_20260910`, `serving_companion_fix_admin_login_redesign_20260910` and `password_flash_invite_roommate_20260911`. Add the missing `index.md`/`spec.md` stubs and `flat_borderless_sweep_20260821/index.md`.
 - [ ] Task: Archive and restructure the registry
   - [ ] Move every completed or superseded pathway to `axon/archive/<id>/`.
   - [ ] Write `axon/archive/README.md`: one line per pathway with date, outcome and status. Note that the three "purge dummy data" pathways were incomplete and are finished by this pathway.
