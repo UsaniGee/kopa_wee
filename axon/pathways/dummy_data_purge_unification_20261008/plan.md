@@ -4,11 +4,11 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 ## Phase 1: Testing Foundation & Workflow (FR2)
 
-- [ ] Task: Install and configure Vitest
-  - [ ] Add `vitest` and `vite-tsconfig-paths` as dev dependencies. Create `vitest.config.ts` with the `@/` path alias.
-  - [ ] Add a `test` script (`vitest run`) to `package.json`.
-  - [ ] Add a shared Prisma mock (`src/test/prismaMock.ts`) and an auth mock for `requireAuth`/`requireAdmin`.
-  - [ ] Write one smoke test for `GET /api/health` and confirm it runs.
+- [x] Task: Install and configure Vitest 4819880
+  - [x] Add `vitest` as a dev dependency. Create `vitest.config.mts` with the `@/` path alias. (Deviation: Vite's built-in `resolve.alias` instead of `vite-tsconfig-paths`, one fewer dependency.)
+  - [x] Add a `test` script (`vitest run`) to `package.json`.
+  - [x] Add a shared Prisma mock (`src/test/prismaMock.ts`) and an auth mock for `requireAuth`/`requireAdmin` (`src/test/authMock.ts`, wired in `src/test/setup.ts`, self-tested in `src/test/mocks.test.ts`).
+  - [x] Write one smoke test for `GET /api/health` and confirm it runs.
 - [ ] Task: Rewrite `axon/workflow.md` for how the project actually works
   - [ ] TDD for API routes and logic; manual verification for UI.
   - [ ] Drop the 80% coverage target. Fill in "Development Commands" with the real commands: `pnpm dev`, `pnpm test`, `pnpm lint`, `npx tsc --noEmit`, `pnpm build`, and the Prisma migrate/seed commands.
