@@ -38,19 +38,19 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - [x] Task: Schema migration 455255d
   - [x] Write the Prisma migration: make `UserStatusHistory.changedBy` nullable (keep `changeType`); add `User.verificationTokenExpiry DateTime?`. All changes backward compatible.
   - [x] Baseline Prisma Migrate (owner decision 2026-10-08; the schema was previously applied with `db push`): offline `0_init` (20 tables = 20 models) plus `20261008000000_nullable_changedby_verification_expiry`. Add `directUrl` for Neon. Document `DIRECT_URL`. Fix the workflow.md migration commands.
-- [ ] Task: Status lifecycle (A6, A12)
-  - [ ] Write failing tests:
+- [x] Task: Status lifecycle (A6, A12) e301ddb
+  - [x] Write failing tests:
     - SERVING→ALUMNI is allowed.
     - `users/status` takes the user from the session (no body `userId`).
     - The cron evaluator writes `changedBy: null` for system changes.
     - Cron POST without CRON_SECRET returns 401.
-  - [ ] Implement:
+  - [x] Implement:
     - Update `ALLOWED_MANUAL_TRANSITIONS`.
     - Remove the body `userId` from `users/status` and `clearance`.
     - Change `"SYSTEM"` → `null` in the cron route.
     - Protect the cron POST.
     - Add a `crons` entry to `vercel.json`.
-  - [ ] Run the tests (Green).
+  - [x] Run the tests (Green).
 - [ ] Task: Profile save endpoint for onboarding (A1–A3)
   - [ ] Write failing tests:
     - PATCH saves `nyscStatus`, phone, institution, courseOfStudy, batch, stream, deployedState, lga and stateCode for the session user.
