@@ -5,5 +5,5 @@
   "description": "Modern Soft-Edge & Bordered Design System Alignment",
   "createdAt": "2026-08-27T10:27:00Z",
   "updatedAt": "2026-10-08T00:00:00.000Z",
-  "notes": "Border rules canonical; radius rules superseded by sharp 0rem edges (1da4525)."
+  "notes": "Border rules canonical; radius rules superseded by sharp 0rem edges (c3a6671, 2026-08-31)."
 }
