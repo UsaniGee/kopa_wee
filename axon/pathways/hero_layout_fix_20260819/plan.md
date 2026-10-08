@@ -6,4 +6,4 @@
 - [x] Task: Refactor Hero image to act as a true background layer (using Next.js `Image` or CSS background).
 - [x] Task: Apply responsive text alignment (`text-center` for mobile, `md:text-left` for desktop).
 - [x] Task: Apply greenish-to-transparent gradient overlay to ensure text readability.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- ⏭ Not performed: Task: Phase Verification & Checkpoint (Refer to workflow.md) — never recorded; hero later reworked by modal_carousel_fix_20260821 and soft_edge_bordered_design_20260827

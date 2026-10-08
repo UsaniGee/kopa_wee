@@ -201,7 +201,7 @@ Paths are relative to the repo root.
 ### F4. Decisions that contradict each other
 | Topic | Conflicting pathways | Reality in code | Verdict |
 |---|---|---|---|
-| Design system | `flat_design_refactor_20260821` + `flat_borderless_sweep_20260821` (flat, borderless) vs `soft_edge_bordered_design_20260827` (bordered) | 247 `border border-*` uses vs 2 `border-0` and 4 `rounded-none`. Bordered won. | Mark both flat pathways **superseded**; tick off the soft-edge pathway |
+| Design system | `flat_design_refactor_20260821` + `flat_borderless_sweep_20260821` (flat, borderless) vs `soft_edge_bordered_design_20260827` (rounded + bordered) vs `theme_fouc_admin_design_ux_fixes_20260910` (sharp 0rem base layer, `1da4525`) | 247 `border border-*` uses; **zero** `rounded-xl/2xl/3xl`; `globals.css` base layer forces `border-radius: 0rem`. Sharp + bordered is what ships. | *(Corrected 2026-10-08 during Phase 2.)* Owner confirmed **sharp + bordered** as canonical. Flat/rally pathways superseded; the soft-edge radius rules superseded, its borders kept; guidelines rewritten in Phase 8 |
 | Design inspiration | `rally_padel_refactor_20260821` | Superseded by soft-edge | Mark superseded |
 | Email provider | security_hardening and email_invite_auth_errors (Resend) vs nodemailer_gmail_smtp | Nodemailer in code; `resend` still in package.json | Resend plans superseded; remove the dependency |
 | Dummy data | `purge_dummy_data_20260831`, `purge_preselected_options_20260831`, `clear_test_packing_items_20260911` say dummy data is gone | Sections A–C show 180+ dummy-data findings | Claims are false; reopen the work in the new pathway |

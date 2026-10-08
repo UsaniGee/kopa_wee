@@ -21,9 +21,9 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - [x] Task: Mark superseded pathways 39bc5f3
   - [x] `flat_design_refactor_20260821`, `flat_borderless_sweep_20260821` and `rally_padel_refactor_20260821` are superseded by `soft_edge_bordered_design_20260827`. Add a note to each `index.md`.
   - [x] Add a note on the Resend tasks in `security_hardening_unified_auth_20260910` and `email_invite_auth_errors_20260914` saying they were superseded by `nodemailer_gmail_smtp_20260914`.
-- [ ] Task: Reconcile open tasks in finished pathways
-  - [ ] `security_hardening_unified_auth_20260910`: tick the tasks the 2026-10-06 review confirmed are built, citing `48f729f` and earlier commits. Move the remaining tasks (tests, clearance-due and logbook-approved email triggers) into the "Deferred" section of this plan.
-  - [ ] Check `soft_edge_bordered_design_20260827`'s 8 tasks against the code and tick what is done. Do the same for `role_dashboards_20260821` (5) and `hero_layout_fix_20260819` (1).
+- [~] Task: Reconcile open tasks in finished pathways
+  - [x] `security_hardening_unified_auth_20260910`: tick the tasks the 2026-10-06 review confirmed are built, citing `48f729f` and earlier commits. Move the remaining tasks (tests, clearance-due and logbook-approved email triggers) into the "Deferred" section of this plan.
+  - [x] Check `soft_edge_bordered_design_20260827`'s 8 tasks against the code and tick what is done. Do the same for `role_dashboards_20260821` (5) and `hero_layout_fix_20260819` (1).
 - [ ] Task: Fill the missing pathway files
   - [ ] Write retroactive `plan.md` files from git history for `theme_fouc_admin_design_ux_fixes_20260910`, `serving_companion_fix_admin_login_redesign_20260910` and `password_flash_invite_roommate_20260911`. Add the missing `index.md`/`spec.md` stubs and `flat_borderless_sweep_20260821/index.md`.
 - [ ] Task: Archive and restructure the registry
@@ -166,7 +166,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 ## Phase 8: Docs Sync & Final Audit (FR7)
 
-- [ ] Task: Update `axon/tech-stack.md` (Nodemailer, no IndexedDB, pnpm, Vitest, image-storage debt), `axon/product-guidelines.md` (real colour tokens, light and dark) and `axon/product.md` (each pillar Live or Planned).
+- [ ] Task: Update `axon/tech-stack.md` (Nodemailer, no IndexedDB, pnpm, Vitest, image-storage debt), `axon/product-guidelines.md` (real colour tokens, light and dark; rewrite the radius rules for the canonical **sharp-edged (0rem) + bordered** system confirmed 2026-10-08) and `axon/product.md` (each pillar Live or Planned).
 - [ ] Task: Update `.env.example` with `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `CRON_SECRET` and `GEMINI_MODEL` (if made configurable).
 - [ ] Task: Re-run the audit greps and walk through every acceptance criterion in spec.md. Record the results in this plan.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)

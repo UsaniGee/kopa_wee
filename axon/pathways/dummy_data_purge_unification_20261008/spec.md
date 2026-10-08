@@ -111,7 +111,7 @@ This pathway removes every piece of dummy data, fixes the data-integrity bugs, w
    - Package manager is pnpm.
    - Vitest added.
    - Note image storage (base64 in the DB) as known debt.
-2. `axon/product-guidelines.md`: colour token table updated to the real `globals.css` values (light and dark).
+2. `axon/product-guidelines.md`: colour token table updated to the real `globals.css` values (light and dark), and the radius rules rewritten for the canonical **sharp-edged (0rem) + bordered** system (owner decision, 2026-10-08).
 3. `axon/product.md`: each pillar marked **Live** or **Planned**, matching the code.
 4. `.env.example`: add `SEED_ADMIN_*`, `CRON_SECRET` and `GEMINI_MODEL` (if the model is made configurable).
 

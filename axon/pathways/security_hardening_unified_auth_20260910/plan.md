@@ -14,7 +14,7 @@
   - [x] Remove hardcoded `NEXTAUTH_SECRET` fallback string from `[...nextauth]/route.ts`
   - [x] Remove hardcoded `mock_google_client_id` / `mock_google_client_secret` fallbacks — replace with `process.env.GOOGLE_CLIENT_ID!` / `process.env.GOOGLE_CLIENT_SECRET!`
   - [x] Remove hardcoded cron secret fallback from `/api/cron/journey-status`
-- [ ] Task: Phase 1 Verification & Checkpoint (Refer to workflow.md)
+- ⏭ Not performed: Task: Phase 1 Verification & Checkpoint (Refer to workflow.md) (work later reviewed in 48f729f, 2026-10-06; no checkpoint recorded at the time)
 
 ---
 
@@ -44,84 +44,84 @@
 
 ## Phase 3: Auth Page & Client-Side Session Migration
 
-- [ ] Task: Write failing tests for client auth flow
-  - [ ] Test: successful credentials login calls `signIn('credentials', ...)` and receives `ok: true`
-  - [ ] Test: failed login surfaces error message to UI
-  - [ ] Test: no localStorage `kopawee_auth_token` fake token is written after login
-  - [ ] Confirm tests fail (Red phase)
-- [ ] Task: Refactor `src/app/auth/page.tsx` signin flow
-  - [ ] Replace `fetch('/api/auth/login')` + localStorage fake token write with `signIn('credentials', { email, password, redirect: false })`
-  - [ ] Handle `result.error` from `signIn` — map `EMAIL_NOT_VERIFIED` to a verification notice UI
-  - [ ] On success, use `router.push(dest)` as before (redirect logic unchanged)
-  - [ ] Remove `localStorage.setItem('kopawee_auth_token', ...)` and `localStorage.setItem('kopawee_user_id', ...)` writes
-- [ ] Task: Refactor Google OAuth handler in auth page
-  - [ ] Remove the premature `localStorage.setItem('kopawee_auth_token', 'google_oauth_token_...')` write before redirect
-  - [ ] Let NextAuth handle session creation after OAuth callback
-- [ ] Task: Update `isUserAuthenticated()` in `src/shared/utils/authNav.ts`
-  - [ ] Replace localStorage token check with a session-aware check using `useSession()` from `next-auth/react`
-  - [ ] Export a new `useIsAuthenticated()` React hook for client components
-  - [ ] Keep `getUserRole()` reading from localStorage (non-security UX state — acceptable)
-- [ ] Task: Update `DashboardLayout` auth guard
-  - [ ] Replace `isUserAuthenticated()` useEffect check with `useSession()` status
-  - [ ] Remove the client-side redirect fallback (middleware now handles this — keep as a secondary safety net only)
-- [ ] Task: Run tests — confirm Green phase
-- [ ] Task: Phase 3 Verification & Checkpoint (Refer to workflow.md)
+- ⏭ Deferred: Task: Write failing tests for client auth flow — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: successful credentials login calls `signIn('credentials', ...)` and receives `ok: true` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: failed login surfaces error message to UI — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: no localStorage `kopawee_auth_token` fake token is written after login — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Confirm tests fail (Red phase) — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- [x] Task: Refactor `src/app/auth/page.tsx` signin flow — verified in code 2026-10-08 (019ae47)
+  - [x] Replace `fetch('/api/auth/login')` + localStorage fake token write with `signIn('credentials', { email, password, redirect: false })`
+  - [x] Handle `result.error` from `signIn` — map `EMAIL_NOT_VERIFIED` to a verification notice UI
+  - [x] On success, use `router.push(dest)` as before (redirect logic unchanged)
+  - [x] Remove `localStorage.setItem('kopawee_auth_token', ...)` and `localStorage.setItem('kopawee_user_id', ...)` writes
+- [x] Task: Refactor Google OAuth handler in auth page — verified in code 2026-10-08 (019ae47)
+  - [x] Remove the premature `localStorage.setItem('kopawee_auth_token', 'google_oauth_token_...')` write before redirect
+  - [x] Let NextAuth handle session creation after OAuth callback
+- [x] Task: Update `isUserAuthenticated()` in `src/shared/utils/authNav.ts` — PARTIAL (019ae47): hook added, localStorage check remains; completion tracked in dummy_data_purge_unification_20261008 Phase 6
+  - ⏭ Deferred: Replace localStorage token check with a session-aware check using `useSession()` from `next-auth/react` — useIsAuthenticated() was added (019ae47) but isUserAuthenticated() still reads localStorage; fixed in dummy_data_purge_unification_20261008 Phase 6
+  - [x] Export a new `useIsAuthenticated()` React hook for client components
+  - [x] Keep `getUserRole()` reading from localStorage (non-security UX state — acceptable) — reversed by dummy_data_purge_unification_20261008: `kopawee_active_role` can contradict the DB role, so it is removed in that pathway's Phase 6
+- [x] Task: Update `DashboardLayout` auth guard — verified in code 2026-10-08 (019ae47)
+  - [x] Replace `isUserAuthenticated()` useEffect check with `useSession()` status
+  - [x] Remove the client-side redirect fallback (middleware now handles this — keep as a secondary safety net only)
+- ⏭ Deferred: Task: Run tests — confirm Green phase — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- ⏭ Not performed: Task: Phase 3 Verification & Checkpoint (Refer to workflow.md) (work later reviewed in 48f729f, 2026-10-06; no checkpoint recorded at the time)
 
 ---
 
 ## Phase 4: `middleware.ts` Route Protection
 
-- [ ] Task: Write failing tests for middleware
-  - [ ] Test: unauthenticated request to `/dashboard` returns a redirect to `/auth?mode=signin&redirect=%2Fdashboard`
-  - [ ] Test: authenticated request to `/dashboard` passes through
-  - [ ] Test: authenticated non-admin request to `/admin` returns redirect to `/dashboard`
-  - [ ] Test: authenticated admin request to `/admin` passes through
-  - [ ] Test: public routes (`/`, `/auth`, `/api/auth/callback/google`) are not intercepted
-  - [ ] Confirm tests fail (Red phase)
-- [ ] Task: Create `src/middleware.ts`
-  - [ ] Import `getToken` from `next-auth/jwt`
-  - [ ] Define matcher: `['/dashboard/:path*', '/admin/:path*', '/onboarding/:path*']`
-  - [ ] Read token with `getToken({ req, secret: process.env.NEXTAUTH_SECRET })`
-  - [ ] If no token: `NextResponse.redirect` to `/auth?mode=signin&redirect=<pathname>`
-  - [ ] If token present but `applicationRole !== 'ADMIN'` on `/admin` paths: redirect to `/dashboard`
-  - [ ] Otherwise: `NextResponse.next()`
-- [ ] Task: Run tests — confirm Green phase
-- [ ] Task: Phase 4 Verification & Checkpoint (Refer to workflow.md)
+- ⏭ Deferred: Task: Write failing tests for middleware — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: unauthenticated request to `/dashboard` returns a redirect to `/auth?mode=signin&redirect=%2Fdashboard` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: authenticated request to `/dashboard` passes through — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: authenticated non-admin request to `/admin` returns redirect to `/dashboard` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: authenticated admin request to `/admin` passes through — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: public routes (`/`, `/auth`, `/api/auth/callback/google`) are not intercepted — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Confirm tests fail (Red phase) — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- [x] Task: Create `src/middleware.ts` — verified (019ae47); renamed to src/proxy.ts for Next 16 (48f729f)
+  - [x] Import `getToken` from `next-auth/jwt` — implemented with the NextAuth v5 auth() wrapper instead (5331ec8)
+  - [x] Define matcher: `['/dashboard/:path*', '/admin/:path*', '/onboarding/:path*']`
+  - [x] Read token with `getToken({ req, secret: process.env.NEXTAUTH_SECRET })` — implemented with the NextAuth v5 auth() wrapper instead (5331ec8)
+  - [x] If no token: `NextResponse.redirect` to `/auth?mode=signin&redirect=<pathname>`
+  - [x] If token present but `applicationRole !== 'ADMIN'` on `/admin` paths: redirect to `/dashboard`
+  - [x] Otherwise: `NextResponse.next()`
+- ⏭ Deferred: Task: Run tests — confirm Green phase — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- ⏭ Not performed: Task: Phase 4 Verification & Checkpoint (Refer to workflow.md) (work later reviewed in 48f729f, 2026-10-06; no checkpoint recorded at the time)
 
 ---
 
 ## Phase 5: Server-Side API Authorization Audit
 
-- [ ] Task: Create `src/shared/lib/apiAuth.ts` helper
-  - [ ] Write failing test: unauthenticated call returns `NextResponse` with status `401`
-  - [ ] Write failing test: authenticated call returns typed session user
-  - [ ] Implement `requireAuth(req)` — calls `getServerSession(authOptions)`, returns session user or throws typed `NextResponse 401`
-  - [ ] Implement `requireAdmin(req)` — calls `requireAuth`, checks `applicationRole === 'ADMIN'`, throws `NextResponse 403` otherwise
-  - [ ] Confirm tests pass (Green phase)
-- [ ] Task: Audit and update `/api/clearance`
-  - [ ] Add `requireAuth` call
-  - [ ] Verify `session.user.id === body.userId` — return `403` if mismatch
-- [ ] Task: Audit and update `/api/users/me`
-  - [ ] Scope response to `session.user.id` only — ignore any user-supplied id param
-- [ ] Task: Audit and update `/api/users/status`
-  - [ ] Add `requireAuth`, verify `session.user.id === body.userId`
-- [ ] Task: Audit and update `/api/users/journey`
-  - [ ] Add `requireAuth`, scope journey fetch/update to session user
-- [ ] Task: Audit and update `/api/marketplace` (POST, PATCH, DELETE)
-  - [ ] Add `requireAuth` on mutating methods
-  - [ ] Verify listing ownership (`listing.userId === session.user.id`) on PATCH/DELETE
-- [ ] Task: Audit and update `/api/accommodation` (POST, PATCH, DELETE)
-  - [ ] Add `requireAuth` on mutating methods
-  - [ ] Verify listing ownership on PATCH/DELETE
-- [ ] Task: Audit and update `/api/safety/sos`
-  - [ ] Add `requireAuth` — SOS must be linked to authenticated user
-- [ ] Task: Audit and update `/api/notifications`
-  - [ ] Add `requireAuth`, scope all queries to `session.user.id`
-- [ ] Task: Audit and update `/api/packing-items`
-  - [ ] Add `requireAuth`, scope all queries/mutations to session user
-- [ ] Task: Audit and update `/api/admin/*` routes
-  - [ ] Replace localStorage admin token check with `requireAdmin()`
-- [ ] Task: Phase 5 Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Create `src/shared/lib/apiAuth.ts` helper — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - ⏭ Deferred: Write failing test: unauthenticated call returns `NextResponse` with status `401` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Write failing test: authenticated call returns typed session user — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - [x] Implement `requireAuth(req)` — calls `getServerSession(authOptions)`, returns session user or throws typed `NextResponse 401`
+  - [x] Implement `requireAdmin(req)` — calls `requireAuth`, checks `applicationRole === 'ADMIN'`, throws `NextResponse 403` otherwise
+  - ⏭ Deferred: Confirm tests pass (Green phase) — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- [x] Task: Audit and update `/api/clearance` — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Add `requireAuth` call
+  - [x] Verify `session.user.id === body.userId` — return `403` if mismatch
+- [x] Task: Audit and update `/api/users/me` — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Scope response to `session.user.id` only — ignore any user-supplied id param
+- [x] Task: Audit and update `/api/users/status` — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Add `requireAuth`, verify `session.user.id === body.userId`
+- [x] Task: Audit and update `/api/users/journey` — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Add `requireAuth`, scope journey fetch/update to session user
+- [x] Task: Audit and update `/api/marketplace` (POST, PATCH, DELETE) — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Add `requireAuth` on mutating methods
+  - [x] Verify listing ownership (`listing.userId === session.user.id`) on PATCH/DELETE — superseded: PATCH is admin-only moderation since 48f729f; no DELETE endpoint exists
+- [x] Task: Audit and update `/api/accommodation` (POST, PATCH, DELETE) — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Add `requireAuth` on mutating methods
+  - [x] Verify listing ownership on PATCH/DELETE — superseded: PATCH is admin-only moderation since 48f729f; no DELETE endpoint exists
+- [x] Task: Audit and update `/api/safety/sos` — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Add `requireAuth` — SOS must be linked to authenticated user
+- [x] Task: Audit and update `/api/notifications` — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Add `requireAuth`, scope all queries to `session.user.id`
+- [x] Task: Audit and update `/api/packing-items` — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Add `requireAuth`, scope all queries/mutations to session user
+- [x] Task: Audit and update `/api/admin/*` routes — verified in code 2026-10-08 (019ae47 + 48f729f)
+  - [x] Replace localStorage admin token check with `requireAdmin()`
+- ⏭ Not performed: Task: Phase 5 Verification & Checkpoint (Refer to workflow.md) (work later reviewed in 48f729f, 2026-10-06; no checkpoint recorded at the time)
 
 ---
 
@@ -129,94 +129,94 @@
 
 > **Superseded in part (2026-10-08):** email delivery moved from Resend to Nodemailer + Gmail SMTP in [nodemailer_gmail_smtp_20260914](../nodemailer_gmail_smtp_20260914/index.md). Resend-specific tasks here are historical; the `sendEmail()` interface and React Email templates still apply.
 
-- [ ] Task: Create `src/shared/lib/email.ts`
-  - [ ] Write failing test: `sendEmail()` called with missing `RESEND_API_KEY` logs warning and returns `{ success: false }` without throwing
-  - [ ] Write failing test: `sendEmail()` with valid config calls Resend client with correct `from`, `to`, `subject`, `html`
-  - [ ] Implement typed `sendEmail({ to, subject, template })` helper
-  - [ ] Graceful degradation: if `RESEND_API_KEY` not set, warn and return early
-  - [ ] Confirm tests pass (Green phase)
-- [ ] Task: Create `src/shared/emails/VerificationEmail.tsx`
-  - [ ] React Email template with KopaWee branding (emerald green, Outfit font)
-  - [ ] Props: `{ name: string, verificationUrl: string }`
-  - [ ] Sections: greeting, CTA button, expiry notice, footer
-- [ ] Task: Create `src/shared/emails/PasswordResetEmail.tsx`
-  - [ ] Props: `{ name: string, resetUrl: string }`
-  - [ ] 1-hour expiry notice
-- [ ] Task: Create `src/shared/emails/SOSAlertEmail.tsx`
-  - [ ] Props: `{ name: string, location: string, timestamp: string, alertId: string }`
-- [ ] Task: Create `src/shared/emails/ClearanceDueEmail.tsx`
-  - [ ] Props: `{ name: string, nextEligibleAt: string }`
-- [ ] Task: Create `src/shared/emails/LogbookApprovedEmail.tsx`
-  - [ ] Props: `{ name: string, entryDate: string, ppaName: string }`
-- [ ] Task: Update `/api/auth/register` to send real verification email
-  - [ ] Replace `verificationUrl` JSON response field with `sendEmail(VerificationEmail)`
-  - [ ] Remove "Simulate Email Link Click" UI from `src/app/auth/page.tsx`
-  - [ ] Update auth page to show "Check your inbox" notice instead
-- [ ] Task: Create `/api/auth/forgot-password` route
-  - [ ] Accept `{ email }`, find user, generate `passwordResetToken` (crypto random) + `passwordResetExpiry` (now + 1hr)
-  - [ ] Store token hash on `User` model (add fields to Prisma schema + migration)
-  - [ ] Send `PasswordResetEmail` via Resend
-  - [ ] Return `{ success: true }` regardless of whether email exists (prevent enumeration)
-- [ ] Task: Create `/api/auth/reset-password` route
-  - [ ] Accept `{ token, password }`, verify token hash + expiry, bcrypt hash new password, clear token fields
-  - [ ] Return `{ success: true }` on success
-- [ ] Task: Add forgot/reset password UI to `src/app/auth/page.tsx`
-  - [ ] "Forgot password?" link on sign-in form → email input screen
-  - [ ] Reset password page at `/auth/reset-password?token=...`
-- [ ] Task: Trigger `SOSAlertEmail` from `/api/safety/sos` POST
-- [ ] Task: Trigger `ClearanceDueEmail` from `/api/cron/journey-status` on clearance eligibility
-- [ ] Task: Trigger `LogbookApprovedEmail` from logbook approval route
-- [ ] Task: Add `passwordResetToken` and `passwordResetExpiry` fields to Prisma `User` model
-  - [ ] Generate and run Prisma migration
-- [ ] Task: Phase 6 Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Create `src/shared/lib/email.ts` — verified in code 2026-10-08 (1865e65)
+  - ⏭ Deferred: Write failing test: `sendEmail()` called with missing `RESEND_API_KEY` logs warning and returns `{ success: false }` without throwing — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Write failing test: `sendEmail()` with valid config calls Resend client with correct `from`, `to`, `subject`, `html` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - [x] Implement typed `sendEmail({ to, subject, template })` helper
+  - [x] Graceful degradation: if `RESEND_API_KEY` not set, warn and return early — now keyed on GMAIL_USER/GMAIL_APP_PASSWORD (nodemailer_gmail_smtp_20260914)
+  - ⏭ Deferred: Confirm tests pass (Green phase) — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- [x] Task: Create `src/shared/emails/VerificationEmail.tsx` — verified in code 2026-10-08 (1865e65)
+  - [x] React Email template with KopaWee branding (emerald green, Outfit font)
+  - [x] Props: `{ name: string, verificationUrl: string }`
+  - [x] Sections: greeting, CTA button, expiry notice, footer
+- [x] Task: Create `src/shared/emails/PasswordResetEmail.tsx` — verified in code 2026-10-08 (1865e65)
+  - [x] Props: `{ name: string, resetUrl: string }`
+  - [x] 1-hour expiry notice
+- [x] Task: Create `src/shared/emails/SOSAlertEmail.tsx` — verified in code 2026-10-08 (1865e65)
+  - [x] Props: `{ name: string, location: string, timestamp: string, alertId: string }`
+- [x] Task: Create `src/shared/emails/ClearanceDueEmail.tsx` — verified in code 2026-10-08 (1865e65)
+  - [x] Props: `{ name: string, nextEligibleAt: string }`
+- [x] Task: Create `src/shared/emails/LogbookApprovedEmail.tsx` — verified in code 2026-10-08 (1865e65)
+  - [x] Props: `{ name: string, entryDate: string, ppaName: string }`
+- [x] Task: Update `/api/auth/register` to send real verification email — verified in code 2026-10-08 (1865e65)
+  - [x] Replace `verificationUrl` JSON response field with `sendEmail(VerificationEmail)`
+  - [x] Remove "Simulate Email Link Click" UI from `src/app/auth/page.tsx`
+  - [x] Update auth page to show "Check your inbox" notice instead
+- [x] Task: Create `/api/auth/forgot-password` route — verified in code 2026-10-08 (1865e65)
+  - [x] Accept `{ email }`, find user, generate `passwordResetToken` (crypto random) + `passwordResetExpiry` (now + 1hr)
+  - [x] Store token hash on `User` model (add fields to Prisma schema + migration)
+  - [x] Send `PasswordResetEmail` via Resend
+  - [x] Return `{ success: true }` regardless of whether email exists (prevent enumeration)
+- [x] Task: Create `/api/auth/reset-password` route — verified in code 2026-10-08 (1865e65)
+  - [x] Accept `{ token, password }`, verify token hash + expiry, bcrypt hash new password, clear token fields
+  - [x] Return `{ success: true }` on success
+- [x] Task: Add forgot/reset password UI to `src/app/auth/page.tsx` — verified in code 2026-10-08 (1865e65)
+  - [x] "Forgot password?" link on sign-in form → email input screen
+  - [x] Reset password page at `/auth/reset-password?token=...`
+- [x] Task: Trigger `SOSAlertEmail` from `/api/safety/sos` POST — verified in code 2026-10-08 (1865e65)
+- ⏭ Deferred: Task: Trigger `ClearanceDueEmail` from `/api/cron/journey-status` on clearance eligibility — never wired; tracked in dummy_data_purge_unification_20261008 plan → Deferred
+- ⏭ Deferred: Task: Trigger `LogbookApprovedEmail` from logbook approval route — no logbook approval route exists; tracked in dummy_data_purge_unification_20261008 plan → Deferred
+- [x] Task: Add `passwordResetToken` and `passwordResetExpiry` fields to Prisma `User` model — verified in code 2026-10-08 (1865e65)
+  - [x] Generate and run Prisma migration
+- ⏭ Not performed: Task: Phase 6 Verification & Checkpoint (Refer to workflow.md) (work later reviewed in 48f729f, 2026-10-06; no checkpoint recorded at the time)
 
 ---
 
 ## Phase 7: Gemini AI Assistant
 
-- [ ] Task: Write failing tests for `/api/ai/listing`
-  - [ ] Test: POST with `{ message }` returns `{ success: true, reply: string }`
-  - [ ] Test: missing `GEMINI_API_KEY` returns `{ success: false, error: 'AI_NOT_CONFIGURED' }` with status `503`
-  - [ ] Test: unauthenticated request returns `401`
-  - [ ] Test: rate limit exceeded returns `429`
-  - [ ] Confirm tests fail (Red phase)
-- [ ] Task: Create `src/app/api/ai/listing/route.ts`
-  - [ ] Add `requireAuth` guard
-  - [ ] Initialize `GoogleGenerativeAI` client from `@google/generative-ai`
-  - [ ] Define KopaWee system prompt covering: NYSC processes, clearance guidance, marketplace listing advice, PPA logbook tips, CDS requirements, safety protocols, state deployment guidance
-  - [ ] Accept `POST { message: string, context?: string }`
-  - [ ] Call `gemini-1.5-flash` model (cost-efficient) with system prompt + user message
-  - [ ] Return `{ success: true, reply: string }`
-  - [ ] Graceful degradation if `GEMINI_API_KEY` missing
-  - [ ] Simple rate limiting: track request count per `session.user.id` in DB or in-memory map (max 20/hour)
-- [ ] Task: Update dashboard AI widget
-  - [ ] Replace hardcoded `handleAskAI` keyword-matching function with `fetch('/api/ai/listing', { method: 'POST', body: JSON.stringify({ message }) })`
-  - [ ] Handle loading, error, and `AI_NOT_CONFIGURED` states gracefully in UI
-- [ ] Task: Run tests — confirm Green phase
-- [ ] Task: Phase 7 Verification & Checkpoint (Refer to workflow.md)
+- ⏭ Deferred: Task: Write failing tests for `/api/ai/listing` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: POST with `{ message }` returns `{ success: true, reply: string }` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: missing `GEMINI_API_KEY` returns `{ success: false, error: 'AI_NOT_CONFIGURED' }` with status `503` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: unauthenticated request returns `401` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: rate limit exceeded returns `429` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Confirm tests fail (Red phase) — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- [x] Task: Create `src/app/api/ai/listing/route.ts` — verified in code 2026-10-08 (e19bb11)
+  - [x] Add `requireAuth` guard
+  - [x] Initialize `GoogleGenerativeAI` client from `@google/generative-ai`
+  - [x] Define KopaWee system prompt covering: NYSC processes, clearance guidance, marketplace listing advice, PPA logbook tips, CDS requirements, safety protocols, state deployment guidance
+  - [x] Accept `POST { message: string, context?: string }`
+  - [x] Call `gemini-1.5-flash` model (cost-efficient) with system prompt + user message — model since updated to gemini-3.8-flash (48f729f)
+  - [x] Return `{ success: true, reply: string }`
+  - [x] Graceful degradation if `GEMINI_API_KEY` missing
+  - [x] Simple rate limiting: track request count per `session.user.id` in DB or in-memory map (max 20/hour)
+- [x] Task: Update dashboard AI widget — verified in code 2026-10-08 (e19bb11)
+  - [x] Replace hardcoded `handleAskAI` keyword-matching function with `fetch('/api/ai/listing', { method: 'POST', body: JSON.stringify({ message }) })`
+  - [x] Handle loading, error, and `AI_NOT_CONFIGURED` states gracefully in UI
+- ⏭ Deferred: Task: Run tests — confirm Green phase — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- ⏭ Not performed: Task: Phase 7 Verification & Checkpoint (Refer to workflow.md) (work later reviewed in 48f729f, 2026-10-06; no checkpoint recorded at the time)
 
 ---
 
 ## Phase 8: Live Notification Bell
 
-- [ ] Task: Write failing tests for notification bell
-  - [ ] Test: `GET /api/notifications?unread=true` returns only unread notifications for the session user
-  - [ ] Test: `PATCH /api/notifications { markAllRead: true }` marks all session user notifications as read
-  - [ ] Test: unauthenticated requests to both endpoints return `401`
-  - [ ] Confirm tests fail (Red phase)
-- [ ] Task: Update `DashboardNavbar` notification bell
-  - [ ] Add `useEffect` to fetch `/api/notifications?unread=true` on mount
-  - [ ] Set up 60-second polling interval (cleared on unmount)
-  - [ ] Display unread count badge on bell icon when count > 0
-  - [ ] On bell click: open dropdown panel with 10 most recent notifications
-  - [ ] Each notification row: title, message preview, relative timestamp
-  - [ ] "Mark all read" button calls `PATCH /api/notifications { markAllRead: true }` and refreshes count
-- [ ] Task: Update `/api/notifications` route to use `requireAuth` (from Phase 5 audit)
-  - [ ] Support `?unread=true` query param filter
-  - [ ] Support `PATCH { markAllRead: true }` body
-  - [ ] Ensure all queries are scoped to `session.user.id`
-- [ ] Task: Run tests — confirm Green phase
-- [ ] Task: Phase 8 Verification & Checkpoint (Refer to workflow.md)
+- ⏭ Deferred: Task: Write failing tests for notification bell — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: `GET /api/notifications?unread=true` returns only unread notifications for the session user — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: `PATCH /api/notifications { markAllRead: true }` marks all session user notifications as read — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Test: unauthenticated requests to both endpoints return `401` — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+  - ⏭ Deferred: Confirm tests fail (Red phase) — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- [x] Task: Update `DashboardNavbar` notification bell — verified in code 2026-10-08 (e19bb11 / 0b4d017)
+  - [x] Add `useEffect` to fetch `/api/notifications?unread=true` on mount
+  - [x] Set up 60-second polling interval (cleared on unmount)
+  - [x] Display unread count badge on bell icon when count > 0
+  - [x] On bell click: open dropdown panel with 10 most recent notifications
+  - [x] Each notification row: title, message preview, relative timestamp
+  - [x] "Mark all read" button calls `PATCH /api/notifications { markAllRead: true }` and refreshes count
+- [x] Task: Update `/api/notifications` route to use `requireAuth` (from Phase 5 audit) — verified in code 2026-10-08 (e19bb11 / 0b4d017)
+  - [x] Support `?unread=true` query param filter
+  - [x] Support `PATCH { markAllRead: true }` body
+  - [x] Ensure all queries are scoped to `session.user.id`
+- ⏭ Deferred: Task: Run tests — confirm Green phase — no tests existed; API route tests are now written under dummy_data_purge_unification_20261008 (FR2/Phase 3)
+- ⏭ Not performed: Task: Phase 8 Verification & Checkpoint (Refer to workflow.md) (work later reviewed in 48f729f, 2026-10-06; no checkpoint recorded at the time)
 
 ---
 

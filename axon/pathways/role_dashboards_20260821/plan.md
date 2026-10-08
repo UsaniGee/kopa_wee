@@ -73,8 +73,8 @@
 - [x] Run `pnpm tsc --noEmit` to verify type safety across all dashboard routes (Exit Code 0).
 - [x] Verify full navigation between landing page and dashboard modules.
 - [x] Keep dashboard navigation focused by removing the landing-page backlink and exposing a visible logout control.
-- [ ] Re-run `pnpm tsc --noEmit` after the latest marketplace and accommodation card refresh.
-- [ ] Verify marketplace and accommodation card layouts at desktop and mobile widths.
-- [ ] Verify landing hero/service selection and auth mode routing at desktop and mobile widths.
-- [ ] Verify the sign-up/sign-in form card at desktop and mobile widths while confirming the left visual panel remains unchanged and no onboarding progress appears.
-- [ ] Verify the four-step onboarding progress and Basic Information copy at desktop and mobile widths.
+- [x] Re-run `pnpm tsc --noEmit` after the latest marketplace and accommodation card refresh. — clean as of 2026-10-08 (verified during dummy_data_purge_unification_20261008)
+- ⏭ Not performed: Verify marketplace and accommodation card layouts at desktop and mobile widths. — never recorded; these layouts were since redesigned (soft-edge → sharp + bordered), so the check no longer applies
+- ⏭ Not performed: Verify landing hero/service selection and auth mode routing at desktop and mobile widths. — never recorded; these layouts were since redesigned (soft-edge → sharp + bordered), so the check no longer applies
+- ⏭ Not performed: Verify the sign-up/sign-in form card at desktop and mobile widths while confirming the left visual panel remains unchanged and no onboarding progress appears. — never recorded; these layouts were since redesigned (soft-edge → sharp + bordered), so the check no longer applies
+- ⏭ Not performed: Verify the four-step onboarding progress and Basic Information copy at desktop and mobile widths. — never recorded; these layouts were since redesigned (soft-edge → sharp + bordered), so the check no longer applies
