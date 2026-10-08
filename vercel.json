@@ -1,5 +1,8 @@
 {
   "buildCommand": "npx prisma generate && npm run build",
   "framework": "nextjs",
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "crons": [
+    { "path": "/api/cron/journey-status", "schedule": "0 1 * * *" }
+  ]
 }

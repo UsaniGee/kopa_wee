@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { requireAuth } from "@/shared/lib/apiAuth";
 
 const CLEARANCE_LOCK_DAYS = 20;
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
 
@@ -58,23 +58,13 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+// Always marks clearance for the session user; no request body is needed
+export async function POST() {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
 
   try {
-    const body = await req.json();
-    const { userId } = body;
-
-    // Ownership check — session user must match the userId in the request body
-    if (userId && userId !== auth.user!.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden: Cannot mark clearance for another user" },
-        { status: 403 }
-      );
-    }
-
-    const sessionUserId = auth.user!.id;
+    const sessionUserId = auth.user.id;
 
     const user = await prisma.user.findUnique({
       where: { id: sessionUserId },

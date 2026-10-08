@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
+import { LEGACY_ROLE_FOR_STAGE } from "@/shared/lib/statusTransitions";
 
+// Users may only move one stage forward themselves; reversals go through an admin
 const ALLOWED_MANUAL_TRANSITIONS: Record<string, string[]> = {
   PCM: ["SERVING"],
-  SERVING: [],
+  SERVING: ["ALUMNI"],
   ALUMNI: [],
 };
 
 const statusTransitionSchema = z.object({
-  userId: z.string().min(1),
   newStatus: z.enum(["PCM", "SERVING", "ALUMNI"]),
   reason: z.string().optional(),
 });
@@ -21,15 +22,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { userId, newStatus, reason } = statusTransitionSchema.parse(body);
-
-    // Ownership check — session user must match the userId
-    if (userId !== auth.user!.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden: Cannot change status for another user" },
-        { status: 403 }
-      );
-    }
+    const { newStatus, reason } = statusTransitionSchema.parse(body);
+    const userId = auth.user.id;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -68,9 +62,9 @@ export async function POST(req: NextRequest) {
       prisma.user.update({
         where: { id: userId },
         data: {
-          nyscStatus: newStatus as any,
-          // Also sync legacy role field
-          role: newStatus === "SERVING" ? "SERVING_CORPER" : newStatus === "ALUMNI" ? "ALUMNI" : "PCM",
+          nyscStatus: newStatus,
+          // Keep the legacy role field in sync
+          role: LEGACY_ROLE_FOR_STAGE[newStatus],
         },
         select: {
           id: true,
@@ -83,7 +77,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId,
           previousStatus: currentStatus,
-          newStatus: newStatus as any,
+          newStatus,
           changedBy: userId,
           changeType: "MANUAL",
           reason: reason || `User self-initiated transition from ${currentStatus} to ${newStatus}`,

@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
+import { requireAuth } from "@/shared/lib/apiAuth";
+import { applyAutomaticTransition, dueAutomaticTransition } from "@/shared/lib/statusTransitions";
 
 /**
  * GET /api/cron/journey-status
- * 
- * Backend journey status evaluator. Automatically transitions:
+ *
+ * Scheduled evaluator (vercel.json `crons`). Moves every user whose saved dates have passed:
  *   PCM -> SERVING when campExitDate has passed
  *   SERVING -> ALUMNI when serviceEndDate has passed
- * 
- * This endpoint is designed to be called by:
- *   1. A scheduled cron job (e.g., Vercel cron, external scheduler)
- *   2. On user profile load as a fallback evaluator
- * 
- * Protected by CRON_SECRET environment variable.
+ *
+ * Vercel Cron sends `Authorization: Bearer $CRON_SECRET` automatically when CRON_SECRET is set.
  */
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
   if (!cronSecret) {
@@ -23,113 +20,40 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Cron not configured" }, { status: 503 });
   }
 
-  // Require valid Bearer token for all cron requests
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (req.headers.get("authorization") !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const now = new Date();
-  const results = {
-    pcmToServing: 0,
-    servingToAlumni: 0,
-    errors: 0,
-  };
+  const results = { pcmToServing: 0, servingToAlumni: 0, errors: 0 };
 
   try {
-    // ── PCM -> SERVING: find PCMs whose campExitDate has passed ──────────────
     const eligibleForServing = await prisma.nYSCJourney.findMany({
-      where: {
-        campExitDate: { lte: now },
-        user: { nyscStatus: "PCM" },
-      },
-      include: {
-        user: {
-          select: { id: true, name: true, nyscStatus: true },
-        },
-      },
+      where: { campExitDate: { lte: now }, user: { nyscStatus: "PCM" } },
+      select: { userId: true },
     });
 
-    for (const journey of eligibleForServing) {
+    for (const { userId } of eligibleForServing) {
       try {
-        await prisma.$transaction([
-          prisma.user.update({
-            where: { id: journey.userId },
-            data: {
-              nyscStatus: "SERVING",
-              role: "SERVING_CORPER",
-            },
-          }),
-          prisma.userStatusHistory.create({
-            data: {
-              userId: journey.userId,
-              previousStatus: "PCM",
-              newStatus: "SERVING",
-              changedBy: "SYSTEM",
-              changeType: "AUTOMATIC",
-              reason: "CAMP_EXIT_DATE_REACHED",
-            },
-          }),
-          prisma.notification.create({
-            data: {
-              userId: journey.userId,
-              title: "Welcome to your service year! 🎉",
-              message:
-                "Based on the camp dates you provided, we've updated your NYSC status to Serving Corps Member. Your dashboard has been updated with features relevant to your service year. Congratulations, Corper!",
-            },
-          }),
-        ]);
+        await applyAutomaticTransition(userId, "PCM", "SERVING", "CAMP_EXIT_DATE_REACHED");
         results.pcmToServing++;
       } catch (err) {
-        console.error(`[CRON] Failed PCM->SERVING for userId ${journey.userId}:`, err);
+        console.error(`[CRON] Failed PCM->SERVING for userId ${userId}:`, err);
         results.errors++;
       }
     }
 
-    // ── SERVING -> ALUMNI: find SERVING members whose serviceEndDate has passed ─
     const eligibleForAlumni = await prisma.nYSCJourney.findMany({
-      where: {
-        serviceEndDate: { lte: now },
-        user: { nyscStatus: "SERVING" },
-      },
-      include: {
-        user: {
-          select: { id: true, name: true, nyscStatus: true },
-        },
-      },
+      where: { serviceEndDate: { lte: now }, user: { nyscStatus: "SERVING" } },
+      select: { userId: true },
     });
 
-    for (const journey of eligibleForAlumni) {
+    for (const { userId } of eligibleForAlumni) {
       try {
-        await prisma.$transaction([
-          prisma.user.update({
-            where: { id: journey.userId },
-            data: {
-              nyscStatus: "ALUMNI",
-              role: "ALUMNI",
-            },
-          }),
-          prisma.userStatusHistory.create({
-            data: {
-              userId: journey.userId,
-              previousStatus: "SERVING",
-              newStatus: "ALUMNI",
-              changedBy: "SYSTEM",
-              changeType: "AUTOMATIC",
-              reason: "SERVICE_END_DATE_REACHED",
-            },
-          }),
-          prisma.notification.create({
-            data: {
-              userId: journey.userId,
-              title: "Congratulations on completing your service year! 🎓",
-              message:
-                "Based on your expected service end date, you've been automatically transitioned to Alumni status. Your KopaWee dashboard has been updated with post-service features. Congratulations on your NYSC journey!",
-            },
-          }),
-        ]);
+        await applyAutomaticTransition(userId, "SERVING", "ALUMNI", "SERVICE_END_DATE_REACHED");
         results.servingToAlumni++;
       } catch (err) {
-        console.error(`[CRON] Failed SERVING->ALUMNI for userId ${journey.userId}:`, err);
+        console.error(`[CRON] Failed SERVING->ALUMNI for userId ${userId}:`, err);
         results.errors++;
       }
     }
@@ -151,119 +75,39 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/cron/journey-status
- * 
- * Per-user evaluation: check a single user's journey dates and
- * transition if eligible. Called on profile load as a fallback.
+ *
+ * Self-evaluation for the signed-in user, e.g. right after they save their journey dates,
+ * so they don't wait for the next scheduled run. Never acts on another user.
  */
-export async function POST(req: NextRequest) {
+export async function POST() {
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   try {
-    const body = await req.json();
-    const { userId } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "userId is required" },
-        { status: 400 }
-      );
-    }
-
-    const now = new Date();
-
+    const userId = auth.user.id;
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        nyscStatus: true,
-        nyscJourney: true,
-      },
+      select: { nyscStatus: true, nyscJourney: true },
     });
 
-    if (!user || !user.nyscJourney) {
+    const due = user ? dueAutomaticTransition(user.nyscStatus, user.nyscJourney, new Date()) : null;
+
+    if (!user || !due) {
       return NextResponse.json({
         success: true,
         transitioned: false,
-        message: "No journey dates set. No transition performed.",
+        newStatus: null,
+        message: "No transition required at this time.",
       });
     }
 
-    const journey = user.nyscJourney;
-    let transitioned = false;
-    let newStatus: string | null = null;
-
-    // PCM -> SERVING check
-    if (
-      user.nyscStatus === "PCM" &&
-      journey.campExitDate &&
-      now >= journey.campExitDate
-    ) {
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { id: userId },
-          data: { nyscStatus: "SERVING", role: "SERVING_CORPER" },
-        }),
-        prisma.userStatusHistory.create({
-          data: {
-            userId,
-            previousStatus: "PCM",
-            newStatus: "SERVING",
-            changedBy: "SYSTEM",
-            changeType: "AUTOMATIC",
-            reason: "CAMP_EXIT_DATE_REACHED",
-          },
-        }),
-        prisma.notification.create({
-          data: {
-            userId,
-            title: "Welcome to your service year! 🎉",
-            message:
-              "Based on the camp dates you provided, we've updated your NYSC status to Serving Corps Member. Your dashboard has been updated with features relevant to your service year.",
-          },
-        }),
-      ]);
-      transitioned = true;
-      newStatus = "SERVING";
-    }
-
-    // SERVING -> ALUMNI check
-    else if (
-      user.nyscStatus === "SERVING" &&
-      journey.serviceEndDate &&
-      now >= journey.serviceEndDate
-    ) {
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { id: userId },
-          data: { nyscStatus: "ALUMNI", role: "ALUMNI" },
-        }),
-        prisma.userStatusHistory.create({
-          data: {
-            userId,
-            previousStatus: "SERVING",
-            newStatus: "ALUMNI",
-            changedBy: "SYSTEM",
-            changeType: "AUTOMATIC",
-            reason: "SERVICE_END_DATE_REACHED",
-          },
-        }),
-        prisma.notification.create({
-          data: {
-            userId,
-            title: "Congratulations on completing your service year! 🎓",
-            message:
-              "Based on your expected service end date, you've been automatically transitioned to Alumni status.",
-          },
-        }),
-      ]);
-      transitioned = true;
-      newStatus = "ALUMNI";
-    }
+    await applyAutomaticTransition(userId, user.nyscStatus, due.to, due.reason);
 
     return NextResponse.json({
       success: true,
-      transitioned,
-      newStatus,
-      message: transitioned
-        ? `Status automatically transitioned to ${newStatus}.`
-        : "No transition required at this time.",
+      transitioned: true,
+      newStatus: due.to,
+      message: `Status automatically transitioned to ${due.to}.`,
     });
   } catch (error) {
     console.error("[POST /api/cron/journey-status] Error:", error);
