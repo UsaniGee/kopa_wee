@@ -251,9 +251,23 @@ Package manager is **pnpm**.
 ```bash
 pnpm install
 cp .env.example .env        # then fill in values (never commit .env)
-pnpm prisma migrate dev     # apply migrations to your local database
+# .env.local must point DATABASE_URL / DIRECT_URL at a Neon *dev branch*, never production
+pnpm prisma migrate deploy  # apply committed migrations (prisma/migrations/)
 pnpm prisma db seed         # reference data + admin from SEED_ADMIN_* env vars
 ```
+
+### Schema Changes
+
+Migration history starts at the `0_init` baseline (2026-10-08); before that the
+schema was applied with `prisma db push`. Do not use `db push` any more.
+
+```bash
+pnpm prisma migrate dev --name <change>   # on the dev branch: writes prisma/migrations/<ts>_<change>/
+pnpm prisma migrate deploy                # production/Vercel: applies pending migrations only
+```
+
+Review every generated `migration.sql` before committing. Apply to production
+only after it has run cleanly on the dev branch.
 
 ### Daily Development
 

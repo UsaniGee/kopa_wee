@@ -6,7 +6,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
+  // Prisma Migrate needs a direct (non-pooled) Neon connection for advisory locks
+  directUrl = env("DIRECT_URL")
 }
 
 // System application-level roles (access control)
@@ -98,6 +100,7 @@ model User {
   avatarUrl         String?
   isVerified        Boolean         @default(false)
   verificationToken String?
+  verificationTokenExpiry DateTime?
   passwordResetToken  String?   @unique
   passwordResetExpiry DateTime?
   createdAt         DateTime        @default(now())
@@ -206,7 +209,8 @@ model UserStatusHistory {
   user           User             @relation("StatusHistoryUser", fields: [userId], references: [id], onDelete: Cascade)
   previousStatus NyscStatus
   newStatus      NyscStatus
-  changedBy      String
+  // Null when the system (cron) made the change; otherwise the acting user or admin
+  changedBy      String?
   changedByUser  User?            @relation("StatusHistoryAdmin", fields: [changedBy], references: [id])
   changeType     StatusChangeType
   reason         String?
