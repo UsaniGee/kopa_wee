@@ -2,6 +2,8 @@
 
 ## Phase 1: Dependencies & Environment Setup
 
+> **Superseded in part (2026-10-08):** email delivery moved from Resend to Nodemailer + Gmail SMTP in [nodemailer_gmail_smtp_20260914](../nodemailer_gmail_smtp_20260914/index.md). Resend-specific tasks here are historical; the `sendEmail()` interface and React Email templates still apply.
+
 - [x] Task: Install required packages — `resend@4.6.0`, `@react-email/components@0.0.36`, `@react-email/render@1.0.12`, `@google/generative-ai@0.24.1` added to package.json; run `npm install` to pull down
   - [x] Install `resend` and `@react-email/components` and `@react-email/render`
   - [x] Install `@google/generative-ai`
@@ -124,6 +126,8 @@
 ---
 
 ## Phase 6: Resend Email — React Email Templates & Transactional Flows
+
+> **Superseded in part (2026-10-08):** email delivery moved from Resend to Nodemailer + Gmail SMTP in [nodemailer_gmail_smtp_20260914](../nodemailer_gmail_smtp_20260914/index.md). Resend-specific tasks here are historical; the `sendEmail()` interface and React Email templates still apply.
 
 - [ ] Task: Create `src/shared/lib/email.ts`
   - [ ] Write failing test: `sendEmail()` called with missing `RESEND_API_KEY` logs warning and returns `{ success: false }` without throwing
