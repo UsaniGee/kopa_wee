@@ -35,8 +35,9 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 ## Phase 3: Backend Data Integrity (FR3, API side)
 
-- [ ] Task: Schema migration
-  - [ ] Write the Prisma migration: make `UserStatusHistory.changedBy` nullable (keep `changeType`); add `User.verificationTokenExpiry DateTime?`. All changes backward compatible.
+- [x] Task: Schema migration 455255d
+  - [x] Write the Prisma migration: make `UserStatusHistory.changedBy` nullable (keep `changeType`); add `User.verificationTokenExpiry DateTime?`. All changes backward compatible.
+  - [x] Baseline Prisma Migrate (owner decision 2026-10-08; the schema was previously applied with `db push`): offline `0_init` (20 tables = 20 models) plus `20261008000000_nullable_changedby_verification_expiry`. Add `directUrl` for Neon. Document `DIRECT_URL`. Fix the workflow.md migration commands.
 - [ ] Task: Status lifecycle (A6, A12)
   - [ ] Write failing tests:
     - SERVING→ALUMNI is allowed.
@@ -91,6 +92,10 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - [ ] Task: Honest SOS API wording (A5)
   - [ ] Write a failing test: the response message describes only what actually happened, and `latitude`/`longitude` are required numbers.
   - [ ] Implement, then run the tests (Green).
+- [ ] Task: Apply migrations on the Neon dev branch (owner creates the branch; never production)
+  - [ ] Confirm `.env.local` `DATABASE_URL`/`DIRECT_URL` host differs from production (`ep-super-fire-aykwex2w`).
+  - [ ] Check for drift: `prisma migrate diff --from-url $DIRECT_URL --to-migrations prisma/migrations` (or `--to-schema-datamodel` of the pre-change schema) shows no difference before baselining.
+  - [ ] `prisma migrate resolve --applied 0_init`, then `prisma migrate deploy`.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 4: Frontend Data Integrity (FR3, UI side)
