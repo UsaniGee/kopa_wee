@@ -89,9 +89,9 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
     - One required-env helper for `NEXTAUTH_URL` (no localhost fallback in production).
     - Unify the minimum password length at 8.
   - [x] Run the tests (Green).
-- [ ] Task: Honest SOS API wording (A5)
-  - [ ] Write a failing test: the response message describes only what actually happened, and `latitude`/`longitude` are required numbers.
-  - [ ] Implement, then run the tests (Green).
+- [x] Task: Honest SOS API wording (A5) c6b005f
+  - [x] Write a failing test: the response message describes only what actually happened, and `latitude`/`longitude` are required numbers.
+  - [x] Implement, then run the tests (Green).
 - [ ] Task: Apply migrations on the Neon dev branch (owner creates the branch; never production)
   - [ ] Confirm `.env.local` `DATABASE_URL`/`DIRECT_URL` host differs from production (`ep-super-fire-aykwex2w`).
   - [ ] Check for drift: `prisma migrate diff --from-url $DIRECT_URL --to-migrations prisma/migrations` (or `--to-schema-datamodel` of the pre-change schema) shows no difference before baselining.
