@@ -111,10 +111,10 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Send email sign-ups to `/onboarding` after their first sign-in when the profile is incomplete.
   - [x] Manual check: two new users complete onboarding with different states, and both are saved correctly. (API end-to-end on the dev branch; UI click-through at the phase checkpoint.)
   - Decision: the "interests" step saved nothing and was replaced by a Deployment step.
-- [ ] Task: SOS location (A4)
-  - [ ] Use `navigator.geolocation` plus the user's saved state/LGA. Show an error if permission is denied.
-  - [ ] Only show success after the server confirms.
-  - [ ] Remove the "trusted contacts notified" wording.
+- [x] Task: SOS location (A4) fb42d73
+  - [x] Use `navigator.geolocation` plus the user's saved state/LGA. Show an error if permission is denied.
+  - [x] Only show success after the server confirms.
+  - [x] Remove the "trusted contacts notified" wording.
 - [ ] Task: Stop fabricated writes (A8–A10)
   - [ ] Marketplace and accommodation send `images: []` when there's no photo and render a neutral placeholder graphic.
   - [ ] Add a `splitInfo` input.
