@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRole } from "@/shared/context/RoleContext";
 import { FiAlertOctagon, FiMapPin, FiPhone, FiAlertTriangle, FiCheckCircle, FiRadio, FiUserCheck, FiPackage, FiPlus, FiTrash2, FiLock, FiClock, FiX, FiShield } from "react-icons/fi";
 
 const ShieldAlert = FiAlertOctagon;
@@ -20,6 +18,11 @@ const Clock = FiClock;
 const X = FiX;
 const ShieldCheck = FiShield;
 
+type SosState =
+  | { phase: "idle" | "locating" | "sending" }
+  | { phase: "sent"; message: string; at: string; accuracy: number }
+  | { phase: "error"; message: string };
+
 interface TrustedContact {
   id: string;
   name: string;
@@ -28,9 +31,8 @@ interface TrustedContact {
 }
 
 export default function SafetyPage() {
-  const { currentRole } = useRole();
-  const { data: session } = useSession();
-  const [sosActive, setSosActive] = useState(false);
+  const [sos, setSos] = useState<SosState>({ phase: "idle" });
+  const sosBusy = sos.phase === "locating" || sos.phase === "sending";
   const [tripActive, setTripActive] = useState(true);
   
   const [contacts, setContacts] = useState<TrustedContact[]>([
@@ -50,24 +52,56 @@ export default function SafetyPage() {
   const [pingInterval, setPingInterval] = useState("2 Hours");
 
   const handleTriggerSos = async () => {
-    const userId = session?.user?.id || "";
-    setSosActive(true);
+    if (sos.phase === "locating" || sos.phase === "sending") return;
 
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setSos({ phase: "error", message: "This browser can't share your location, so no alert was sent." });
+      return;
+    }
+
+    setSos({ phase: "locating" });
+    let position: GeolocationPosition;
     try {
-      await fetch("/api/safety/sos", {
+      position = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 })
+      );
+    } catch (err) {
+      const code = (err as GeolocationPositionError)?.code;
+      setSos({
+        phase: "error",
+        message:
+          code === 1
+            ? "Location permission was denied, so no alert was sent. Allow location for this site in your browser settings and try again."
+            : "Your location could not be found, so no alert was sent. Move to an open area or turn on GPS and try again.",
+      });
+      return;
+    }
+
+    setSos({ phase: "sending" });
+    try {
+      // State and LGA come from your saved profile on the server
+      const res = await fetch("/api/safety/sos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
-          latitude: 6.5244,
-          longitude: 3.3792,
-          state: "Lagos",
-          lga: "Ikeja",
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
           message: "EMERGENCY SOS: Corper needs immediate assistance!",
         }),
       });
-    } catch (err) {
-      console.error("Failed to post SOS alert", err);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        setSos({ phase: "error", message: data.error || "The alert could not be saved." });
+        return;
+      }
+      setSos({
+        phase: "sent",
+        message: data.message,
+        at: new Date(data.data.createdAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" }),
+        accuracy: Math.round(position.coords.accuracy),
+      });
+    } catch {
+      setSos({ phase: "error", message: "Network error: the alert was not sent." });
     }
   };
 
@@ -109,35 +143,55 @@ export default function SafetyPage() {
             Highway Convoys & Emergency Broadcast
           </h1>
           <p className="text-xs text-slate-300">
-            Real-time travel check-in and encrypted SOS alerts sent to your designated trusted contacts.
+            SOS records your current location and emails you a copy. Alerts to trusted contacts are not available yet. In danger? Call 112.
           </p>
         </div>
 
-        <button
-          onClick={handleTriggerSos}
-          className={`px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-2 cursor-pointer ${
-            sosActive
-              ? "bg-red-700 text-white border border-red-500 animate-pulse"
-              : "bg-red-600 hover:bg-red-700 text-white"
-          }`}
-        >
-          <Radio className="w-4 h-4" />
-          <span>{sosActive ? "SOS EMERGENCY BROADCASTING" : "TRIGGER SOS BROADCAST"}</span>
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <button
+            onClick={handleTriggerSos}
+            disabled={sosBusy}
+            className={`px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${
+              sosBusy ? "bg-red-700 text-white border border-red-500 animate-pulse cursor-wait" : "bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+            }`}
+          >
+            <Radio className="w-4 h-4" />
+            <span>
+              {sos.phase === "locating" ? "Getting your location..." : sos.phase === "sending" ? "Sending SOS..." : "Send SOS with my location"}
+            </span>
+          </button>
+          <a
+            href="tel:112"
+            className="px-6 py-4 border border-slate-600 hover:border-white text-white text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+          >
+            <Phone className="w-4 h-4" />
+            <span>Call 112</span>
+          </a>
+        </div>
       </div>
 
-      {/* SOS Active Alert Box */}
-      {sosActive && (
-        <div className="p-6 bg-red-950/40 border border-red-600/50 text-white space-y-3">
-          <div className="flex items-center gap-2 text-red-400 font-bold font-display text-sm">
-            <AlertTriangle className="w-5 h-5" />
-            <span>EMERGENCY SOS ACTIVE</span>
+      {/* SOS result: only what the server confirmed */}
+      <div aria-live="assertive">
+        {sos.phase === "sent" && (
+          <div className="p-6 bg-red-950/40 border border-red-600/50 text-white space-y-2">
+            <div className="flex items-center gap-2 text-red-400 font-bold font-display text-sm">
+              <CheckCircle2 className="w-5 h-5" />
+              <span>SOS LOGGED AT {sos.at}</span>
+            </div>
+            <p className="text-xs text-slate-300">{sos.message}</p>
+            <p className="text-[11px] text-slate-400 font-mono">Location accuracy: about {sos.accuracy} m</p>
           </div>
-          <p className="text-xs text-slate-300">
-            GPS Location pinged to {contacts.length} trusted contacts and NYSC Security Desk.
-          </p>
-        </div>
-      )}
+        )}
+        {sos.phase === "error" && (
+          <div role="alert" className="p-6 bg-red-950/40 border border-red-600/50 text-white space-y-2">
+            <div className="flex items-center gap-2 text-red-400 font-bold font-display text-sm">
+              <AlertTriangle className="w-5 h-5" />
+              <span>SOS NOT SENT</span>
+            </div>
+            <p className="text-xs text-slate-300">{sos.message} If you are in danger, call 112 now.</p>
+          </div>
+        )}
+      </div>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
