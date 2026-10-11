@@ -79,12 +79,6 @@ export default function MarketplacePage() {
   }, []);
 
   // Modal Form State
-  const [itemTitle, setItemTitle] = useState("");
-  const [itemCategory, setItemCategory] = useState("Pre-Camp Gear");
-  const [itemPrice, setItemPrice] = useState("");
-  const [itemLocation, setItemLocation] = useState("");
-  const [itemDescription, setItemDescription] = useState("");
-  const [posting, setPosting] = useState(false);
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportedListingTitle, setReportedListingTitle] = useState("");
@@ -118,60 +112,6 @@ export default function MarketplacePage() {
       })
       .catch(() => {});
   }, []);
-
-  const handlePostItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!itemTitle || !itemPrice) return;
-
-    setPosting(true);
-    const userId = session?.user?.id || "";
-
-    try {
-      const res = await fetch("/api/marketplace", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sellerId: userId,
-          title: itemTitle,
-          category: itemCategory,
-          price: `₦${itemPrice}`,
-          description: itemDescription || "Corper Item for sale",
-          state: selectedState === "All States" ? "Lagos" : selectedState,
-          lga: "Ikeja",
-          images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80"],
-        }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        const newItem: Listing = {
-          id: data.data.id,
-          title: itemTitle,
-          price: parseInt(itemPrice, 10) || 5000,
-          state: selectedState === "All States" ? "Lagos" : selectedState,
-          location: itemLocation || "Ikeja LGA, Lagos",
-          distanceKm: 1.0,
-          seller: "You",
-          roleBadge: "Fresh Listing",
-          badgeType: "verified",
-          category: itemCategory,
-          condition: "Listed Just Now",
-          imageBg: "bg-emerald-700",
-          imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80",
-          forRoles: ["pcm", "serving", "alumni"],
-        };
-        setListings((prev) => [newItem, ...prev]);
-        setShowModal(false);
-        setItemTitle("");
-        setItemPrice("");
-        setItemDescription("");
-      }
-    } catch (err) {
-      console.error("Failed to post item", err);
-    } finally {
-      setPosting(false);
-    }
-  };
 
   const filteredListings = listings.filter((item) => {
     const matchesState = selectedState === "All States" || item.state === selectedState;

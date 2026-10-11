@@ -98,8 +98,6 @@ export default function AdminDashboardPage() {
   const [revertStatus, setRevertStatus] = useState<"PCM" | "SERVING" | "ALUMNI">("PCM");
   const [revertLoading, setRevertLoading] = useState(false);
 
-  // TODO: get real admin userId from auth session
-
   const fetchPendingData = async () => {
     setLoading(true);
     try {
@@ -144,6 +142,8 @@ export default function AdminDashboardPage() {
       if (data.success) {
         setActionMsg(`✅ Listing ${id} APPROVED and published live!`);
         fetchPendingData();
+      } else {
+        setActionMsg(`❌ Not approved: ${data.error || "the server refused the change"}`);
       }
     } catch (err) {
       setActionMsg("❌ Failed to approve listing");
@@ -162,6 +162,8 @@ export default function AdminDashboardPage() {
       if (data.success) {
         setActionMsg(`🚫 Listing ${id} REJECTED.`);
         fetchPendingData();
+      } else {
+        setActionMsg(`❌ Not rejected: ${data.error || "the server refused the change"}`);
       }
     } catch (err) {
       setActionMsg("❌ Failed to reject listing");

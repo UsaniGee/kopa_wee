@@ -223,11 +223,12 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
   const [newItemName, setNewItemName] = useState("");
   const [addingItem, setAddingItem] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   const fetchItems = useCallback(async () => {
     if (!userId) return;
     try {
-      const res = await fetch(`/api/packing-items?userId=${userId}`);
+      const res = await fetch("/api/packing-items");
       const data = await res.json();
       if (data.success) setItems(data.data);
     } catch (err) {
@@ -241,25 +242,35 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
     fetchItems();
   }, [fetchItems]);
 
-  const togglePcmCompleted = async (item: PackingItem) => {
-    const updated = { ...item, pcmCompleted: !item.pcmCompleted };
-    setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)));
-    await fetch("/api/packing-items", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ itemId: item.id, userId, pcmCompleted: updated.pcmCompleted }),
-    });
+  /** Sends a change; true only when the server confirms it. */
+  const save = async (method: "PATCH" | "DELETE", body: object) => {
+    try {
+      const res = await fetch("/api/packing-items", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      return res.ok && data.success === true;
+    } catch {
+      return false;
+    }
   };
 
-  const setServingStatus = async (item: PackingItem, status: "INTACT" | "USED" | "MISSING") => {
-    const updated = { ...item, servingTrackingStatus: status };
-    setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)));
-    await fetch("/api/packing-items", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ itemId: item.id, userId, servingTrackingStatus: status }),
-    });
+  // Optimistic update, rolled back if the save fails
+  const updateItem = async (item: PackingItem, changes: Partial<PackingItem>) => {
+    setActionError("");
+    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, ...changes } : i)));
+    if (!(await save("PATCH", { itemId: item.id, ...changes }))) {
+      setItems((prev) => prev.map((i) => (i.id === item.id ? item : i)));
+      setActionError(`"${item.name}" was not updated. Please try again.`);
+    }
   };
+
+  const togglePcmCompleted = (item: PackingItem) => updateItem(item, { pcmCompleted: !item.pcmCompleted });
+
+  const setServingStatus = (item: PackingItem, status: "INTACT" | "USED" | "MISSING") =>
+    updateItem(item, { servingTrackingStatus: status });
 
   const addCustomItem = async () => {
     if (!newItemName.trim()) return;
@@ -268,16 +279,18 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
       const res = await fetch("/api/packing-items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, name: newItemName.trim(), category: "custom" }),
+        body: JSON.stringify({ name: newItemName.trim(), category: "custom" }),
       });
       const data = await res.json();
       if (data.success) {
         setItems((prev) => [...prev, data.data]);
         setNewItemName("");
         setShowAddForm(false);
+      } else {
+        setActionError(data.error || "The item was not added.");
       }
-    } catch (err) {
-      console.error("Failed to add item:", err);
+    } catch {
+      setActionError("Network error: the item was not added.");
     } finally {
       setAddingItem(false);
     }
@@ -285,12 +298,13 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
 
   const deleteItem = async (item: PackingItem) => {
     if (!item.isCustom) return;
+    setActionError("");
+    const before = items;
     setItems((prev) => prev.filter((i) => i.id !== item.id));
-    await fetch("/api/packing-items", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ itemId: item.id, userId }),
-    });
+    if (!(await save("DELETE", { itemId: item.id }))) {
+      setItems(before);
+      setActionError(`"${item.name}" was not removed.`);
+    }
   };
 
   const completedCount = items.filter((i) => i.pcmCompleted).length;
@@ -307,6 +321,8 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
 
   return (
     <div className="space-y-4">
+      {actionError && <p role="alert" className="text-xs font-semibold text-red-700 dark:text-red-400">{actionError}</p>}
+
       {/* Serving notice banner */}
       {isServing && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
@@ -462,7 +478,7 @@ interface ClearanceWidgetProps {
 }
 
 function ClearanceWidget({ userId }: ClearanceWidgetProps) {
-  const { setRole } = useRole();
+  const { update: refreshSession } = useSession();
   const [clearanceData, setClearanceData] = useState<{
     hasCleared: boolean;
     lastClearedAt: string | null;
@@ -500,7 +516,6 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
       const res = await fetch("/api/clearance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
       });
       const data = await res.json();
       if (data.success) {
@@ -526,14 +541,13 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
           newStatus: "ALUMNI",
           reason: "Completed 12 monthly clearances and transitioned to Alumni status",
         }),
       });
       const data = await res.json();
       if (data.success) {
-        setRole("alumni");
+        await refreshSession(); // role comes from the session; this switches the dashboard
       } else {
         setError(data.message || "Failed to transition to Alumni");
       }
@@ -633,8 +647,8 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
 // MAIN DASHBOARD PAGE
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function DashboardOverviewPage() {
-  const { currentRole, setRole } = useRole();
-  const { data: session } = useSession();
+  const { currentRole } = useRole();
+  const { data: session, update: refreshSession } = useSession();
 
   const [leaveRequests, setLeaveRequests] = useState([
     { id: 1, name: "John Okoh", role: "ICT Assistant", reason: "Medical Leave (3 Days)", status: "pending" },
@@ -644,6 +658,7 @@ export default function DashboardOverviewPage() {
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const [statusError, setStatusError] = useState("");
   const [journeyInfo, setJourneyInfo] = useState<any>(null);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [clearanceInfo, setClearanceInfo] = useState<any>(null);
@@ -701,25 +716,25 @@ export default function DashboardOverviewPage() {
 
   const handleStatusUpdate = async () => {
     setStatusUpdating(true);
+    setStatusError("");
     try {
       const res = await fetch("/api/users/status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
           newStatus: "SERVING",
           reason: "User self-initiated transition from PCM dashboard",
         }),
       });
       const data = await res.json();
       if (data.success) {
-        setRole("serving");
+        await refreshSession(); // role comes from the session; this switches the dashboard
         setShowStatusModal(false);
       } else {
-        console.error("Status update failed:", data.message);
+        setStatusError(data.message || data.error || "Your status was not changed.");
       }
-    } catch (err) {
-      console.error("Failed to update status:", err);
+    } catch {
+      setStatusError("Network error: your status was not changed.");
     } finally {
       setStatusUpdating(false);
     }
@@ -764,6 +779,36 @@ export default function DashboardOverviewPage() {
             <span>Update Status ➔ Serving Corper</span>
           </button>
         </div>
+
+        {showStatusModal && (
+          <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="status-modal-title">
+            <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 max-w-md w-full p-6 space-y-4 text-[#121815] dark:text-white">
+              <h2 id="status-modal-title" className="text-lg font-bold font-display uppercase tracking-wider">Switch to Serving Corps Member?</h2>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Do this after camp, once you have your PPA. Your dashboard will show serving tools (clearance, logbook, lodges). You can&apos;t switch back yourself.
+              </p>
+              {statusError && <p role="alert" className="text-xs font-semibold text-red-700 dark:text-red-400">{statusError}</p>}
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowStatusModal(false); setStatusError(""); }}
+                  disabled={statusUpdating}
+                  className="px-4 py-2 border border-slate-400 dark:border-slate-700 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStatusUpdate}
+                  disabled={statusUpdating}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider cursor-pointer disabled:opacity-50"
+                >
+                  {statusUpdating ? "Updating..." : "Yes, I'm serving"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Metric Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -951,7 +951,6 @@ function RequestRoommateModal({
           accommodationType: accommodationType || "Shared Apartment",
           preferences,
         } : {
-          userId,
           state: selectedState,
           lga,
           area: [area, street].filter(Boolean).join(", "),
