@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import {
   FiShield,
   FiLock,
@@ -16,7 +16,7 @@ import {
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@kopawee.ng");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -59,8 +59,8 @@ export default function AdminLoginPage() {
       if (data.success && data.data?.applicationRole === "ADMIN") {
         router.push("/admin");
       } else {
-        // Sign them out — authenticated but not admin
-        await fetch("/api/auth/signout", { method: "POST" });
+        // Signed in but not an admin: end that session (NextAuth's signOut sends the CSRF token)
+        await signOut({ redirect: false });
         setErrorMsg("Access denied. This portal is for platform administrators only.");
         setLoading(false);
       }
@@ -191,7 +191,7 @@ export default function AdminLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@kopawee.ng"
+                  placeholder="name@example.com"
                   className="w-full pl-10 pr-4 py-3 bg-[#121815] border border-slate-800 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-red-600 transition-colors"
                 />
               </div>

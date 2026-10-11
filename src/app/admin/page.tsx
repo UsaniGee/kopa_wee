@@ -387,7 +387,8 @@ export default function AdminDashboardPage() {
 
 
         {/* Listings Moderation List */}
-        {loading ? (
+        {/* Listing review tabs only; Users and Invites render below */}
+        {(activeTab === "marketplace" || activeTab === "accommodation") && (loading ? (
           <div className="p-12 text-center text-xs font-mono text-slate-400 space-y-2">
             <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-slate-500 dark:text-slate-400">Fetching pending listings for review...</p>
@@ -510,7 +511,7 @@ export default function AdminDashboardPage() {
               </div>
             ))}
           </div>
-        )}
+        ))}
 
         {/* User Status Management Tab */}
         {activeTab === "users" && (
