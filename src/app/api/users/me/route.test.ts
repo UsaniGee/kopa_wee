@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PATCH } from "./route";
+import { GET, PATCH } from "./route";
 import { prismaMock } from "@/test/prismaMock";
 import { signInAs } from "@/test/authMock";
 import { makeRequest } from "@/test/request";
@@ -25,6 +25,34 @@ function stubWrites() {
   prismaMock.nYSCJourney.upsert.mockResolvedValue({});
   prismaMock.userStatusHistory.create.mockResolvedValue({});
 }
+
+describe("GET /api/users/me", () => {
+  const journey = { institution: "University of Nigeria", courseOfStudy: "Law", batch: "2026 Batch A", stream: null };
+
+  it("returns 401 when signed out", async () => {
+    expect((await GET()).status).toBe(401);
+  });
+
+  it("returns the journey details and marks onboarding complete once phone and institution are saved", async () => {
+    signInAs({ id: "user_1" });
+    prismaMock.user.findUnique.mockResolvedValue({ id: "user_1", phone: "+2348031234567", nyscJourney: journey });
+
+    const body = await (await GET()).json();
+
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "user_1" } }));
+    expect(body.data).toMatchObject({ journey, onboardingComplete: true });
+    expect(body.data).not.toHaveProperty("nyscJourney");
+  });
+
+  it("marks onboarding incomplete for a fresh sign-up", async () => {
+    signInAs({ id: "user_1" });
+    prismaMock.user.findUnique.mockResolvedValue({ id: "user_1", phone: null, nyscJourney: null });
+
+    const body = await (await GET()).json();
+
+    expect(body.data).toMatchObject({ journey: null, onboardingComplete: false });
+  });
+});
 
 describe("PATCH /api/users/me", () => {
   it("returns 401 when signed out", async () => {

@@ -130,7 +130,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
 
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       // On initial sign-in, enrich token from user object or DB
       if (user) {
         token.id = user.id as string;
@@ -172,9 +172,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       // Re-read role fields periodically so admin demotions and status changes
-      // reach live sessions without forcing a sign-out
+      // reach live sessions without forcing a sign-out. useSession().update() forces
+      // a re-read from the DB; data the client sends with it is ignored.
       const isStale = Date.now() - (token.rolesRefreshedAt ?? 0) > ROLE_REFRESH_INTERVAL_MS;
-      if (isStale && token.id) {
+      if ((isStale || trigger === "update") && token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id },
           select: { role: true, applicationRole: true, nyscStatus: true, isVerified: true },

@@ -31,14 +31,21 @@ export async function GET() {
   try {
     const user = await prisma.user.findUnique({
       where: { id: auth.user.id }, // Scoped to session user only
-      select: PROFILE_SELECT,
+      select: {
+        ...PROFILE_SELECT,
+        nyscJourney: { select: { institution: true, courseOfStudy: true, batch: true, stream: true } },
+      },
     });
 
     if (!user) {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: user });
+    const { nyscJourney, ...profile } = user;
+    // Onboarding asks for both; sign-in sends users without them back to /onboarding
+    const onboardingComplete = Boolean(profile.phone && nyscJourney?.institution);
+
+    return NextResponse.json({ success: true, data: { ...profile, journey: nyscJourney, onboardingComplete } });
   } catch {
     return NextResponse.json({ success: false, error: "Failed to fetch user profile" }, { status: 500 });
   }

@@ -111,11 +111,13 @@ function AuthPageContent() {
         }
 
         // Fetch user profile to set UX state in localStorage (non-security)
+        let needsOnboarding = false;
         try {
           const profileRes = await fetch("/api/users/me");
           const profileData = await profileRes.json();
           if (profileData.success && profileData.data) {
             const u = profileData.data;
+            needsOnboarding = !u.onboardingComplete;
             localStorage.setItem("kopawee_user_email", u.email);
             localStorage.setItem("kopawee_user_name", u.name);
             localStorage.setItem("kopawee_active_role",
@@ -126,6 +128,12 @@ function AuthPageContent() {
           }
         } catch {
           // Non-fatal — UX state defaults will apply
+        }
+
+        // Email sign-ups finish their profile on first sign-in, as Google sign-ups do
+        if (needsOnboarding) {
+          router.push(redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding");
+          return;
         }
 
         const dest = redirectUrl ? getRouteForRole(redirectUrl, localStorage.getItem("kopawee_active_role") || "serving") : "/dashboard";
