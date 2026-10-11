@@ -95,7 +95,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - ⏭ Deferred: Apply migrations on the Neon dev branch. Both env files still pointed at production (`ep-super-fire-aykwex2w`), so no migration ran; the owner chose to move this to the start of Phase 4 (2026-10-08).
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 4: Frontend Data Integrity (FR3, UI side)
+## Phase 4: Frontend Data Integrity (FR3, UI side) [checkpoint: 19c394a]
 
 - [x] Task: Apply migrations on the Neon dev branch (owner creates the branch; never production). Must run before any UI that saves `verificationTokenExpiry` or a null `changedBy` reaches a real database.
   - [x] Confirm `.env.local` `DATABASE_URL`/`DIRECT_URL` host differs from production (`ep-super-fire-aykwex2w`).
@@ -123,7 +123,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - Also: lodge photo URL box replaced by a device photo picker; photos downscaled in the browser; logbook API rejects client employerId and allows one entry per day.
 - [x] Task: Admin fixes (A13) 7f2e7d5
   - [x] Start the login email field empty, use `signOut()` from `next-auth/react`, and fix the lodges list showing on the wrong tabs.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5: Wire Existing Backends (FR4)
 
