@@ -27,7 +27,7 @@ describe("seedAdmin", () => {
     expect(data.passwordHash).toMatch(/^\$2[aby]\$/);
     expect(data.passwordHash).not.toContain(ADMIN_ENV.SEED_ADMIN_PASSWORD);
     expect(JSON.stringify(log.mock.calls)).not.toContain(ADMIN_ENV.SEED_ADMIN_PASSWORD);
-  });
+  }, 15_000); // real bcrypt (cost 12) takes ~2 s and can pass 5 s on a busy machine
 
   it("does not overwrite an existing admin's password", async () => {
     prismaMock.user.findUnique.mockResolvedValue({ id: "admin_1" });
