@@ -5,6 +5,10 @@ import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import { FiHome, FiUsers, FiMapPin, FiCheckCircle, FiShield, FiHeart, FiPlus, FiPackage, FiAlertTriangle, FiCompass, FiNavigation, FiFlag, FiX, FiSearch, FiFilter, FiEdit2, FiTrash2, FiLoader } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
+import { FiImage } from "react-icons/fi";
+import { downscaleImage } from "@/shared/lib/downscaleImage";
+
+const MAX_PHOTOS = 3;
 
 const Home = FiHome;
 const Users = FiUsers;
@@ -119,8 +123,8 @@ export default function AccommodationPage() {
             distanceKm: 1.5,
             badgeType: "verified",
             features: ["Verified Host", "Corper Suitable"],
-            split: item.splitInfo || "Contact Host",
-            image: item.images[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80",
+            split: item.splitInfo || "",
+            image: item.images?.[0] || "",
             forRoles: ["pcm", "serving", "alumni"],
           }));
           setLodges(apiLodges);
@@ -260,7 +264,14 @@ export default function AccommodationPage() {
             {filteredLodges.map((lodge) => (
               <div key={lodge.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
                 <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
-                  <img src={lodge.image} alt={lodge.name} className="w-full h-full object-cover" />
+                  {lodge.image ? (
+                    <img src={lodge.image} alt={lodge.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-400 dark:text-slate-600">
+                      <FiImage className="w-8 h-8" aria-hidden />
+                      <span className="text-[10px] font-mono uppercase tracking-widest">No photo</span>
+                    </div>
+                  )}
                   <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold px-2.5 py-1">
                     {lodge.lga} LGA · {lodge.distanceKm}km from PPA
                   </span>
@@ -281,7 +292,7 @@ export default function AccommodationPage() {
                 </div>
 
                 <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
-                  <span className="text-slate-600 dark:text-slate-400">{lodge.split}</span>
+                  <span className="text-slate-600 dark:text-slate-400">{lodge.split || "\u00a0"}</span>
                   <button 
                     onClick={() => handleFlagItem(lodge.name)}
                     className="text-red-600 hover:text-red-700 flex items-center gap-1 font-semibold cursor-pointer text-xs"
@@ -557,7 +568,8 @@ function PostLodgeModal({
   const [area, setArea] = useState("");
   const [street, setStreet] = useState("");
   const [contactPhone, setContactPhone] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [splitInfo, setSplitInfo] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -567,6 +579,22 @@ function PostLodgeModal({
     setLga("");
     const matched = states.find((s) => s.name === stateName);
     setAvailableLgas(matched && matched.lgas ? matched.lgas : []);
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const files = Array.from(input.files ?? []);
+    input.value = "";
+    const room = MAX_PHOTOS - photos.length;
+    if (files.length > room) setErrorMsg(`Only the first ${room} photo(s) were added (max ${MAX_PHOTOS}).`);
+    for (const file of files.slice(0, Math.max(room, 0))) {
+      try {
+        const dataUrl = await downscaleImage(file);
+        setPhotos((prev) => (prev.length < MAX_PHOTOS ? [...prev, dataUrl] : prev));
+      } catch {
+        setErrorMsg(`${file.name} could not be read. Use a JPEG, PNG or WebP photo.`);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -583,14 +611,11 @@ function PostLodgeModal({
     setSubmitting(true);
     setErrorMsg("");
 
-    const userId = session?.user?.id || "";
-
     try {
       const res = await fetch("/api/accommodation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ownerId: userId,
           title,
           price: `₦${Number(rent.replace(/[^0-9]/g, "")).toLocaleString()}/year`,
           state,
@@ -598,8 +623,8 @@ function PostLodgeModal({
           location: [street, area, lga, state].filter(Boolean).join(", "),
           contactPhone,
           description,
-          splitInfo: "Roommate Split Preferred",
-          images: imageUrl ? [imageUrl] : ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=85"],
+          splitInfo: splitInfo.trim() || undefined,
+          images: photos, // no stock photo: lodges without photos show a placeholder
         }),
       });
 
@@ -746,16 +771,50 @@ function PostLodgeModal({
           </div>
 
           <div className="space-y-1">
-            <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-              Photo URL (Optional)
+            <label htmlFor="splitInfo" className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+              Sharing / Split (Optional)
             </label>
             <input
-              type="url"
-              placeholder="https://images.unsplash.com/..."
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+              id="splitInfo"
+              type="text"
+              maxLength={120}
+              placeholder="e.g. 2 rooms, looking for 1 corper to split rent"
+              value={splitInfo}
+              onChange={(e) => setSplitInfo(e.target.value)}
               className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
             />
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="lodgePhotos" className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+              Photos (Optional, up to {MAX_PHOTOS})
+            </label>
+            <input
+              id="lodgePhotos"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              disabled={photos.length >= MAX_PHOTOS}
+              onChange={handlePhotoChange}
+              className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800 cursor-pointer disabled:opacity-50"
+            />
+            {photos.length > 0 && (
+              <div className="flex items-center gap-3 overflow-x-auto pt-2">
+                {photos.map((src, idx) => (
+                  <div key={idx} className="relative w-16 h-16 border border-slate-300 dark:border-slate-700 shrink-0">
+                    <img src={src} alt={`Lodge photo ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      aria-label={`Remove photo ${idx + 1}`}
+                      onClick={() => setPhotos((prev) => prev.filter((_, i) => i !== idx))}
+                      className="absolute -top-1 -right-1 bg-red-600 text-white p-0.5 cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">

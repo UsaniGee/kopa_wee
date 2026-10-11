@@ -23,26 +23,39 @@ const X = FiX;
 export default function WorkplacePage() {
   const { currentRole } = useRole();
   const { data: session } = useSession();
-  const [loggedToday, setLoggedToday] = useState(false);
   const [logSummary, setLogSummary] = useState("");
+  const [logHours, setLogHours] = useState("");
   const [logging, setLogging] = useState(false);
+  const [logError, setLogError] = useState("");
 
-  const handleLogTodaySubmit = async () => {
+  // Local calendar day (en-CA formats as YYYY-MM-DD); toISOString() would use UTC
+  const today = new Date().toLocaleDateString("en-CA");
+
+  const hoursNumber = Number(logHours);
+  const logFormValid = logSummary.trim().length >= 5 && Number.isInteger(hoursNumber) && hoursNumber >= 1 && hoursNumber <= 24;
+
+  const handleLogTodaySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!logFormValid || logging) return;
     setLogging(true);
+    setLogError("");
 
     try {
-      await fetch("/api/workplace/logbook", {
+      const res = await fetch("/api/workplace/logbook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date: new Date().toISOString().split("T")[0],
-          summary: logSummary || "Completed daily PPA duties & attendance clock-in.",
-          hoursWorked: 8,
-        }),
+        body: JSON.stringify({ date: today, summary: logSummary.trim(), hoursWorked: hoursNumber }),
       });
-      setLoggedToday(true);
-    } catch (err) {
-      console.error("Failed to log workplace attendance", err);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        setLogError(data.message || data.error || "Your entry was not saved. Please try again.");
+        return;
+      }
+      setLogSummary("");
+      setLogHours("");
+      loadLogs();
+    } catch {
+      setLogError("Network error: your entry was not saved.");
     } finally {
       setLogging(false);
     }
@@ -81,9 +94,9 @@ export default function WorkplacePage() {
   }
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const todaysEntry = logs.find((l) => l.date === today);
 
-  React.useEffect(() => {
-    if (!session?.user?.id) return;
+  const loadLogs = () => {
     fetch("/api/workplace/logbook")
       .then((res) => res.json())
       .then((data) => {
@@ -98,7 +111,12 @@ export default function WorkplacePage() {
         }
       })
       .catch(() => {});
-  }, [loggedToday, session]);
+  };
+
+  React.useEffect(() => {
+    if (session?.user?.id) loadLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when the signed-in user changes
+  }, [session?.user?.id]);
 
   if (currentRole === "pcm") {
     return (
@@ -132,18 +150,71 @@ export default function WorkplacePage() {
           </p>
         </div>
 
-        <button
-          onClick={handleLogTodaySubmit}
-          disabled={logging}
-          className={`px-6 py-3.5 text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
-            loggedToday
-              ? "bg-emerald-800 text-white"
-              : "bg-emerald-600 hover:bg-emerald-700 text-white"
-          }`}
-        >
-          <CheckCircle2 className="w-4 h-4" />
-          <span>{logging ? "LOGGING..." : loggedToday ? "ATTENDANCE LOGGED TODAY" : "LOG TODAY'S ATTENDANCE"}</span>
-        </button>
+      </div>
+
+      {/* Today's entry */}
+      <div className="p-6 sm:p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
+        <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-emerald-600" /> Today&apos;s Log · {today}
+        </h2>
+
+        {todaysEntry ? (
+          <div className="p-4 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-emerald-600/50 text-xs space-y-1">
+            <div className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-400 font-display">
+              <CheckCircle2 className="w-4 h-4" /> Logged · {todaysEntry.hoursWorked} h · {todaysEntry.status}
+            </div>
+            <p className="text-slate-600 dark:text-slate-300">{todaysEntry.summary}</p>
+          </div>
+        ) : (
+          <form onSubmit={handleLogTodaySubmit} className="space-y-3 text-xs">
+            <div className="space-y-1">
+              <label htmlFor="logSummary" className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                What did you do today? *
+              </label>
+              <textarea
+                id="logSummary"
+                rows={3}
+                maxLength={1000}
+                placeholder="e.g. Taught JSS2 mathematics, marked assignments, attended staff meeting."
+                value={logSummary}
+                onChange={(e) => setLogSummary(e.target.value)}
+                className="w-full px-3 py-2.5 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+              <div className="space-y-1 sm:w-40">
+                <label htmlFor="logHours" className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
+                  Hours worked *
+                </label>
+                <input
+                  id="logHours"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={24}
+                  step={1}
+                  placeholder="e.g. 6"
+                  value={logHours}
+                  onChange={(e) => setLogHours(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={!logFormValid || logging}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>{logging ? "Saving..." : "Save today's log"}</span>
+              </button>
+            </div>
+            {logError && (
+              <p role="alert" className="flex items-center gap-2 text-red-700 dark:text-red-400 font-semibold">
+                <AlertCircle className="w-4 h-4 shrink-0" /> {logError}
+              </p>
+            )}
+          </form>
+        )}
       </div>
 
       {/* Workplace Logs */}
@@ -160,7 +231,7 @@ export default function WorkplacePage() {
                 No workplace log entries recorded yet.
               </p>
               <p className="text-[11px] text-slate-500">
-                Click &quot;LOG TODAY&apos;S ATTENDANCE&quot; above to log your daily PPA work summary.
+                Use &quot;Today&apos;s Log&quot; above to record what you did and how many hours.
               </p>
             </div>
           ) : (

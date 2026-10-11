@@ -5,6 +5,10 @@ import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import { FiShoppingBag, FiPlus, FiFilter, FiMapPin, FiTag, FiMessageSquare, FiCheckCircle, FiX, FiPackage, FiAward, FiCompass, FiNavigation, FiAlertTriangle, FiFlag } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
+import { FiImage } from "react-icons/fi";
+import { downscaleImage } from "@/shared/lib/downscaleImage";
+
+const MAX_PHOTOS = 3; // matches the AI draft limit
 
 const ShoppingBag = FiShoppingBag;
 const Plus = FiPlus;
@@ -104,7 +108,7 @@ export default function MarketplacePage() {
             category: item.category,
             condition: "Good Condition",
             imageBg: "bg-emerald-800",
-            imageUrl: item.images[0] || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80",
+            imageUrl: item.images?.[0] || "",
             forRoles: ["pcm", "serving", "alumni"],
           }));
           setListings(apiListings);
@@ -273,7 +277,14 @@ export default function MarketplacePage() {
           {filteredListings.map((item) => (
             <div key={item.id} className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
               <div className="relative h-48 border border-slate-300/50 dark:border-slate-800 overflow-hidden">
-                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                {item.imageUrl ? (
+                  <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-[#eaf5ed] dark:bg-[#0a0f0d] text-slate-400 dark:text-slate-600">
+                    <FiImage className="w-8 h-8" aria-hidden />
+                    <span className="text-[10px] font-mono uppercase tracking-widest">No photo</span>
+                  </div>
+                )}
                 <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold px-2.5 py-1">
                   {item.roleBadge}
                 </span>
@@ -339,6 +350,7 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   const [analyzingAi, setAnalyzingAi] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [aiMissing, setAiMissing] = useState<string[]>([]);
   const [statesList, setStatesList] = useState<{ id: string; name: string; lgas: string[] }[]>([]);
 
   useEffect(() => {
@@ -357,24 +369,27 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
     setAvailableLgas(matched ? matched.lgas : []);
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const files = Array.from(input.files ?? []);
+    input.value = ""; // lets the same photo be picked again after removing it
+    if (files.length === 0) return;
 
-    const newPreviews: string[] = [];
-    Array.from(files).forEach((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg("Image files must be under 5MB each");
-        return;
+    const room = MAX_PHOTOS - imagePreviews.length;
+    if (room <= 0) {
+      setErrorMsg(`You can add up to ${MAX_PHOTOS} photos.`);
+      return;
+    }
+    if (files.length > room) setErrorMsg(`Only the first ${room} photo(s) were added (max ${MAX_PHOTOS}).`);
+
+    for (const file of files.slice(0, room)) {
+      try {
+        const dataUrl = await downscaleImage(file);
+        setImagePreviews((prev) => (prev.length < MAX_PHOTOS ? [...prev, dataUrl] : prev));
+      } catch {
+        setErrorMsg(`${file.name} could not be read. Use a JPEG, PNG or WebP photo.`);
       }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setImagePreviews((prev) => [...prev, event.target!.result as string]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    }
   };
 
   const removeImagePreview = (index: number) => {
@@ -407,12 +422,18 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
         if (draft.title) setTitle(draft.title);
         if (draft.categoryOrType) setCategory(draft.categoryOrType);
         if (draft.price) setPrice(draft.price.toString());
-        if (draft.state) setState(draft.state);
-        if (draft.lga) setLga(draft.lga);
+        if (draft.state) {
+          // Load that state's LGAs so the AI's LGA can be shown and changed
+          const lgas = statesList.find((s) => s.name === draft.state)?.lgas ?? [];
+          setState(draft.state);
+          setAvailableLgas(lgas);
+          setLga(draft.lga && lgas.includes(draft.lga) ? draft.lga : "");
+        }
         if (draft.description) setDescription(draft.description);
+        setAiMissing(Array.isArray(draft.missingFields) ? draft.missingFields : []);
         setPostingMode("manual"); // Switch to manual edit & confirm mode
       } else {
-        setErrorMsg(data.error || "AI analysis failed");
+        setErrorMsg(data.message || data.error || "AI analysis failed");
       }
     } catch (err) {
       setErrorMsg("Error communicating with AI service");
@@ -431,21 +452,19 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
     setSubmitting(true);
     setErrorMsg("");
 
-    const userId = session?.user?.id || "";
 
     try {
       const res = await fetch("/api/marketplace", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sellerId: userId,
           title,
           category,
           price: `₦${Number(price.toString().replace(/[^0-9]/g, "")).toLocaleString()}`,
           state,
           lga,
           description,
-          images: imagePreviews.length > 0 ? imagePreviews : ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"],
+          images: imagePreviews, // no stock photo: listings without photos show a placeholder
         }),
       });
 
@@ -583,6 +602,11 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
+            {aiMissing.length > 0 && (
+              <div className="p-3 bg-amber-500/10 border border-amber-500/40 text-amber-800 dark:text-amber-300 text-[11px]">
+                AI draft ready. Check every field and add what it couldn&apos;t find: <strong>{aiMissing.join(", ")}</strong>.
+              </div>
+            )}
             <div className="space-y-1">
               <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
                 Item Title *

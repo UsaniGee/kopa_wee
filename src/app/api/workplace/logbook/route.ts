@@ -3,11 +3,11 @@ import { prisma } from "@/shared/lib/prisma";
 import { z } from "zod";
 import { requireAuth } from "@/shared/lib/apiAuth";
 
+// employerId is not accepted from the client: it would let anyone link an entry to any user
 const logbookSchema = z.object({
-  date: z.string(),
-  summary: z.string().min(5),
-  hoursWorked: z.number().default(8),
-  employerId: z.string().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
+  summary: z.string().trim().min(5, "Describe what you did (at least 5 characters)").max(1000),
+  hoursWorked: z.number().int("Hours must be a whole number").min(1).max(24),
 });
 
 export async function GET() {
@@ -40,8 +40,19 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validatedData = logbookSchema.parse(body);
 
+    const existing = await prisma.pPALogbookEntry.findFirst({
+      where: { userId: auth.user.id, date: validatedData.date },
+      select: { id: true },
+    });
+    if (existing) {
+      return NextResponse.json(
+        { success: false, error: "ALREADY_LOGGED", message: "You have already logged this day." },
+        { status: 409 }
+      );
+    }
+
     const newEntry = await prisma.pPALogbookEntry.create({
-      data: { ...validatedData, userId: auth.user.id },
+      data: { userId: auth.user.id, ...validatedData },
     });
 
     return NextResponse.json(
