@@ -23,6 +23,7 @@ const X = FiX;
 export default function WorkplacePage() {
   const { currentRole } = useRole();
   const { data: session } = useSession();
+  const [ppaName, setPpaName] = useState<string | null>(null);
   const [logSummary, setLogSummary] = useState("");
   const [logHours, setLogHours] = useState("");
   const [logging, setLogging] = useState(false);
@@ -114,7 +115,12 @@ export default function WorkplacePage() {
   };
 
   React.useEffect(() => {
-    if (session?.user?.id) loadLogs();
+    if (!session?.user?.id) return;
+    loadLogs();
+    fetch("/api/users/me")
+      .then((res) => res.json())
+      .then((data) => data.success && setPpaName(data.data.ppaName || null))
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when the signed-in user changes
   }, [session?.user?.id]);
 
@@ -143,10 +149,10 @@ export default function WorkplacePage() {
             <span>PPA WORKPLACE & LOGBOOK</span>
           </div>
           <h1 className="text-3xl font-medium text-white tracking-tight font-display">
-            Grace High School PPA Management
+            {ppaName ?? "Your PPA"}
           </h1>
           <p className="text-xs text-slate-300">
-            Log weekly work presence, submit leave applications, and view supervisor reviews.
+            {ppaName ? "Log your daily work at your place of primary assignment." : "Add your PPA name in Settings to show it here."}
           </p>
         </div>
 

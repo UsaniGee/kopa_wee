@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { FiSave, FiLoader, FiCalendar, FiInfo, FiCheck, FiAlertTriangle, FiBook, FiPackage, FiLock } from "react-icons/fi";
 
 import { useRole } from "@/shared/context/RoleContext";
+import ProfileSection from "./ProfileSection";
+import SubscriptionSection from "./SubscriptionSection";
 
 interface JourneyData {
   campEntryDate: string | null;
@@ -100,7 +102,7 @@ export default function AccountSettingsPage() {
     setSaved(false);
 
     try {
-      const payload: Record<string, string | null> = { userId };
+      const payload: Record<string, string | null> = {};
 
       // Only include dates that have a value
       if (journeyData.campEntryDate) {
@@ -371,39 +373,11 @@ export default function AccountSettingsPage() {
           )}
         </div>
 
-        {/* Subscription Status Section */}
-        <div className="space-y-5 pt-4 border-t border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-2">
-            <FiLock className="w-4 h-4 text-emerald-600" />
-            <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display">
-              Subscription
-            </h2>
-          </div>
-
-          <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/10 border border-emerald-200 dark:border-emerald-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 border border-emerald-300 dark:border-emerald-700">
-                  Early Access
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-emerald-600 px-2 py-0.5">
-                  FREE
-                </span>
-              </div>
-              <p className="text-xs text-slate-700 dark:text-slate-300 mt-2 leading-relaxed">
-                You joined during KopaWee Early Access. You have full access to all platform features at no cost.
-              </p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-                Premium plans will be introduced as the platform grows. Early Access members will receive special pricing.
-              </p>
-            </div>
-            <div className="text-right shrink-0">
-              <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 font-display">₦0</div>
-              <div className="text-[10px] text-slate-500 uppercase tracking-widest">/ month</div>
-            </div>
-          </div>
-        </div>
       </form>
+
+      <ProfileSection />
+
+      <SubscriptionSection />
 
       {/* ── Security — Change Password ─────────────────────────────────── */}
       <ChangePasswordSection />

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRole } from "@/shared/context/RoleContext";
 import CampEssentialsChecklist from "@/shared/components/CampEssentialsChecklist";
+import { googleCalendarAllDayLink } from "@/shared/utils/calendarLink";
 import {
   FiCalendar,
   FiFileText,
@@ -43,7 +44,20 @@ const Check = FiCheck;
 
 export default function CompanionPage() {
   const { currentRole } = useRole();
-  const [syncedCalendar, setSyncedCalendar] = useState(false);
+  const [clearance, setClearance] = useState<{ hasCleared: boolean; isEligible: boolean; nextEligibleAt: string | null } | null>(null);
+  const [place, setPlace] = useState<{ lga: string | null; deployedState: string | null } | null>(null);
+
+  useEffect(() => {
+    if (currentRole !== "serving") return;
+    fetch("/api/clearance")
+      .then((res) => res.json())
+      .then((data) => data.success && setClearance(data.data))
+      .catch(() => {});
+    fetch("/api/users/me")
+      .then((res) => res.json())
+      .then((data) => data.success && setPlace({ lga: data.data.lga, deployedState: data.data.deployedState }))
+      .catch(() => {});
+  }, [currentRole]);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [documents, setDocuments] = useState([
     { name: "NYSC Call-Up Letter", status: "Verified & stored", date: "Aug 10, 2026", type: "PDF" },
@@ -66,15 +80,24 @@ export default function CompanionPage() {
     } catch (e) {}
   }, []);
 
-  const handleGoogleCalendarSync = () => {
-    const title = encodeURIComponent("NYSC Monthly LGA Biometric Clearance");
-    const details = encodeURIComponent("Mandatory monthly LGA biometric clearance for serving corps members.");
-    const location = encodeURIComponent("Ikeja LGA Secretariat Hub, Lagos");
-    const dates = "20260925T140000Z/20260925T160000Z";
-    const googleCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${dates}`;
-    window.open(googleCalUrl, "_blank", "noopener,noreferrer");
-    setSyncedCalendar(true);
-  };
+  const placeLabel = place?.lga && place.deployedState ? `${place.lga} LGA, ${place.deployedState}` : null;
+  const nextDate = clearance?.nextEligibleAt ? new Date(clearance.nextEligibleAt) : null;
+  const nextDateLabel = nextDate?.toLocaleDateString("en-NG", { weekday: "long", month: "short", day: "numeric" });
+  const clearanceSummary = !clearance
+    ? "Loading your clearance status..."
+    : !clearance.hasCleared
+      ? "No clearance logged yet. Record it on your Overview after you clear at your LGA."
+      : clearance.isEligible
+        ? "Your next clearance window is open now."
+        : `You can clear again from ${nextDateLabel}.`;
+  const calendarUrl = nextDate
+    ? googleCalendarAllDayLink({
+        title: "NYSC monthly LGA clearance",
+        date: nextDate,
+        details: "Your next monthly clearance is due from this day (from your KopaWee record).",
+        location: placeLabel ?? undefined,
+      })
+    : null;
 
   const handleAddDocument = (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,22 +183,25 @@ export default function CompanionPage() {
             Monthly LGA biometric clearance
           </h1>
           <p className="text-xs text-slate-300">
-            Next clearance window: Thursday, Sep 25 · 2:00 PM at Ikeja LGA Secretariat Hub.
+            {clearanceSummary}
+            {placeLabel ? ` · ${placeLabel}` : " · Add your LGA in Settings."}
           </p>
         </div>
 
-        <button
-          onClick={handleGoogleCalendarSync}
-          className={`px-6 py-3.5 text-xs font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
-            syncedCalendar
-              ? "bg-emerald-800 text-white"
-              : "bg-emerald-600 hover:bg-emerald-700 text-white"
-          }`}
-        >
-          <CalendarCheck className="w-4 h-4" />
-          <span>{syncedCalendar ? "Synced to Google Calendar" : "Sync to Google Calendar"}</span>
-          <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-80" />
-        </button>
+        {calendarUrl ? (
+          <a
+            href={calendarUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold tracking-wider transition-all flex items-center gap-2"
+          >
+            <CalendarCheck className="w-4 h-4" />
+            <span>Add to Google Calendar</span>
+            <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-80" />
+          </a>
+        ) : (
+          <span className="text-[11px] text-slate-400 max-w-[14rem]">The calendar link appears once your first clearance is logged.</span>
+        )}
       </div>
 
       {/* Encrypted Document Vault */}

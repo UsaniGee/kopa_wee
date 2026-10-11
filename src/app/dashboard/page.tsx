@@ -479,7 +479,7 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
   const fetchClearance = useCallback(async () => {
     if (!userId) return;
     try {
-      const res = await fetch(`/api/clearance?userId=${userId}`);
+      const res = await fetch("/api/clearance");
       const data = await res.json();
       if (data.success) setClearanceData(data.data);
     } catch (err) {
@@ -662,7 +662,7 @@ export default function DashboardOverviewPage() {
       })
       .catch(() => {});
 
-    fetch(`/api/clearance?userId=${userId}`)
+    fetch("/api/clearance")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setClearanceInfo(data.data);
@@ -729,6 +729,17 @@ export default function DashboardOverviewPage() {
      1. PROSPECTIVE CORPS MEMBER (PCM) VIEW
      ========================================================================= */
   if (currentRole === "pcm") {
+    const campEntry = journeyInfo?.campEntryDate ? new Date(journeyInfo.campEntryDate) : null;
+    const daysToCamp = campEntry ? Math.ceil((campEntry.getTime() - Date.now()) / 86_400_000) : null;
+    const campDateLabel = campEntry?.toLocaleDateString("en-NG", { month: "short", day: "numeric", year: "numeric" });
+    const campPlace = userInfo?.deployedState ? ` · ${userInfo.deployedState} camp` : "";
+    const campCountdown =
+      daysToCamp === null
+        ? { value: "Date not set", sub: "Add your camp entry date in Settings once your call-up letter is out." }
+        : daysToCamp > 0
+          ? { value: `${daysToCamp} Day${daysToCamp === 1 ? "" : "s"} Left`, sub: `Camp starts ${campDateLabel}${campPlace}.` }
+          : { value: "Camp has started", sub: `Camp began ${campDateLabel}${campPlace}.` };
+
     return (
       <div className="space-y-8 font-sans">
         {/* Banner */}
@@ -761,8 +772,8 @@ export default function DashboardOverviewPage() {
               <span className="text-[10px] font-bold uppercase tracking-widest font-display">Orientation Countdown</span>
               <Clock className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-3xl font-bold font-display text-[#121815] dark:text-white">14 Days Left</div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">KADUNA NYSC Permanent Camp, Mando.</p>
+            <div className="text-3xl font-bold font-display text-[#121815] dark:text-white">{campCountdown.value}</div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">{campCountdown.sub}</p>
           </div>
 
           <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
@@ -779,8 +790,14 @@ export default function DashboardOverviewPage() {
               <span className="text-[10px] font-bold uppercase tracking-widest font-display">Route Planner</span>
               <Compass className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-base font-bold font-display text-[#121815] dark:text-white">Lagos ➔ Kaduna State</div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">Corper convoy leaves Jibowu Park Aug 28, 6:00 AM.</p>
+            <div className="text-base font-bold font-display text-[#121815] dark:text-white">
+              {userInfo?.stateOfOrigin && userInfo?.deployedState ? `${userInfo.stateOfOrigin} ➔ ${userInfo.deployedState}` : "Route not set"}
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
+              {userInfo?.deployedState
+                ? "Plan your trip and tell family your route before you travel."
+                : "Add your state of origin and deployment state in Settings."}
+            </p>
           </div>
         </div>
 
