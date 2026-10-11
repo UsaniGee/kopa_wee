@@ -97,10 +97,11 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 ## Phase 4: Frontend Data Integrity (FR3, UI side)
 
-- [ ] Task: Apply migrations on the Neon dev branch (owner creates the branch; never production). Must run before any UI that saves `verificationTokenExpiry` or a null `changedBy` reaches a real database.
-  - [ ] Confirm `.env.local` `DATABASE_URL`/`DIRECT_URL` host differs from production (`ep-super-fire-aykwex2w`).
-  - [ ] Check for drift: `prisma migrate diff --from-url $DIRECT_URL --to-migrations prisma/migrations` (or `--to-schema-datamodel` of the pre-change schema) shows no difference before baselining.
-  - [ ] `prisma migrate resolve --applied 0_init`, then `prisma migrate deploy`, then `pnpm prisma db seed`.
+- [x] Task: Apply migrations on the Neon dev branch (owner creates the branch; never production). Must run before any UI that saves `verificationTokenExpiry` or a null `changedBy` reaches a real database.
+  - [x] Confirm `.env.local` `DATABASE_URL`/`DIRECT_URL` host differs from production (`ep-super-fire-aykwex2w`).
+  - [x] Check for drift: `prisma migrate diff --from-url $DIRECT_URL --to-migrations prisma/migrations` (or `--to-schema-datamodel` of the pre-change schema) shows no difference before baselining.
+  - [x] `prisma migrate resolve --applied 0_init`, then `prisma migrate deploy`, then `pnpm prisma db seed`.
+  - Done 2026-10-11 on dev branch `ep-odd-truth-ay95xk5d`. Drift vs the pre-change schema: only Neon's sample table `playing_with_neon` (left alone). Seed: 37 states, 771 LGAs, 10 fields of study; admin skipped (no SEED_ADMIN_*). Production not touched; it still needs `migrate resolve --applied 0_init` + `migrate deploy` before this code ships.
 
 - [ ] Task: Rebuild onboarding saving (A1–A3)
   - [ ] Remove the hard-coded `stateCode`, the "Lagos"/"Ikeja" defaults and the fake form defaults.
