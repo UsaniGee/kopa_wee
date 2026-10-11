@@ -138,9 +138,9 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - [x] Task: One packing checklist 2795982
   - [x] Switch `CampEssentialsChecklist` to `/api/packing-items`.
   - [x] Remove `/api/checklist` and its tests, the `CampChecklist` model (migration) and the duplicate item lists.
-- [ ] Task: Clean up client requests
-  - [ ] Remove every client-sent `userId`, `sellerId` and `ownerId`.
-  - [ ] Check every mutation's response before showing success, and roll back optimistic updates on failure.
+- [x] Task: Clean up client requests 7a8dc03
+  - [x] Remove every client-sent `userId`, `sellerId` and `ownerId`.
+  - [x] Check every mutation's response before showing success, and roll back optimistic updates on failure.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 6: Remove Fabricated UI, localStorage Shadows & Dead Code (FR5)
