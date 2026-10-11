@@ -7,6 +7,8 @@ import { FiHome, FiUsers, FiMapPin, FiCheckCircle, FiShield, FiHeart, FiPlus, Fi
 import { HiSparkles } from "react-icons/hi2";
 import { FiImage } from "react-icons/fi";
 import { downscaleImage } from "@/shared/lib/downscaleImage";
+import { telLink, whatsAppLink } from "@/shared/utils/phoneLinks";
+import { ExpressInterestButton, IncomingInterests, MyInterests } from "./RoommateInterests";
 
 const MAX_PHOTOS = 3;
 
@@ -41,6 +43,7 @@ interface Lodge {
   features: string[];
   split: string;
   image: string;
+  contactPhone: string | null;
   forRoles: ("pcm" | "serving" | "alumni")[];
 }
 
@@ -78,6 +81,8 @@ export default function AccommodationPage() {
 
   const userId = session?.user?.id || "";
 
+  const [interestsRefresh, setInterestsRefresh] = useState(0);
+
   const fetchRoommatesData = () => {
     fetch("/api/roommates")
       .then((res) => res.json())
@@ -94,6 +99,7 @@ export default function AccommodationPage() {
         if (data.success) {
           setActiveUserRequest(data.data || null);
         }
+        setInterestsRefresh((n) => n + 1); // reload "My interests" alongside
       })
       .catch(() => {});
   };
@@ -125,6 +131,7 @@ export default function AccommodationPage() {
             features: ["Verified Host", "Corper Suitable"],
             split: item.splitInfo || "",
             image: item.images?.[0] || "",
+            contactPhone: item.contactPhone ?? null,
             forRoles: ["pcm", "serving", "alumni"],
           }));
           setLodges(apiLodges);
@@ -291,6 +298,22 @@ export default function AccommodationPage() {
                   </p>
                 </div>
 
+                {whatsAppLink(lodge.contactPhone) && (
+                  <div className="flex items-center gap-3 text-xs">
+                    <a
+                      href={whatsAppLink(lodge.contactPhone, `Hi, I saw "${lodge.name}" on KopaWee. Is it still available?`)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors"
+                    >
+                      WhatsApp Host ➔
+                    </a>
+                    <a href={telLink(lodge.contactPhone)!} className="font-semibold text-emerald-700 dark:text-emerald-400 hover:underline">
+                      Call {lodge.contactPhone}
+                    </a>
+                  </div>
+                )}
+
                 <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
                   <span className="text-slate-600 dark:text-slate-400">{lodge.split || "\u00a0"}</span>
                   <button 
@@ -313,17 +336,20 @@ export default function AccommodationPage() {
           <div className="p-4 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-0.5">
               <h4 className="font-bold text-xs tracking-wider text-[#121815] dark:text-white font-display">
-                {activeUserRequest ? "Active roommate request" : "Looking for a roommate?"}
+                {activeUserRequest ? (activeUserRequest.status === "MATCHED" ? "Roommate request matched" : "Active roommate request") : "Looking for a roommate?"}
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400">
                 {activeUserRequest
-                  ? `Your request in ${activeUserRequest.lga}, ${activeUserRequest.state} is active.`
+                  ? activeUserRequest.status === "MATCHED"
+                    ? `Your request in ${activeUserRequest.lga}, ${activeUserRequest.state} is matched and no longer shown to others.`
+                    : `Your request in ${activeUserRequest.lga}, ${activeUserRequest.state} is visible to other corpers.`
                   : "Post your budget & preferred location to match with corpers."}
               </p>
             </div>
 
             {activeUserRequest ? (
               <div className="flex items-center gap-2">
+                {activeUserRequest.status !== "MATCHED" && (
                 <button
                   onClick={() => {
                     setEditingRequest(activeUserRequest);
@@ -334,6 +360,7 @@ export default function AccommodationPage() {
                   <Edit className="w-3.5 h-3.5" />
                   <span>Edit request</span>
                 </button>
+                )}
                 <button
                   onClick={() => setCancelConfirmOpen(true)}
                   className="px-3.5 py-2 bg-red-950/80 hover:bg-red-900 text-red-300 border border-red-800 text-xs font-semibold tracking-wider flex items-center gap-1.5 cursor-pointer transition-colors"
@@ -356,6 +383,20 @@ export default function AccommodationPage() {
             )}
           </div>
 
+          {activeUserRequest && (
+            <div className="p-4 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-3">
+              <h4 className="font-bold text-xs tracking-wider uppercase text-[#121815] dark:text-white font-display">
+                Interest in your request
+              </h4>
+              <IncomingInterests
+                interests={activeUserRequest.interests ?? []}
+                context={`${activeUserRequest.lga}, ${activeUserRequest.state}`}
+                onChanged={fetchRoommatesData}
+              />
+            </div>
+          )}
+
+          <MyInterests refreshKey={interestsRefresh} />
 
           {roommateRequests.length === 0 ? (
             <div className="p-12 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-center space-y-3">
@@ -392,12 +433,7 @@ export default function AccommodationPage() {
                     {rm.preferences && <div><strong>Preferences:</strong> {rm.preferences}</div>}
                   </div>
 
-                  <button
-                    onClick={() => alert(`Contacting ${rm.user?.name || "Corper"} via WhatsApp (${rm.user?.phone || "Phone"})`)}
-                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                  >
-                    Connect Roommate on WhatsApp ➔
-                  </button>
+                  <ExpressInterestButton requestId={rm.id} status={rm.myInterestStatus} onChanged={fetchRoommatesData} />
                 </div>
               ))}
             </div>

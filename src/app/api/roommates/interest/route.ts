@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
+import { CONTACT_SELECT, contactIfAccepted } from "@/shared/lib/roommateContact";
 
 // POST /api/roommates/interest — express interest in a roommate request
 export async function POST(req: NextRequest) {
@@ -135,6 +136,13 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    if (interest.request.status !== "ACTIVE") {
+      return NextResponse.json(
+        { success: false, error: "This roommate request is no longer active." },
+        { status: 409 }
+      );
+    }
+
     if (interest.status !== "PENDING") {
       return NextResponse.json(
         { success: false, error: "This interest has already been responded to." },
@@ -148,7 +156,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (action === "ACCEPT") {
-      // Accept: mark interest as ACCEPTED, mark request as MATCHED
+      // Accept: mark interest as ACCEPTED, mark request as MATCHED, close the other pending interests
       await prisma.$transaction([
         prisma.roommateInterest.update({
           where: { id: interestId },
@@ -158,12 +166,16 @@ export async function PATCH(req: NextRequest) {
           where: { id: interest.request.id },
           data: { status: "MATCHED" },
         }),
+        prisma.roommateInterest.updateMany({
+          where: { requestId: interest.request.id, status: "PENDING", NOT: { id: interestId } },
+          data: { status: "DECLINED" },
+        }),
         // Notify the interested user
         prisma.notification.create({
           data: {
             userId: interest.interestedUser.id,
             title: "🎉 Roommate request accepted!",
-            message: `${owner?.name || "A corps member"} has accepted your roommate interest. You are now matched! You can send them a message in the Accommodation tab.`,
+            message: `${owner?.name || "A corps member"} has accepted your roommate interest. Their phone number and email are now shown under "My interests" in the Accommodation tab.`,
           },
         }),
         // Notify the request owner
@@ -171,7 +183,7 @@ export async function PATCH(req: NextRequest) {
           data: {
             userId: auth.user!.id,
             title: "Roommate match confirmed!",
-            message: `You accepted ${interest.interestedUser.name}'s roommate request. You are now matched! Connect with them via the Accommodation tab.`,
+            message: `You accepted ${interest.interestedUser.name}'s roommate request. Their phone number and email are now shown on your request in the Accommodation tab.`,
           },
         }),
       ]);
@@ -203,7 +215,8 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// GET /api/roommates/interest?requestId=... — get interests for a request (owner only)
+// GET /api/roommates/interest?requestId=... — interests received on a request (owner only)
+// GET /api/roommates/interest?mine=true    — interests the user has expressed, with the owner's contact once accepted
 export async function GET(req: NextRequest) {
   const auth = await requireAuth();
   if (auth.error) return auth.error;
@@ -211,6 +224,25 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const requestId = searchParams.get("requestId");
+
+    if (searchParams.get("mine") === "true") {
+      const mine = await prisma.roommateInterest.findMany({
+        where: { interestedUserId: auth.user!.id },
+        include: {
+          request: {
+            select: {
+              id: true, state: true, lga: true, area: true, budget: true, accommodationType: true, status: true,
+              user: { select: { name: true, avatarUrl: true, ...CONTACT_SELECT } },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      return NextResponse.json({
+        success: true,
+        data: mine.map((i) => ({ ...i, request: { ...i.request, user: contactIfAccepted(i.status, i.request.user) } })),
+      });
+    }
 
     if (!requestId) {
       return NextResponse.json({ success: false, error: "requestId is required" }, { status: 400 });
@@ -244,13 +276,17 @@ export async function GET(req: NextRequest) {
             deployedState: true,
             lga: true,
             avatarUrl: true,
+            ...CONTACT_SELECT,
           },
         },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ success: true, data: interests });
+    return NextResponse.json({
+      success: true,
+      data: interests.map((i) => ({ ...i, interestedUser: contactIfAccepted(i.status, i.interestedUser) })),
+    });
   } catch (error) {
     console.error("[GET /api/roommates/interest]", error);
     return NextResponse.json({ success: false, error: "Failed to fetch interests" }, { status: 500 });

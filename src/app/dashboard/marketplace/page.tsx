@@ -7,6 +7,7 @@ import { FiShoppingBag, FiPlus, FiFilter, FiMapPin, FiTag, FiMessageSquare, FiCh
 import { HiSparkles } from "react-icons/hi2";
 import { FiImage } from "react-icons/fi";
 import { downscaleImage } from "@/shared/lib/downscaleImage";
+import { telLink, whatsAppLink } from "@/shared/utils/phoneLinks";
 
 const MAX_PHOTOS = 3; // matches the AI draft limit
 
@@ -35,6 +36,7 @@ interface Listing {
   location: string;
   distanceKm: number;
   seller: string;
+  sellerPhone?: string | null;
   roleBadge: string;
   badgeType: "verified" | "unverified" | "corps_member" | "business";
   category: string;
@@ -64,7 +66,6 @@ export default function MarketplacePage() {
   const [selectedState, setSelectedState] = useState("All States");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
-  const [contactedListing, setContactedListing] = useState<string | null>(null);
 
   React.useEffect(() => {
     fetch("/api/states")
@@ -103,6 +104,7 @@ export default function MarketplacePage() {
             location: `${item.lga} LGA, ${item.state}`,
             distanceKm: 1.5,
             seller: item.seller?.name || "Verified Corper",
+            sellerPhone: item.seller?.phone ?? null,
             roleBadge: "Direct Sale",
             badgeType: "verified",
             category: item.category,
@@ -299,12 +301,23 @@ export default function MarketplacePage() {
               </div>
 
               <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
-                <button
-                  onClick={() => setContactedListing(item.id)}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer"
-                >
-                  {contactedListing === item.id ? "WhatsApp Opened" : "Contact Seller ➔"}
-                </button>
+                {whatsAppLink(item.sellerPhone) ? (
+                  <div className="flex items-center gap-3">
+                    <a
+                      href={whatsAppLink(item.sellerPhone, `Hi, I saw your "${item.title}" on KopaWee. Is it still available?`)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
+                    >
+                      WhatsApp Seller ➔
+                    </a>
+                    <a href={telLink(item.sellerPhone)!} className="text-emerald-700 dark:text-emerald-400 font-semibold hover:underline">
+                      Call
+                    </a>
+                  </div>
+                ) : (
+                  <span className="text-slate-500 text-[11px]">Seller has no phone number on file</span>
+                )}
 
                 <button
                   onClick={() => handleFlagListing(item.title)}

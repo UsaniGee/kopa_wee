@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
+import { CONTACT_SELECT, contactIfAccepted } from "@/shared/lib/roommateContact";
 
 const roommateSchema = z.object({
   state: z.string(),
@@ -31,14 +32,18 @@ export async function GET(req: NextRequest) {
           interests: {
             include: {
               interestedUser: {
-                select: { id: true, name: true, ppaName: true, deployedState: true, lga: true, avatarUrl: true },
+                select: { id: true, name: true, ppaName: true, deployedState: true, lga: true, avatarUrl: true, ...CONTACT_SELECT },
               },
             },
             orderBy: { createdAt: "desc" },
           },
         },
       });
-      return NextResponse.json({ success: true, data: activeRequest });
+      const data = activeRequest && {
+        ...activeRequest,
+        interests: activeRequest.interests.map((i) => ({ ...i, interestedUser: contactIfAccepted(i.status, i.interestedUser) })),
+      };
+      return NextResponse.json({ success: true, data });
     }
 
     // Browse all active requests (exclude own)
