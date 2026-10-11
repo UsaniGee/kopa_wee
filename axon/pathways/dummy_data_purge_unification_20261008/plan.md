@@ -103,13 +103,14 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] `prisma migrate resolve --applied 0_init`, then `prisma migrate deploy`, then `pnpm prisma db seed`.
   - Done 2026-10-11 on dev branch `ep-odd-truth-ay95xk5d`. Drift vs the pre-change schema: only Neon's sample table `playing_with_neon` (left alone). Seed: 37 states, 771 LGAs, 10 fields of study; admin skipped (no SEED_ADMIN_*). Production not touched; it still needs `migrate resolve --applied 0_init` + `migrate deploy` before this code ships.
 
-- [ ] Task: Rebuild onboarding saving (A1–A3)
-  - [ ] Remove the hard-coded `stateCode`, the "Lagos"/"Ikeja" defaults and the fake form defaults.
-  - [ ] Add state and LGA pickers from `/api/states` and an optional state-code input with a format hint.
-  - [ ] Call the profile endpoint, check the response, show errors, then call `useSession().update()`.
-  - [ ] Delete `src/app/api/users/role/route.ts` once onboarding uses `PATCH /api/users/me` (it accepts client-chosen roles and the old field set).
-  - [ ] Send email sign-ups to `/onboarding` after their first sign-in when the profile is incomplete.
-  - [ ] Manual check: two new users complete onboarding with different states, and both are saved correctly.
+- [x] Task: Rebuild onboarding saving (A1–A3) cc64132
+  - [x] Remove the hard-coded `stateCode`, the "Lagos"/"Ikeja" defaults and the fake form defaults.
+  - [x] Add state and LGA pickers from `/api/states` and an optional state-code input with a format hint.
+  - [x] Call the profile endpoint, check the response, show errors, then call `useSession().update()`.
+  - [x] Delete `src/app/api/users/role/route.ts` once onboarding uses `PATCH /api/users/me` (it accepts client-chosen roles and the old field set).
+  - [x] Send email sign-ups to `/onboarding` after their first sign-in when the profile is incomplete.
+  - [x] Manual check: two new users complete onboarding with different states, and both are saved correctly. (API end-to-end on the dev branch; UI click-through at the phase checkpoint.)
+  - Decision: the "interests" step saved nothing and was replaced by a Deployment step.
 - [ ] Task: SOS location (A4)
   - [ ] Use `navigator.geolocation` plus the user's saved state/LGA. Show an error if permission is denied.
   - [ ] Only show success after the server confirms.
