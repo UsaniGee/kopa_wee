@@ -127,10 +127,10 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 ## Phase 5: Wire Existing Backends (FR4)
 
-- [ ] Task: Contact flows
-  - [ ] Marketplace "Contact Seller" opens WhatsApp or a phone link. Lodge cards show `contactPhone`. Both only when signed in.
-  - [ ] Write failing tests for the roommate interest flow: express interest, owner accepts or declines, contact shown after acceptance, MATCHED requests can't be edited. Fix the route if needed (Green).
-  - [ ] UI: express interest, a list of incoming interests with accept/decline, and correct MATCHED labels.
+- [x] Task: Contact flows 0a2c597
+  - [x] Marketplace "Contact Seller" opens WhatsApp or a phone link. Lodge cards show `contactPhone`. Both only when signed in.
+  - [x] Write failing tests for the roommate interest flow: express interest, owner accepts or declines, contact shown after acceptance, MATCHED requests can't be edited. Fix the route if needed (Green).
+  - [x] UI: express interest, a list of incoming interests with accept/decline, and correct MATCHED labels.
 - [ ] Task: Real profile data everywhere
   - [ ] Overview, workplace and companion: take PPA name, LGA, state and dates from `/api/users/journey` and `/api/clearance`. Remove all hard-coded places and dates.
   - [ ] Calendar link uses the real `nextEligibleAt`, labelled "Add to Google Calendar".
