@@ -107,7 +107,6 @@ model User {
   updatedAt         DateTime        @updatedAt
 
   // Relationships
-  checklist           CampChecklist?
   packingItems        PackingItem[]
   accommodations      AccommodationListing[]
   marketplaceItems    MarketplaceItem[]
@@ -171,7 +170,7 @@ model MonthlyClearance {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PACKING ITEMS (rich per-item tracking replacing simple JSON CampChecklist)
+// PACKING ITEMS (the one per-user camp checklist)
 // ─────────────────────────────────────────────────────────────────────────────
 model PackingItem {
   id                    String             @id @default(cuid())
@@ -189,15 +188,6 @@ model PackingItem {
 
   @@index([userId])
   @@index([userId, category])
-}
-
-// Legacy CampChecklist (kept for backwards compatibility during migration)
-model CampChecklist {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  completedItems Json     @default("[]")
-  updatedAt      DateTime @updatedAt
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
