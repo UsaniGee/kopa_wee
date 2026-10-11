@@ -115,11 +115,12 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Use `navigator.geolocation` plus the user's saved state/LGA. Show an error if permission is denied.
   - [x] Only show success after the server confirms.
   - [x] Remove the "trusted contacts notified" wording.
-- [ ] Task: Stop fabricated writes (A8–A10)
-  - [ ] Marketplace and accommodation send `images: []` when there's no photo and render a neutral placeholder graphic.
-  - [ ] Add a `splitInfo` input.
-  - [ ] Logbook gets summary and hours inputs and a response check. `loggedToday` is derived from today's existing entry.
-  - [ ] Wire the marketplace "Create with AI" button to the new response shape, and refresh the LGA list when the AI sets the state.
+- [x] Task: Stop fabricated writes (A8–A10) 7bc3cf5
+  - [x] Marketplace and accommodation send `images: []` when there's no photo and render a neutral placeholder graphic.
+  - [x] Add a `splitInfo` input.
+  - [x] Logbook gets summary and hours inputs and a response check. `loggedToday` is derived from today's existing entry.
+  - [x] Wire the marketplace "Create with AI" button to the new response shape, and refresh the LGA list when the AI sets the state.
+  - Also: lodge photo URL box replaced by a device photo picker; photos downscaled in the browser; logbook API rejects client employerId and allows one entry per day.
 - [ ] Task: Admin fixes (A13)
   - [ ] Start the login email field empty, use `signOut()` from `next-auth/react`, and fix the lodges list showing on the wrong tabs.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
