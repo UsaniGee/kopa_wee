@@ -4,6 +4,8 @@ import { prismaMock } from "@/test/prismaMock";
 import { makeRequest } from "@/test/request";
 
 vi.mock("@/shared/lib/email", () => ({ sendEmail: vi.fn(async () => ({ success: true })) }));
+// Real bcrypt (cost 12) takes seconds and made these tests flaky under load; hashing is not what they check
+vi.mock("@/shared/lib/auth", () => ({ hashPassword: vi.fn(async (pw: string) => `hashed:${pw}`) }));
 
 const register = (body: unknown) => POST(makeRequest("/api/auth/register", { method: "POST", body }));
 
