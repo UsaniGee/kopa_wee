@@ -121,8 +121,8 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Logbook gets summary and hours inputs and a response check. `loggedToday` is derived from today's existing entry.
   - [x] Wire the marketplace "Create with AI" button to the new response shape, and refresh the LGA list when the AI sets the state.
   - Also: lodge photo URL box replaced by a device photo picker; photos downscaled in the browser; logbook API rejects client employerId and allows one entry per day.
-- [ ] Task: Admin fixes (A13)
-  - [ ] Start the login email field empty, use `signOut()` from `next-auth/react`, and fix the lodges list showing on the wrong tabs.
+- [x] Task: Admin fixes (A13) 7f2e7d5
+  - [x] Start the login email field empty, use `signOut()` from `next-auth/react`, and fix the lodges list showing on the wrong tabs.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 5: Wire Existing Backends (FR4)
