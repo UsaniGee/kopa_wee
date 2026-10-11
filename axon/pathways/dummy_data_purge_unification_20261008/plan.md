@@ -135,9 +135,9 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Overview, workplace and companion: take PPA name, LGA, state and dates from `/api/users/journey` and `/api/clearance`. Remove all hard-coded places and dates.
   - [x] Calendar link uses the real `nextEligibleAt`, labelled "Add to Google Calendar".
   - [x] Settings: show the real subscription from `/api/subscription`, and add editable PPA name, LGA, deployed state, state code and call-up number.
-- [ ] Task: One packing checklist
-  - [ ] Switch `CampEssentialsChecklist` to `/api/packing-items`.
-  - [ ] Remove `/api/checklist` and its tests, the `CampChecklist` model (migration) and the duplicate item lists.
+- [x] Task: One packing checklist 2795982
+  - [x] Switch `CampEssentialsChecklist` to `/api/packing-items`.
+  - [x] Remove `/api/checklist` and its tests, the `CampChecklist` model (migration) and the duplicate item lists.
 - [ ] Task: Clean up client requests
   - [ ] Remove every client-sent `userId`, `sellerId` and `ownerId`.
   - [ ] Check every mutation's response before showing success, and roll back optimistic updates on failure.
