@@ -17,7 +17,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "KopaWee+ | NYSC Companion App",
+  title: "KopaWee | NYSC Companion App",
   description: "The proactive companion for Nigerian Corps Members — camp guides, PPA logbooks, accommodation, safety, and marketplace.",
 };
 

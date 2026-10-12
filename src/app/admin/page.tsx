@@ -407,11 +407,11 @@ export default function AdminDashboardPage() {
               {pendingItems.map((item) => (
                 <div key={item.id} className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
                   <div className="flex items-start gap-4">
-                    <img
-                      src={item.images?.[0] || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"}
-                      alt={item.title}
-                      className="w-24 h-24 object-cover border border-slate-300/60 dark:border-slate-700 shrink-0"
-                    />
+                    {item.images?.[0] ? (
+                      <img src={item.images[0]} alt={item.title} className="w-24 h-24 object-cover border border-slate-300/60 dark:border-slate-700 shrink-0" />
+                    ) : (
+                      <div className="w-24 h-24 shrink-0 border border-slate-300/60 dark:border-slate-700 flex items-center justify-center text-[10px] font-mono uppercase text-slate-400">No photo</div>
+                    )}
                     <div className="space-y-1">
                       <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-mono font-semibold">
                         Pending approval
@@ -467,11 +467,11 @@ export default function AdminDashboardPage() {
             {pendingLodges.map((lodge) => (
               <div key={lodge.id} className="p-6 bg-white dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
                 <div className="flex items-start gap-4">
-                  <img
-                    src={lodge.images?.[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=85"}
-                    alt={lodge.title}
-                    className="w-24 h-24 object-cover border border-slate-300/60 dark:border-slate-700 shrink-0"
-                  />
+                  {lodge.images?.[0] ? (
+                    <img src={lodge.images[0]} alt={lodge.title} className="w-24 h-24 object-cover border border-slate-300/60 dark:border-slate-700 shrink-0" />
+                  ) : (
+                    <div className="w-24 h-24 object-cover border border-slate-300/60 dark:border-slate-700 shrink-0 flex items-center justify-center text-[10px] font-mono uppercase text-slate-400">No photo</div>
+                  )}
                   <div className="space-y-1">
                     <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-mono font-semibold">
                       Pending approval

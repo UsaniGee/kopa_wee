@@ -479,18 +479,6 @@ export default function AccommodationPage() {
         </div>
       )}
 
-      {/* POST LODGE CLASSIFIED MODAL */}
-      {addModalOpen && (
-        <PostLodgeModal
-          states={states}
-          onClose={() => setAddModalOpen(false)}
-          onSuccess={() => {
-            setAddModalOpen(false);
-            fetchAccommodationData();
-          }}
-        />
-      )}
-
     </div>
   );
 }
