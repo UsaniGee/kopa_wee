@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import ComingSoon from "@/shared/components/ComingSoon";
 import { FiAlertOctagon, FiMapPin, FiPhone, FiAlertTriangle, FiCheckCircle, FiRadio, FiUserCheck, FiPackage, FiPlus, FiTrash2, FiLock, FiClock, FiX, FiShield } from "react-icons/fi";
 
 const ShieldAlert = FiAlertOctagon;
@@ -23,33 +24,9 @@ type SosState =
   | { phase: "sent"; message: string; at: string; accuracy: number }
   | { phase: "error"; message: string };
 
-interface TrustedContact {
-  id: string;
-  name: string;
-  relationship: string;
-  phone: string;
-}
-
 export default function SafetyPage() {
   const [sos, setSos] = useState<SosState>({ phase: "idle" });
   const sosBusy = sos.phase === "locating" || sos.phase === "sending";
-  const [tripActive, setTripActive] = useState(true);
-  
-  const [contacts, setContacts] = useState<TrustedContact[]>([
-    { id: "1", name: "Mr. & Mrs. Okeke", relationship: "Parents", phone: "+234 803 123 4567" },
-    { id: "2", name: "Corper President Ikeja", relationship: "Local Corper Rep", phone: "+234 812 987 6543" },
-    { id: "3", name: "NYSC HQ Emergency Response", relationship: "NYSC Official", phone: "0700-CALL-NYSC" },
-  ]);
-
-  const [addModalOpen, setAddModalOpen] = useState(false);
-  const [newContactName, setNewContactName] = useState("");
-  const [newContactRel, setNewContactRel] = useState("");
-  const [newContactPhone, setNewContactPhone] = useState("");
-
-  const [tripModalOpen, setTripModalOpen] = useState(false);
-  const [originState, setOriginState] = useState("Lagos State");
-  const [destinationState, setDestinationState] = useState("Kaduna NYSC Camp");
-  const [pingInterval, setPingInterval] = useState("2 Hours");
 
   const handleTriggerSos = async () => {
     if (sos.phase === "locating" || sos.phase === "sending") return;
@@ -103,30 +80,6 @@ export default function SafetyPage() {
     } catch {
       setSos({ phase: "error", message: "Network error: the alert was not sent." });
     }
-  };
-
-  const handleAddContact = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newContactName.trim() || !newContactPhone.trim()) return;
-    if (contacts.length >= 5) {
-      alert("Maximum 5 trusted safety contacts allowed.");
-      return;
-    }
-    const newEntry: TrustedContact = {
-      id: "contact_" + Date.now(),
-      name: newContactName.trim(),
-      relationship: newContactRel.trim() || "Contact",
-      phone: newContactPhone.trim(),
-    };
-    setContacts(prev => [...prev, newEntry]);
-    setNewContactName("");
-    setNewContactRel("");
-    setNewContactPhone("");
-    setAddModalOpen(false);
-  };
-
-  const handleDeleteContact = (id: string) => {
-    setContacts(prev => prev.filter(c => c.id !== id));
   };
 
   return (
@@ -193,71 +146,22 @@ export default function SafetyPage() {
         )}
       </div>
 
-      {/* Main Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {/* Highway Travel Monitoring */}
-        <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-emerald-600" /> Active Highway Convoy Tracker
-            </h2>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-emerald-700 text-white uppercase">
-              {tripActive ? "Active Trip" : "Idle"}
-            </span>
-          </div>
-
-          <div className="p-5 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 space-y-2 text-xs">
-            <div><strong>Route:</strong> {originState} ➔ {destinationState}</div>
-            <div><strong>Check-in Interval:</strong> Every {pingInterval}</div>
-            <div className="text-emerald-700 dark:text-emerald-400 font-semibold">Status: Convoy on schedule (Last ping 12m ago)</div>
-          </div>
-
-          <button
-            onClick={() => setTripModalOpen(true)}
-            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-          >
-            Configure Trip & Check-ins ➔
-          </button>
-        </div>
-
-        {/* Trusted Contacts Vault */}
-        <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
-              <Phone className="w-4 h-4 text-emerald-600" /> Emergency Trusted Contacts ({contacts.length}/5)
-            </h2>
-
-            {contacts.length < 5 && (
-              <button
-                onClick={() => setAddModalOpen(true)}
-                className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider hover:underline"
-              >
-                + Add Contact
-              </button>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            {contacts.map((c) => (
-              <div key={c.id} className="p-3.5 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-[#121815] dark:text-white font-display">{c.name}</div>
-                  <div className="text-slate-500">{c.relationship} · {c.phone}</div>
-                </div>
-                <button
-                  onClick={() => handleDeleteContact(c.id)}
-                  className="text-slate-400 hover:text-red-600 cursor-pointer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
+        <ComingSoon
+          compact
+          icon={MapPin}
+          title="Trip check-ins"
+          description="Share your route before an interstate trip and check in at each stop."
+          planned={["Route and expected arrival", "Check-in reminders on the road"]}
+        />
+        <ComingSoon
+          compact
+          icon={Phone}
+          title="Trusted contacts"
+          description="Choose up to five people who receive your SOS alerts by SMS or email."
+          planned={["Family and friends", "Your LGA corps rep"]}
+        />
       </div>
-
     </div>
   );
 }

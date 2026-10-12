@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import ComingSoon from "@/shared/components/ComingSoon";
 import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
 import {
@@ -650,10 +651,6 @@ export default function DashboardOverviewPage() {
   const { currentRole } = useRole();
   const { data: session, update: refreshSession } = useSession();
 
-  const [leaveRequests, setLeaveRequests] = useState([
-    { id: 1, name: "John Okoh", role: "ICT Assistant", reason: "Medical Leave (3 Days)", status: "pending" },
-    { id: 2, name: "Amina Bello", role: "Research Associate", reason: "LGA Clearance Exemption", status: "pending" },
-  ]);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -685,9 +682,6 @@ export default function DashboardOverviewPage() {
       .catch(() => {});
   }, [userId]);
 
-  const handleLeaveAction = (id: number, status: "approved" | "rejected") => {
-    setLeaveRequests((prev) => prev.map((req) => req.id === id ? { ...req, status } : req));
-  };
 
   const handleAskAI = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -965,6 +959,15 @@ export default function DashboardOverviewPage() {
 
     const clearanceSub = `${nextDateStr} · ${hubName}`;
 
+    const serviceEndDate = journeyInfo?.serviceEndDate ? new Date(journeyInfo.serviceEndDate) : null;
+    const daysToPop = serviceEndDate ? Math.ceil((serviceEndDate.getTime() - Date.now()) / 86_400_000) : null;
+    const serviceEnd =
+      daysToPop === null
+        ? { value: "Not set", sub: "Add your service end date in Settings" }
+        : daysToPop > 0
+          ? { value: `${daysToPop} day${daysToPop === 1 ? "" : "s"}`, sub: `Passing out ${serviceEndDate!.toLocaleDateString("en-NG", { month: "short", day: "numeric", year: "numeric" })}` }
+          : { value: "Completed", sub: "Your service year has ended" };
+
     return (
       <div className="space-y-8 font-sans">
         <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
@@ -1028,9 +1031,19 @@ export default function DashboardOverviewPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { label: "Next Clearance", val: clearanceVal, sub: clearanceSub, icon: Clock },
-            { label: "Allawee Savings", val: "₦77,000", sub: "Saved via P2P Market", icon: TrendingUp },
-            { label: "CDS Attendance", val: "92% Rate", sub: "Education CDS Group", icon: Users },
-            { label: "Safety Status", val: "Active & Safe", sub: "Last check-in: 2h ago", icon: ShieldAlert },
+            {
+              label: "Clearances Logged",
+              val: String(clearanceInfo?.completedCount ?? 0),
+              sub: clearanceInfo?.hasCleared ? "Monthly clearances recorded" : "None logged yet",
+              icon: TrendingUp,
+            },
+            {
+              label: "Your LGA",
+              val: userInfo?.lga ?? "Not set",
+              sub: userInfo?.deployedState ?? "Add it in Settings",
+              icon: Users,
+            },
+            { label: "Service Ends", val: serviceEnd.value, sub: serviceEnd.sub, icon: ShieldAlert },
           ].map((m, idx) => {
             const IconComp = m.icon;
             return (
@@ -1062,12 +1075,12 @@ export default function DashboardOverviewPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { href: "/dashboard/companion", tag: "Clearance", title: "Smart Clearance Assistant", desc: "LGA biometric reminders, document vault, and route sync.", icon: Calendar },
+              { href: "/dashboard/companion", tag: "Clearance", title: "Clearance Tracker", desc: "Log monthly clearance and add the next date to your calendar.", icon: Calendar },
               { href: "/dashboard/marketplace", tag: "Marketplace", title: "Corper Peer Marketplace", desc: "Buy, sell, or swap mattresses, fans, and gas cylinders.", icon: ShoppingBag },
-              { href: "/dashboard/accommodation", tag: "Housing", title: "Lodge & Roommate Matcher", desc: "Find corper lodges near PPA and split rent easily.", icon: Home },
-              { href: "/dashboard/safety", tag: "Safety", title: "Travel SOS Tracker", desc: "Active highway trip monitoring and emergency contact ping.", icon: ShieldAlert },
-              { href: "/dashboard/workplace", tag: "Workplace", title: "PPA Logbook", desc: "Log work presence, request leave, and track evaluations.", icon: Briefcase },
-              { href: "/dashboard/community", tag: "CDS", title: "CDS Group Manager", desc: "Meeting schedule, attendance register, and dues log.", icon: Users },
+              { href: "/dashboard/accommodation", tag: "Housing", title: "Lodges & Roommates", desc: "Browse lodges and match with a roommate by state and LGA.", icon: Home },
+              { href: "/dashboard/safety", tag: "Safety", title: "Safety SOS", desc: "One-tap SOS that records your location and emails you a copy.", icon: ShieldAlert },
+              { href: "/dashboard/workplace", tag: "Workplace", title: "PPA Logbook", desc: "Record what you did each day and how many hours.", icon: Briefcase },
+              { href: "/dashboard/community", tag: "CDS · Soon", title: "CDS Group Hub", desc: "Meetings, attendance and projects for your CDS group. Coming soon.", icon: Users },
             ].map((mod, idx) => {
               const IconComp = mod.icon;
               return (
@@ -1095,166 +1108,41 @@ export default function DashboardOverviewPage() {
   }
 
   /* =========================================================================
-     3. PPA REPRESENTATIVE / EMPLOYER VIEW
+     3-5. EMPLOYER, CDS EXECUTIVE AND LGA INSPECTOR: not built yet
      ========================================================================= */
   if (currentRole === "ppa") {
     return (
-      <div className="space-y-8 font-sans">
-        <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
-          <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
-              <Building2 className="w-3.5 h-3.5" />
-              <span>ROLE: PPA REPRESENTATIVE (EMPLOYER)</span>
-            </div>
-            <h1 className="text-3xl font-medium text-white tracking-tight font-display">
-              Grace High School PPA Hub 🏫
-            </h1>
-            <p className="text-xs text-slate-300">
-              Managing 8 Corps Members assigned for 2024 Service Year.
-            </p>
-          </div>
-          <button className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Add Corper Slot
-          </button>
-        </div>
-
-        <div className="p-8 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-4">
-          <h2 className="text-sm font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-emerald-600" /> Corper Leave Applications
-          </h2>
-
-          <div className="space-y-3">
-            {leaveRequests.map((req) => (
-              <div key={req.id} className="p-4 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <div className="font-bold text-sm text-[#121815] dark:text-white font-display flex items-center gap-2">
-                    <span>{req.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono">{req.role}</span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">{req.reason}</p>
-                </div>
-
-                {req.status === "pending" ? (
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() => handleLeaveAction(req.id, "approved")}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleLeaveAction(req.id, "rejected")}
-                      className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                ) : (
-                  <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 ${
-                    req.status === "approved" ? "bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 border border-emerald-600/40" : "bg-red-950/20 text-red-700 dark:text-red-300 border border-red-600/40"
-                  }`}>
-                    {req.status}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <ComingSoon
+        icon={Briefcase}
+        title="PPA employer portal"
+        description="Tools for places of primary assignment to see their corps members' logbooks and handle leave requests."
+        planned={["View your corps members' daily logbooks", "Approve or decline leave requests", "Monthly attendance summary"]}
+        action={{ href: "/dashboard/settings", label: "Account settings" }}
+      />
     );
   }
 
-  /* =========================================================================
-     4. CDS EXECUTIVE VIEW
-     ========================================================================= */
   if (currentRole === "cds_exec") {
     return (
-      <div className="space-y-8 font-sans">
-        <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
-          <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
-              <Users className="w-3.5 h-3.5" />
-              <span>ROLE: CDS EXECUTIVE</span>
-            </div>
-            <h1 className="text-3xl font-medium text-white tracking-tight font-display">
-              Editorial & Publicity CDS Hub 📢
-            </h1>
-            <p className="text-xs text-slate-300">
-              Ikeja LGA Branch · 42 Registered Members
-            </p>
-          </div>
-          <Link href="/dashboard/community" className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider shrink-0">
-            Today&apos;s Attendance ➔
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
-            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">Total Dues Collected</span>
-            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">₦42,000</div>
-            <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">₦1,000 / Corper per month</span>
-          </div>
-
-          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
-            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">Active Projects</span>
-            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">2 Projects</div>
-            <span className="text-xs text-slate-600 dark:text-slate-400">Solar Library & School Renovation</span>
-          </div>
-
-          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
-            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">Next Meeting</span>
-            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">Thursday, 9:00 AM</div>
-            <span className="text-xs text-slate-600 dark:text-slate-400">Ikeja LGA Secretariat Hall</span>
-          </div>
-        </div>
-      </div>
+      <ComingSoon
+        icon={Users}
+        title="CDS executive hub"
+        description="Tools for CDS executives to run meetings, take attendance and track group projects and dues."
+        planned={["Meeting schedule and reminders", "Attendance register", "Project updates", "Dues tracking"]}
+        action={{ href: "/dashboard/safety", label: "Open Safety SOS" }}
+      />
     );
   }
 
-  /* =========================================================================
-     5. NYSC OFFICIAL / LGA INSPECTOR VIEW
-     ========================================================================= */
   if (currentRole === "nysc_official") {
     return (
-      <div className="space-y-8 font-sans">
-        <div className="p-8 bg-[#121815] text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border border-slate-800">
-          <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-widest font-display">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>ROLE: NYSC LGA INSPECTOR (LGI)</span>
-            </div>
-            <h1 className="text-3xl font-medium text-white tracking-tight font-display">
-              Ikeja LGA Biometric Command Center 🏛️
-            </h1>
-            <p className="text-xs text-slate-300">
-              Lagos Directorate · Monitoring 1,600 Active Corps Members
-            </p>
-          </div>
-          <Link href="/dashboard/companion" className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider shrink-0">
-            Open Biometric Scanner ➔
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
-            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">August Biometrics Verified</span>
-            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">1,420 / 1,600</div>
-            <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">88.7% Clearance Completion</span>
-          </div>
-
-          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
-            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">PPA Employer Reports</span>
-            <div className="text-2xl font-bold font-display text-[#121815] dark:text-white">148 Approved</div>
-            <span className="text-xs text-slate-600 dark:text-slate-400">12 Pending Query</span>
-          </div>
-
-          <div className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-2">
-            <span className="text-[10px] font-bold uppercase text-slate-500 font-display">Biometric Terminal</span>
-            <div className="text-2xl font-bold font-display text-emerald-600">Online & Syncing</div>
-            <span className="text-xs text-slate-600 dark:text-slate-400">HQ Server Ping: 12ms</span>
-          </div>
-        </div>
-      </div>
+      <ComingSoon
+        icon={ShieldAlert}
+        title="LGA inspector portal"
+        description="Tools for LGA officials to see clearance activity for corps members in their LGA."
+        planned={["Clearance activity by LGA", "Corps member lookup by state code"]}
+        action={{ href: "/dashboard/settings", label: "Account settings" }}
+      />
     );
   }
 
@@ -1273,7 +1161,7 @@ export default function DashboardOverviewPage() {
             KopaWee Alumni Launchpad 🎓
           </h1>
           <p className="text-xs text-slate-300">
-            Sell relocation household items and explore post-service career opportunities.
+            Sell the household items you no longer need to incoming corps members.
           </p>
         </div>
         <Link href="/dashboard/marketplace" className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider shrink-0">
@@ -1288,11 +1176,12 @@ export default function DashboardOverviewPage() {
           <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block pt-1">Open POP Market ➔</span>
         </Link>
 
-        <Link href="/dashboard/workplace" className="p-6 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 hover:border-emerald-600 transition-all space-y-3">
-          <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">Post-NYSC Career & Gigs</h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400">NiYA Job Bank integration, CV builder, remote tech gigs, and employer referrals.</p>
-          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 block pt-1">Explore Jobs ➔</span>
-        </Link>
+        <ComingSoon
+          compact
+          title="Career & gigs"
+          description="Job listings and a CV builder for corps members after passing out."
+          planned={["Job and gig listings", "CV builder"]}
+        />
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ const LEGACY_SESSION_KEYS = [
   "kopawee_user_name",
   "kopawee_active_role",
   "kopawee_user_profile",
+  "kopawee_offline_documents", // names of "vault" documents; the vault was never built
 ];
 
 export function clearLegacySessionStorage(): void {

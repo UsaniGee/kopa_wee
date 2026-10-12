@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRole } from "@/shared/context/RoleContext";
+import ComingSoon from "@/shared/components/ComingSoon";
 import { FiBriefcase, FiCheckCircle, FiStar, FiCalendar, FiFileText, FiClock, FiAlertCircle, FiBox, FiUserCheck, FiUserX, FiPackage, FiAward, FiExternalLink, FiX } from "react-icons/fi";
 
 const Briefcase = FiBriefcase;
@@ -62,31 +63,6 @@ export default function WorkplacePage() {
     }
   };
 
-  const [leaveRequests, setLeaveRequests] = useState([
-    { id: 1, name: "John Okoh", role: "ICT Assistant", reason: "Medical Leave (3 Days)", status: "pending", note: "" },
-    { id: 2, name: "Amina Bello", role: "Research Associate", reason: "LGA Clearance Exemption", status: "pending", note: "" },
-  ]);
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [activeReqId, setActiveReqId] = useState<number | null>(null);
-  const [actionType, setActionType] = useState<"approved" | "rejected">("approved");
-  const [actionNote, setActionNote] = useState("");
-
-  const handleOpenActionModal = (id: number, type: "approved" | "rejected") => {
-    setActiveReqId(id);
-    setActionType(type);
-    setActionNote("");
-    setModalOpen(true);
-  };
-
-  const handleConfirmLeaveAction = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (activeReqId !== null) {
-      setLeaveRequests(prev => prev.map(req => req.id === activeReqId ? { ...req, status: actionType, note: actionNote } : req));
-    }
-    setModalOpen(false);
-  };
-
   interface LogEntry {
     date: string;
     status: string;
@@ -123,6 +99,29 @@ export default function WorkplacePage() {
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when the signed-in user changes
   }, [session?.user?.id]);
+
+  if (currentRole === "ppa") {
+    return (
+      <ComingSoon
+        icon={Briefcase}
+        title="Corps members and leave requests"
+        description="PPAs will be able to see their corps members' logbooks and respond to leave requests here."
+        planned={["Your corps members' daily logbooks", "Leave requests", "Monthly attendance summary"]}
+      />
+    );
+  }
+
+  if (currentRole === "alumni") {
+    return (
+      <ComingSoon
+        icon={Briefcase}
+        title="Career & gigs"
+        description="Job listings and a CV builder for corps members after passing out."
+        planned={["Job and gig listings", "CV builder"]}
+        action={{ href: "/dashboard/marketplace", label: "Sell items you no longer need" }}
+      />
+    );
+  }
 
   if (currentRole === "pcm") {
     return (
