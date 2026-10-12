@@ -143,7 +143,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Check every mutation's response before showing success, and roll back optimistic updates on failure.
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 6: Remove Fabricated UI, localStorage Shadows & Dead Code (FR5)
+## Phase 6: Remove Fabricated UI, localStorage Shadows & Dead Code (FR5) [checkpoint: c772522]
 
 - [x] Task: Remove fake records and fallbacks 785d554
   - [x] Delete the fake arrays: `SAMPLE_LISTINGS`, leave requests, CDS members and dues, safety contacts, vault documents, `services.ts` preview records.
@@ -161,7 +161,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Fix the layout title: "KopaWee".
 - [x] Task: Run the dummy-data grep (`LA/26A|Ikeja|unsplash|SAMPLE_|kopawee_user|kopawee_active_role`) and confirm nothing turns up outside the approved static data.
   - Result 2026-10-12 (no code change): no `unsplash` or `SAMPLE_` left. Remaining matches are approved: real LGA data (`nigeriaStatesLgas.ts`), the legacy-key clearing list (`authNav.ts`), state-code format hints/placeholders and the API validation message, and "e.g. … Ikeja" input placeholders. The other hits are Phase 7 mockup screens: overview CDS/inspector views (`dashboard/page.tsx`), `community/page.tsx`, safety contacts, companion inspector view.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 7: Honest "Coming Soon" States (FR6)
 
