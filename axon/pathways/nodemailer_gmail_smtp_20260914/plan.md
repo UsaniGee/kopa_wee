@@ -21,3 +21,10 @@
 
 - [ ] Task: User registers, checks inbox, confirms email arrives
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions d22b413
+  - axon-inspect 2026-10-12. Original work had no SHAs recorded: email.ts swap in `f827518` (inside the pathway-initialize chore commit), package.json in `051cb15`.
+  - Fixed: SMTP timeouts, no recipient address or raw error in logs, plain-text alternative, first sendEmail tests, Gmail limit noted in tech-stack.
+  - Still open: Phase 4 real-inbox check by the owner.
