@@ -1,42 +1,54 @@
 # Product Definition: KopaWee (NYSC Companion)
 
 ## Vision
-**KopaWee** is an active, modern personal assistant and companion application designed specifically for National Youth Service Corps (NYSC) members across Nigeria. While official NYSC portals function strictly as passive administrative databases, KopaWee acts as an indispensable, proactive companion from the moment a graduate receives their call-up letter until long after passing out (POP).
+**KopaWee** is an active personal companion for National Youth Service Corps (NYSC) members across Nigeria. Official NYSC portals are administrative records; KopaWee helps from the moment a graduate receives their call-up letter until after passing out (POP).
 
-## Target Audience & Supported User Roles
-1. **Prospective Corps Members (PCMs):** Preparing for mobilization, registration, call-up letter, and orientation camp.
-2. **Serving Corps Members:** Navigating daily PPA life, monthly LGA biometric clearance, CDS activities, travel, housing, and budgeting.
-3. **CDS Executives:** Managing attendance registers, community development projects, dues, announcements, and group safety.
-4. **Employers & PPAs (Places of Primary Assignment):** Managing corper staff directory, clock-in attendance, and leave requests.
-5. **LGA NYSC Inspectors / Officials:** Overseeing biometric clearance portals, attendance logs, and LGA statistics.
-6. **Outgoing / Ex-Corps Members (POP Alumni):** Selling relocation/POP items, searching for post-service jobs/gigs, and alumni networking.
+Status labels below: **Live** works today, **Partly live** has some parts working, **Planned** is not built yet. The app shows the same honesty: unbuilt features use a "Coming soon" panel or a "Soon" badge.
 
-## Key Feature Pillars & Mini-Products
+## Target Audience & User Roles
+1. **Prospective Corps Members (PCMs):** preparing for mobilization and orientation camp. **Live.**
+2. **Serving Corps Members:** clearance, PPA, housing, travel and marketplace. **Live.**
+3. **Ex-Corps Members (POP alumni):** selling household items. **Partly live** (marketplace live; careers planned).
+4. **CDS executives, PPA employers, LGA officials:** **Planned.** Their dashboards show "Coming soon"; users cannot give themselves these roles.
 
-### 1. Dynamic Role Isolation & Smart Role Auto-Redirect
-- **Tailored Dashboards:** Single core account platform with 6 strictly role-isolated mini-product views. Switching roles instantly cleanses and re-renders only relevant content and auto-jumps to the role's primary overview tab.
-- **Status Upgrade Progression:** Seamless upgrade flow from PCM to Serving Corps Member with stage-gated field visibility (eliminating decision fatigue for PPA input until posted).
+Every new account starts as a PCM. Status changes go forward (PCM → Serving → Alumni), by the user, by the daily automatic check of camp and service dates, or by an admin.
 
-### 2. Full-Screen Split Layout Auth & Guided Onboarding
-- **Obsidian Black & NYSC Emerald Green Brand System:** High-contrast edge-to-edge split screens for sign-up, sign-in, and 4-step progressive onboarding wizard.
-- **Location-Aware Profiling:** State-level location tracking (GPS & user selection) powering state-gated marketplace listings and accommodation recommendations.
+## Feature Pillars
 
-### 3. Pre-Camp & Interactive Orientation Camp Guide
-- **Camp Essentials Checklist:** Interactive packing checklist with item quantities, progress tracking, and official disclaimers (e.g. Crocs for hostel/bathroom use vs. white parade ground footwear).
+### 1. Accounts, Onboarding & Roles: Live
+- Email/password (with email verification and password reset) and Google sign-in.
+- 4-step onboarding saves name, phone, NYSC status, institution, course, batch, stream, deployed state and LGA (from seeded reference data), state code and PPA.
+- Dashboards and menus follow the role in the session.
 
-### 4. Location-Filtered Peer-to-Peer Corper Marketplace
-- **State-Gated Buying & Selling:** Secure P2P marketplace filtered by deployed/service state for camp gear, electronics, furniture, and POP household bundle hand-offs.
+### 2. Camp Companion: Live
+- Camp packing checklist saved per user (one list, notes and warnings included), countdown to the camp date.
+- **Planned:** document vault, state camp guides.
 
-### 5. Accommodation & Roommate Matching
-- **Corper Housing Directory:** Transit stays, corper lodges near PPAs/LGA offices, and preference-based roommate finder.
+### 3. Peer-to-Peer Marketplace: Live
+- Listings with photos (downscaled in the browser) reviewed by an admin before going live; filter by state and category; optional AI-written draft (Gemini).
+- Seller phone and email are shown only to signed-in users; WhatsApp and call links.
+- **Planned:** reporting a listing.
 
-### 6. Workplace (PPA) & CDS Hub
-- **PPA Navigation & Logbook:** Attendance tracking, leave requests review, and employer directory.
-- **CDS Group Hub:** Projects tracker, attendance manager, dues collection, and announcements.
+### 4. Accommodation & Roommates: Live
+- Lodge listings (moderated) with a host contact, filter by LGA.
+- Roommate requests: express interest, owner accepts or declines, phone and email shared only after acceptance.
+- **Planned:** tenant reviews.
 
-### 7. Emergency & Travel Safety Tracker
-- **Highway & Interstate Travel Monitor:** Active journey status check-ins for corper highway transit.
-- **SOS Emergency Broadcast:** Instant emergency alert trigger for safety circles and local corper reps.
+### 5. Clearance & PPA Logbook: Partly live
+- Log monthly clearance, see the next eligible date, add it to Google Calendar.
+- Daily PPA logbook (summary and hours, one entry per day).
+- **Planned:** clearance reminders, employer tools, leave requests.
 
-### 8. Post-POP Career & Gig Marketplace
-- **Alumni Launchpad:** Household hand-off deals, CV builder, job bank, and alumni network.
+### 6. Safety: Partly live
+- One-tap SOS with the phone's GPS location, logged and emailed to the user; quick link to call 112.
+- **Planned:** trip check-ins, alerts to trusted contacts.
+
+### 7. AI Assistant: Partly live (beta)
+- General answers from Google Gemini, with a reminder to confirm with official NYSC sources.
+- **Planned:** answers grounded in official NYSC documents.
+
+### 8. CDS Hub and Careers: Planned
+- CDS meetings, attendance and projects; job listings and a CV builder for alumni.
+
+### 9. Verified Corps Members: Planned
+- Confirm corps member identity through a licensed verification provider (e.g. an NYSC-number check plus a selfie match).
