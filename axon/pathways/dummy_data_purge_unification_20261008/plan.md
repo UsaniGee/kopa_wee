@@ -159,7 +159,8 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - [x] Task: Dead code and dependencies c772522
   - [x] Delete `RoleOnboardingModal.tsx`, the unused `public/` files, the Unsplash remote pattern, the duplicate `PostLodgeModal`, the dead `handlePostItem`, the stale TODO and the `resend` package.
   - [x] Fix the layout title: "KopaWee".
-- [ ] Task: Run the dummy-data grep (`LA/26A|Ikeja|unsplash|SAMPLE_|kopawee_user|kopawee_active_role`) and confirm nothing turns up outside the approved static data.
+- [x] Task: Run the dummy-data grep (`LA/26A|Ikeja|unsplash|SAMPLE_|kopawee_user|kopawee_active_role`) and confirm nothing turns up outside the approved static data.
+  - Result 2026-10-12 (no code change): no `unsplash` or `SAMPLE_` left. Remaining matches are approved: real LGA data (`nigeriaStatesLgas.ts`), the legacy-key clearing list (`authNav.ts`), state-code format hints/placeholders and the API validation message, and "e.g. … Ikeja" input placeholders. The other hits are Phase 7 mockup screens: overview CDS/inspector views (`dashboard/page.tsx`), `community/page.tsx`, safety contacts, companion inspector view.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 7: Honest "Coming Soon" States (FR6)
