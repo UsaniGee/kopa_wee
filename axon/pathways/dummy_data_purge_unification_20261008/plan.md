@@ -203,3 +203,12 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - Move image uploads to object storage.
 - A persistent rate limiter for the AI and resend-verification routes.
 - Send the clearance-due and logbook-approved emails (from `security_hardening_unified_auth_20260910`).
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions 6990c2e ffde03f
+  - axon-inspect 2026-10-12 (4 parallel reviewers, every finding checked against HEAD): 5 High, 9 Medium, ~14 Low.
+  - Server (6990c2e): seed refuses to promote an unverified account; MATCHED roommate requests can be cancelled; unique packing name / logbook day (migration 20261012010000, dev branch only); admin reversal clears the date the cron would act on; SOS reports the real email result; clearance advisory lock; no lister emails in listing APIs, validated photos, cover photo only in lists; guarded status updates; atomic roommate accept; stale LGA cleared; AI draft rate limit; prompt no longer says "official".
+  - UI (ffde03f): Settings cannot wipe an unloaded profile and sends only changes; Google sign-ins pass the onboarding check; honest copy fixes; error states instead of fake defaults; precise rollbacks; roommate edit LGAs; a11y labels; dead modal removed.
+  - Not changed: undialable-phone display in roommate contacts, Math.ceil countdown edge in the first hour of the day (cosmetic).
+  - Operations, owner: rotate or disable the old seeded admin (`admin@kopawee.ng`, password in git history) on production before deploy; production also needs the 4 migrations (`migrate resolve --applied 0_init`, then `migrate deploy`) and `NEXTAUTH_URL`.
