@@ -182,7 +182,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 ## Phase 8: Docs Sync & Final Audit (FR7)
 
 - [x] Task: Update `axon/tech-stack.md` (Nodemailer, no IndexedDB, pnpm, Vitest, image-storage debt), `axon/product-guidelines.md` (real colour tokens, light and dark; rewrite the radius rules for the canonical **sharp-edged (0rem) + bordered** system confirmed 2026-10-08) and `axon/product.md` (each pillar Live or Planned). 48f613c
-- [x] Task: Update `.env.example` with `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `CRON_SECRET` and `GEMINI_MODEL` (if made configurable). (already done in Phase 3, 50cf503/4fe1d3d: all four are documented)
+- [x] Task: Update `.env.example` with `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `CRON_SECRET` and `GEMINI_MODEL` (if made configurable). (already done: SEED_ADMIN_* in 4fe1d3d, GEMINI_MODEL in 570c58f, CRON_SECRET in 957af04)
 - [ ] Task: Re-run the audit greps and walk through every acceptance criterion in spec.md. Record the results in this plan.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
