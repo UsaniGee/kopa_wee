@@ -163,7 +163,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - Result 2026-10-12 (no code change): no `unsplash` or `SAMPLE_` left. Remaining matches are approved: real LGA data (`nigeriaStatesLgas.ts`), the legacy-key clearing list (`authNav.ts`), state-code format hints/placeholders and the API validation message, and "e.g. … Ikeja" input placeholders. The other hits are Phase 7 mockup screens: overview CDS/inspector views (`dashboard/page.tsx`), `community/page.tsx`, safety contacts, companion inspector view.
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 7: Honest "Coming Soon" States (FR6)
+## Phase 7: Honest "Coming Soon" States (FR6) [checkpoint: ceaa773]
 
 - [x] Task: Build a shared `ComingSoon` component (canonical sharp + bordered design, dark mode, mobile) and a "Soon" nav badge. 8319f70
 - [x] Task: Replace the mockups ceaa773
@@ -177,7 +177,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - The savings/CDS/safety overview cards were replaced with real data (clearances logged, LGA, days to passing out) instead of ComingSoon.
 - [x] Task: Run the `axon-compose` checks on every changed screen.
   - Done 2026-10-12 as a code-level audit (no Playwright; headless Chrome screenshots of the landing page show the hero correctly but render scroll-revealed sections blank, so they are not evidence). Utility copy, one action per panel, no card mosaics, 44 px tap targets, reduced-motion fade. Kept by choice: the landing stats strip (existing design, honest content now). Copy note for the owner: the hero sentence for the Safety slide is accurate but flat. Visual check by the owner at the Phase 7 checkpoint.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 8: Docs Sync & Final Audit (FR7)
 
