@@ -165,7 +165,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 ## Phase 7: Honest "Coming Soon" States (FR6)
 
-- [ ] Task: Build a shared `ComingSoon` component (soft-edge design, dark mode, mobile) and a "Soon" nav badge.
+- [ ] Task: Build a shared `ComingSoon` component (canonical sharp + bordered design, dark mode, mobile) and a "Soon" nav badge.
 - [ ] Task: Replace the mockups
   - [ ] CDS hub (community page and overview CDS view).
   - [ ] PPA/employer view (overview and workplace).

@@ -16,7 +16,8 @@ const Briefcase = FiBriefcase;
 const Users = FiUsers;
 const Settings = FiSettings;
 
-export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon: React.ElementType }[]> = {
+/** soon: the page is a "Coming soon" placeholder; the menu shows a Soon badge. */
+export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon: React.ElementType; soon?: boolean }[]> = {
   pcm: [
     { href: "/dashboard", label: "PCM Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/companion", label: "Camp Guide & Packing", icon: CalendarCheck },
@@ -30,25 +31,25 @@ export const ROLE_NAV_ITEMS: Record<string, { href: string; label: string; icon:
     { href: "/dashboard/accommodation", label: "Lodges & Roomies", icon: Home },
     { href: "/dashboard/safety", label: "Safety SOS", icon: ShieldAlert },
     { href: "/dashboard/workplace", label: "PPA Logbook", icon: Briefcase },
-    { href: "/dashboard/community", label: "CDS Hub", icon: Users },
+    { href: "/dashboard/community", label: "CDS Hub", icon: Users, soon: true },
   ],
   cds_exec: [
-    { href: "/dashboard", label: "CDS Executive Hub", icon: LayoutDashboard },
-    { href: "/dashboard/community", label: "Attendance, Projects & Dues", icon: Users },
+    { href: "/dashboard", label: "CDS Executive Hub", icon: LayoutDashboard, soon: true },
+    { href: "/dashboard/community", label: "Attendance, Projects & Dues", icon: Users, soon: true },
     { href: "/dashboard/safety", label: "Group Safety SOS", icon: ShieldAlert },
   ],
   ppa: [
-    { href: "/dashboard", label: "PPA Employer Portal", icon: LayoutDashboard },
-    { href: "/dashboard/workplace", label: "Corper Staff & Leave Requests", icon: Briefcase },
+    { href: "/dashboard", label: "PPA Employer Portal", icon: LayoutDashboard, soon: true },
+    { href: "/dashboard/workplace", label: "Corper Staff & Leave Requests", icon: Briefcase, soon: true },
   ],
   nysc_official: [
-    { href: "/dashboard", label: "LGA Inspector Portal", icon: LayoutDashboard },
-    { href: "/dashboard/companion", label: "Biometric Clearance Portal", icon: CalendarCheck },
+    { href: "/dashboard", label: "LGA Inspector Portal", icon: LayoutDashboard, soon: true },
+    { href: "/dashboard/companion", label: "Biometric Clearance Portal", icon: CalendarCheck, soon: true },
   ],
   alumni: [
     { href: "/dashboard", label: "Ex-Corper Hub", icon: LayoutDashboard },
     { href: "/dashboard/marketplace", label: "POP Household Deals", icon: ShoppingBag },
-    { href: "/dashboard/workplace", label: "Career & Gigs", icon: Briefcase },
+    { href: "/dashboard/workplace", label: "Career & Gigs", icon: Briefcase, soon: true },
   ],
 };
 
@@ -114,6 +115,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 >
                   <IconComp className={`w-3.5 h-3.5 ${isActive ? "text-emerald-300" : "text-slate-500 dark:text-slate-400"}`} />
                   <span>{item.label}</span>
+                  {item.soon && <SoonBadge />}
                 </Link>
               );
             })}
@@ -140,12 +142,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               }`}
             >
               <IconComp className="w-4 h-4 mb-0.5" />
-              <span className="truncate max-w-[72px] text-[9px]">{item.label.split(" ")[0]}</span>
+              <span className="truncate max-w-[72px] text-[9px]">{item.label.split(" ")[0]}{item.soon ? " · Soon" : ""}</span>
             </Link>
           );
         })}
       </nav>
     </div>
+  );
+}
+
+function SoonBadge() {
+  return (
+    <span className="px-1.5 py-px text-[9px] font-mono font-bold uppercase tracking-wider border border-current opacity-70">Soon</span>
   );
 }
 
