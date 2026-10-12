@@ -175,7 +175,8 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Leave requests, listing reports, job bank and CV builder (alumni card).
   - [x] The savings, CDS-attendance and safety-status overview cards.
   - The savings/CDS/safety overview cards were replaced with real data (clearances logged, LGA, days to passing out) instead of ComingSoon.
-- [ ] Task: Run the `axon-compose` checks on every changed screen.
+- [x] Task: Run the `axon-compose` checks on every changed screen.
+  - Done 2026-10-12 as a code-level audit (no Playwright; headless Chrome screenshots of the landing page show the hero correctly but render scroll-revealed sections blank, so they are not evidence). Utility copy, one action per panel, no card mosaics, 44 px tap targets, reduced-motion fade. Kept by choice: the landing stats strip (existing design, honest content now). Copy note for the owner: the hero sentence for the Safety slide is accurate but flat. Visual check by the owner at the Phase 7 checkpoint.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 8: Docs Sync & Final Audit (FR7)
