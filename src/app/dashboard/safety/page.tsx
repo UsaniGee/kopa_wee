@@ -40,7 +40,7 @@ export default function SafetyPage() {
     let position: GeolocationPosition;
     try {
       position = await new Promise<GeolocationPosition>((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 })
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 })
       );
     } catch (err) {
       const code = (err as GeolocationPositionError)?.code;

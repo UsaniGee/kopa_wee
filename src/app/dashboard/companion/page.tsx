@@ -46,14 +46,15 @@ const Check = FiCheck;
 export default function CompanionPage() {
   const { currentRole } = useRole();
   const [clearance, setClearance] = useState<{ hasCleared: boolean; isEligible: boolean; nextEligibleAt: string | null } | null>(null);
+  const [clearanceFailed, setClearanceFailed] = useState(false);
   const [place, setPlace] = useState<{ lga: string | null; deployedState: string | null } | null>(null);
 
   useEffect(() => {
     if (currentRole !== "serving") return;
     fetch("/api/clearance")
       .then((res) => res.json())
-      .then((data) => data.success && setClearance(data.data))
-      .catch(() => {});
+      .then((data) => (data.success ? setClearance(data.data) : setClearanceFailed(true)))
+      .catch(() => setClearanceFailed(true));
     fetch("/api/users/me")
       .then((res) => res.json())
       .then((data) => data.success && setPlace({ lga: data.data.lga, deployedState: data.data.deployedState }))
@@ -62,14 +63,17 @@ export default function CompanionPage() {
   const placeLabel = place?.lga && place.deployedState ? `${place.lga} LGA, ${place.deployedState}` : null;
   const nextDate = clearance?.nextEligibleAt ? new Date(clearance.nextEligibleAt) : null;
   const nextDateLabel = nextDate?.toLocaleDateString("en-NG", { weekday: "long", month: "short", day: "numeric" });
-  const clearanceSummary = !clearance
+  const clearanceSummary = clearanceFailed
+    ? "Your clearance status could not be loaded. Refresh to try again."
+    : !clearance
     ? "Loading your clearance status..."
     : !clearance.hasCleared
       ? "No clearance logged yet. Record it on your Overview after you clear at your LGA."
       : clearance.isEligible
         ? "Your next clearance window is open now."
         : `You can clear again from ${nextDateLabel}.`;
-  const calendarUrl = nextDate
+  // Only a future date is worth adding; an open window has no date to plan for
+  const calendarUrl = nextDate && !clearance?.isEligible
     ? googleCalendarAllDayLink({
         title: "NYSC monthly LGA clearance",
         date: nextDate,

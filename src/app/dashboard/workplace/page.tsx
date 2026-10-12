@@ -51,6 +51,7 @@ export default function WorkplacePage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
         setLogError(data.message || data.error || "Your entry was not saved. Please try again.");
+        if (data.error === "ALREADY_LOGGED") loadLogs(); // logged from another device: show that entry
         return;
       }
       setLogSummary("");
@@ -71,6 +72,7 @@ export default function WorkplacePage() {
   }
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logsError, setLogsError] = useState("");
   const todaysEntry = logs.find((l) => l.date === today);
 
   const loadLogs = () => {
@@ -85,9 +87,12 @@ export default function WorkplacePage() {
             hoursWorked: item.hoursWorked,
           }));
           setLogs(apiLogs);
+          setLogsError("");
+        } else {
+          setLogsError(data.error || "Your log entries could not be loaded.");
         }
       })
-      .catch(() => {});
+      .catch(() => setLogsError("Your log entries could not be loaded. Check your connection."));
   };
 
   React.useEffect(() => {
@@ -229,7 +234,9 @@ export default function WorkplacePage() {
         </h2>
 
         <div className="space-y-2">
-          {logs.length === 0 ? (
+          {logsError ? (
+            <p role="alert" className="p-4 border border-red-300 dark:border-red-900 text-xs text-red-700 dark:text-red-400">{logsError}</p>
+          ) : logs.length === 0 ? (
             <div className="p-6 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-center space-y-2">
               <Clock className="w-6 h-6 text-slate-400 mx-auto" />
               <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">

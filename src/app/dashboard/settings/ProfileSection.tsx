@@ -18,6 +18,8 @@ const labelClass = "text-[11px] font-bold text-slate-700 dark:text-slate-300 upp
 export default function ProfileSection() {
   const { update } = useSession();
   const [profile, setProfile] = useState<Profile>(EMPTY);
+  // What the server has; only fields that differ are sent, and nothing is sent if loading failed
+  const [serverProfile, setSavedProfile] = useState<Profile | null>(null);
   const [states, setStates] = useState<StateOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,7 +29,13 @@ export default function ProfileSection() {
   useEffect(() => {
     Promise.all([fetch("/api/users/me").then((r) => r.json()), fetch("/api/states").then((r) => r.json())])
       .then(([me, st]) => {
-        if (me.success) setProfile(Object.fromEntries(FIELDS.map((f) => [f, me.data[f] ?? ""])) as Profile);
+        if (me.success) {
+          const loaded = Object.fromEntries(FIELDS.map((f) => [f, me.data[f] ?? ""])) as Profile;
+          setProfile(loaded);
+          setSavedProfile(loaded);
+        } else {
+          setError(me.error || "Could not load your profile. Refresh to try again.");
+        }
         if (st.success && Array.isArray(st.data)) setStates(st.data);
         else setError(st.error || "Location data is not available right now.");
       })
@@ -43,6 +51,12 @@ export default function ProfileSection() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!serverProfile) return;
+    const changes = Object.fromEntries(FIELDS.filter((f) => profile[f] !== serverProfile[f]).map((f) => [f, profile[f]]));
+    if (Object.keys(changes).length === 0) {
+      setSaved(true);
+      return;
+    }
     if (profile.deployedState && !profile.lga) {
       setError("Choose your LGA, or clear the deployment state.");
       return;
@@ -54,14 +68,16 @@ export default function ProfileSection() {
       const res = await fetch("/api/users/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(changes),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
         setError(data.message || data.error || "Your changes were not saved.");
         return;
       }
-      setProfile(Object.fromEntries(FIELDS.map((f) => [f, data.data[f] ?? ""])) as Profile);
+      const updated = Object.fromEntries(FIELDS.map((f) => [f, data.data[f] ?? ""])) as Profile;
+      setProfile(updated);
+      setSavedProfile(updated);
       setSaved(true);
       await update();
     } catch {
@@ -129,7 +145,7 @@ export default function ProfileSection() {
       <div className="flex items-center gap-4">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || !serverProfile}
           className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer disabled:opacity-50"
         >
           {saving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />}

@@ -51,6 +51,7 @@ export default function AdminLoginPage() {
       // Check if user has ADMIN applicationRole
       const res = await fetch("/api/users/me");
       if (!res.ok) {
+        await signOut({ redirect: false }); // do not leave an unchecked session behind
         setErrorMsg("Failed to verify user permissions. Please try again.");
         setLoading(false);
         return;

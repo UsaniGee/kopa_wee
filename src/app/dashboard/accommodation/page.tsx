@@ -143,7 +143,7 @@ export default function AccommodationPage() {
             Corper Lodges & Compatibility Finder
           </h1>
           <p className="text-xs text-slate-300">
-            Find verified lodges near your PPA and match with compatible roommates to split rent.
+            Find lodges listed by corpers and hosts, and post a roommate request to split rent.
           </p>
         </div>
 
@@ -801,7 +801,10 @@ function RequestRoommateModal({
 }) {
   const isEditing = !!initialData;
   const [selectedState, setSelectedState] = useState(initialData?.state || "");
-  const [availableLgas, setAvailableLgas] = useState<string[]>([]);
+  // When editing, start with the saved state's LGAs so the saved LGA shows and can be changed
+  const [availableLgas, setAvailableLgas] = useState<string[]>(
+    () => states.find((s) => s.name === initialData?.state)?.lgas ?? []
+  );
   const [lga, setLga] = useState(initialData?.lga || "");
   const [area, setArea] = useState(initialData?.area || "");
   const [street, setStreet] = useState("");

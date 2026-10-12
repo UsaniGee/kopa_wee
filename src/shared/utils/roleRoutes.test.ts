@@ -21,6 +21,11 @@ describe("getRouteForRole", () => {
     expect(getRouteForRole("/dashboard/workplace", "serving")).toBe("/dashboard/workplace");
     expect(getRouteForRole("/dashboard/workplace", "pcm")).toBe("/dashboard");
   });
+
+  it("keeps settings for every role", () => {
+    expect(getRouteForRole("/dashboard/settings", "pcm")).toBe("/dashboard/settings");
+    expect(getRouteForRole("/dashboard/settings", "alumni")).toBe("/dashboard/settings");
+  });
 });
 
 describe("destinationFor", () => {

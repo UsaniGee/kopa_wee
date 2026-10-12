@@ -19,10 +19,13 @@ export function deriveRole(nyscStatus?: string | null, legacyRole?: string | nul
   return "pcm";
 }
 
+/** Open to every signed-in role (not a role tab). */
+const SHARED_ROUTES = ["/dashboard/settings"];
+
 /** The target route if the role may open it, else the role's first allowed route. */
 export function getRouteForRole(targetRoute: string, role: string): string {
   const allowed = ROLE_ALLOWED_ROUTES[role as RoleType] ?? ROLE_ALLOWED_ROUTES.pcm;
-  return allowed.includes(targetRoute) ? targetRoute : allowed[0];
+  return allowed.includes(targetRoute) || SHARED_ROUTES.includes(targetRoute) ? targetRoute : allowed[0];
 }
 
 /** Where a link should go: sign-up for visitors, otherwise the route the session role allows. */

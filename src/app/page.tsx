@@ -351,7 +351,7 @@ export default function LandingPage() {
               Ready to Navigate Your Service Year With Calm Precision?
             </h2>
             <p className="text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
-              Join thousands of Nigerian corps members using KopaWee as their proactive companion.
+              Free during early access. Set up your account in a few minutes.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FiArrowRight, FiArrowLeft, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
-import { getRouteForRole } from "@/shared/utils/authNav";
+import { deriveRole, getRouteForRole } from "@/shared/utils/authNav";
 
 type NyscStatus = "PCM" | "SERVING" | "ALUMNI";
 type StateOption = { id: string; name: string; code: string; lgas: string[] };
@@ -53,6 +53,8 @@ function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
+  // ?check=1 (after Google sign-in): forward complete profiles instead of showing the form
+  const [checking, setChecking] = useState(searchParams.get("check") === "1");
   const { update } = useSession();
 
   const [step, setStep] = useState(1);
@@ -98,12 +100,18 @@ function OnboardingContent() {
     fetch("/api/users/me")
       .then((res) => res.json())
       .then(({ success, data: u }) => {
-        if (!success || !u) return;
+        if (!success || !u) return setChecking(false);
+        if (checking && u.onboardingComplete) {
+          router.replace(redirectUrl ? getRouteForRole(redirectUrl, deriveRole(u.nyscStatus, u.role)) : "/dashboard");
+          return;
+        }
+        setChecking(false);
         setFormData((prev) => ({
           ...prev,
           fullName: prev.fullName || u.name || "",
           phone: prev.phone || u.phone || "",
-          nyscStatus: prev.nyscStatus || (u.onboardingComplete ? u.nyscStatus : ""),
+          // A status other than the PCM default was set before (it can't be self-changed here again)
+          nyscStatus: prev.nyscStatus || (u.onboardingComplete || u.nyscStatus !== "PCM" ? u.nyscStatus : ""),
           institution: prev.institution || u.journey?.institution || "",
           fieldOfStudy: prev.fieldOfStudy || u.journey?.courseOfStudy || "",
           batch: prev.batch || u.journey?.batch || "",
@@ -117,7 +125,9 @@ function OnboardingContent() {
           setFieldOfStudyOptions((opts) => (opts.includes(u.journey.courseOfStudy) ? opts : [...opts, u.journey.courseOfStudy]));
         }
       })
-      .catch(() => {});
+      .catch(() => setChecking(false));
+    // Runs once on mount; `checking` is read at that moment only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const lgaOptions = states.find((s) => s.name === formData.deployedState)?.lgas ?? [];
@@ -202,6 +212,10 @@ function OnboardingContent() {
       setSubmitting(false);
     }
   };
+
+  if (checking) {
+    return <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] flex items-center justify-center font-mono text-xs">Checking your profile...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#eaf5ed] dark:bg-[#0a0f0d] text-[#121815] dark:text-white flex flex-col font-sans transition-colors duration-500">

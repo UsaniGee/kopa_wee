@@ -123,7 +123,7 @@ export const services: Service[] = [
       "Browse lodges listed by corpers and hosts after a moderation check, post a roommate request with your budget, and share contact details only when both of you agree.",
     highlights: [
       "Lodge listings reviewed before they go live",
-      "Roommate requests filtered by state and LGA",
+      "Roommate requests from corpers, with budget and preferences",
       "Phone and email shared only after a match",
       "WhatsApp or call hosts in one tap",
     ],

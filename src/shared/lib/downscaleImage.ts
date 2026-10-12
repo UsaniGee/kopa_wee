@@ -12,6 +12,8 @@ export async function downscaleImage(file: File, maxSide = 1280, quality = 0.8):
     canvas.height = Math.round(bitmap.height * scale);
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas is not available");
+    ctx.fillStyle = "#ffffff"; // JPEG has no transparency; without this, clear areas turn black
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL("image/jpeg", quality);
   } finally {

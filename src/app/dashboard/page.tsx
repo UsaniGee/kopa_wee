@@ -45,19 +45,20 @@ interface ClearanceModalProps {
 
 function ClearanceModal({ onConfirm, onCancel, isLoading }: ClearanceModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="clearance-modal-title">
       <div className="bg-white dark:bg-[#121815] border border-slate-200 dark:border-slate-700 max-w-md w-full p-8 space-y-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             </div>
-            <h2 className="text-lg font-bold text-[#121815] dark:text-white font-display">
+            <h2 id="clearance-modal-title" className="text-lg font-bold text-[#121815] dark:text-white font-display">
               Mark Monthly Clearance as Done?
             </h2>
           </div>
           <button
             onClick={onCancel}
+            aria-label="Close"
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -102,107 +103,6 @@ function ClearanceModal({ onConfirm, onCancel, isLoading }: ClearanceModalProps)
   );
 }
 
-// ─── Update Status Confirmation Modal ────────────────────────────────────────
-interface StatusUpdateModalProps {
-  fromStatus: string;
-  toStatus: string;
-  campExitDate?: string | null;
-  onConfirm: () => void;
-  onCancel: () => void;
-  isLoading: boolean;
-}
-
-function StatusUpdateModal({ fromStatus, toStatus, campExitDate, onConfirm, onCancel, isLoading }: StatusUpdateModalProps) {
-  const formattedExitDate = campExitDate
-    ? new Date(campExitDate).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
-    : null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-[#121815] border border-slate-200 dark:border-slate-700 max-w-md w-full p-8 space-y-6 shadow-2xl">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30">
-              <FiRefreshCw className="w-5 h-5 text-blue-600" />
-            </div>
-            <h2 className="text-lg font-bold text-[#121815] dark:text-white font-display">
-              Update NYSC Status?
-            </h2>
-          </div>
-          <button
-            onClick={onCancel}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">From:</span>
-            <span className="text-sm font-bold text-[#121815] dark:text-white">{fromStatus}</span>
-            <span className="text-slate-400">→</span>
-            <span className="text-sm font-bold text-emerald-600">{toStatus}</span>
-          </div>
-
-          {formattedExitDate ? (
-            <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 space-y-1">
-              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                📅 Automatic Schedule Active
-              </p>
-              <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
-                Your status is scheduled to automatically transition to <strong>Serving Corps Member</strong> on <strong>{formattedExitDate}</strong> when orientation camp ends. Would you like to update to Serving now anyway?
-              </p>
-            </div>
-          ) : (
-            <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 space-y-1">
-              <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-                ⚠️ No Camp Dates Found
-              </p>
-              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                You haven't set your orientation camp dates in Account Settings. You can update your status manually now, or add your camp dates in Settings to enable automatic status transitions.
-              </p>
-            </div>
-          )}
-
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-            <p className="text-sm text-red-800 dark:text-red-300 leading-relaxed font-medium">
-              ⚠️ Manual transitions are non-reversible
-            </p>
-            <p className="text-xs text-red-700 dark:text-red-400 mt-1 leading-relaxed">
-              Once updated to <strong>{toStatus}</strong>, you cannot revert to PCM yourself. Only an administrator can revert status corrections.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-3 pt-2">
-          <button
-            onClick={onCancel}
-            disabled={isLoading}
-            className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={isLoading}
-            className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
-          >
-            {isLoading ? (
-              <>
-                <FiLoader className="w-4 h-4 animate-spin" />
-                <span>Updating...</span>
-              </>
-            ) : (
-              <span>Yes, Update Status</span>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Packing Checklist Component ─────────────────────────────────────────────
 interface PackingItem {
   id: string;
@@ -232,8 +132,9 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
       const res = await fetch("/api/packing-items");
       const data = await res.json();
       if (data.success) setItems(data.data);
-    } catch (err) {
-      console.error("Failed to fetch packing items:", err);
+      else setActionError(data.error || "Could not load your checklist. Refresh to try again.");
+    } catch {
+      setActionError("Could not load your checklist. Check your connection and refresh.");
     } finally {
       setLoading(false);
     }
@@ -263,7 +164,13 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
     setActionError("");
     setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, ...changes } : i)));
     if (!(await save("PATCH", { itemId: item.id, ...changes }))) {
-      setItems((prev) => prev.map((i) => (i.id === item.id ? item : i)));
+      // Undo only this change, and only if no later change replaced it
+      const undo = Object.fromEntries(Object.keys(changes).map((k) => [k, item[k as keyof PackingItem]]));
+      setItems((prev) =>
+        prev.map((i) =>
+          i.id === item.id && Object.entries(changes).every(([k, v]) => i[k as keyof PackingItem] === v) ? { ...i, ...undo } : i
+        )
+      );
       setActionError(`"${item.name}" was not updated. Please try again.`);
     }
   };
@@ -300,10 +207,10 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
   const deleteItem = async (item: PackingItem) => {
     if (!item.isCustom) return;
     setActionError("");
-    const before = items;
     setItems((prev) => prev.filter((i) => i.id !== item.id));
     if (!(await save("DELETE", { itemId: item.id }))) {
-      setItems(before);
+      // Put back just this item; other edits made meanwhile stay
+      setItems((prev) => (prev.some((i) => i.id === item.id) ? prev : [...prev, item]));
       setActionError(`"${item.name}" was not removed.`);
     }
   };
@@ -376,6 +283,7 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
                 {!isServing && (
                   <input
                     type="checkbox"
+                    aria-label={`Packed: ${item.name}`}
                     checked={item.pcmCompleted}
                     onChange={() => togglePcmCompleted(item)}
                     className="accent-emerald-600 w-4 h-4 shrink-0 cursor-pointer"
@@ -424,6 +332,7 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
                 {item.isCustom && (
                   <button
                     onClick={() => deleteItem(item)}
+                    aria-label={`Remove ${item.name}`}
                     className="text-slate-400 hover:text-red-500 transition-colors shrink-0 ml-1"
                   >
                     <FiTrash2 className="w-3.5 h-3.5" />
@@ -455,6 +364,7 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
           </button>
           <button
             onClick={() => { setShowAddForm(false); setNewItemName(""); }}
+            aria-label="Cancel adding an item"
             className="px-3 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-3.5 h-3.5" />
@@ -476,9 +386,12 @@ function PackingChecklist({ userId, isServing = false }: PackingChecklistProps) 
 // ─── Clearance Status Widget ──────────────────────────────────────────────────
 interface ClearanceWidgetProps {
   userId: string;
+  /** Called after clearance is logged, so the page's cards refresh too. */
+  onChange?: () => void;
 }
 
-function ClearanceWidget({ userId }: ClearanceWidgetProps) {
+function ClearanceWidget({ userId, onChange }: ClearanceWidgetProps) {
+  const [loadFailed, setLoadFailed] = useState(false);
   const { update: refreshSession } = useSession();
   const [clearanceData, setClearanceData] = useState<{
     hasCleared: boolean;
@@ -498,9 +411,10 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
     try {
       const res = await fetch("/api/clearance");
       const data = await res.json();
+      setLoadFailed(!data.success);
       if (data.success) setClearanceData(data.data);
-    } catch (err) {
-      console.error("Failed to fetch clearance:", err);
+    } catch {
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -521,6 +435,7 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
       const data = await res.json();
       if (data.success) {
         await fetchClearance();
+        onChange?.();
         setShowModal(false);
       } else {
         setError(data.message || data.error || "Failed to mark clearance");
@@ -558,6 +473,18 @@ function ClearanceWidget({ userId }: ClearanceWidgetProps) {
       setSubmitting(false);
     }
   };
+
+  if (loadFailed) {
+    return (
+      <button
+        type="button"
+        onClick={() => { setLoading(true); fetchClearance(); }}
+        className="px-6 py-3 border border-red-400 text-red-700 dark:text-red-400 text-xs font-bold uppercase tracking-wider cursor-pointer"
+      >
+        Couldn&apos;t load clearance status · Retry
+      </button>
+    );
+  }
 
   if (loading) {
     return (
@@ -662,6 +589,14 @@ export default function DashboardOverviewPage() {
 
   const userId = session?.user?.id || "";
 
+  const loadClearanceInfo = () =>
+    fetch("/api/clearance")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setClearanceInfo(data.data);
+      })
+      .catch(() => {});
+
   React.useEffect(() => {
     if (!userId) return;
     fetch(`/api/users/journey`)
@@ -674,18 +609,13 @@ export default function DashboardOverviewPage() {
       })
       .catch(() => {});
 
-    fetch("/api/clearance")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setClearanceInfo(data.data);
-      })
-      .catch(() => {});
+    loadClearanceInfo();
   }, [userId]);
 
 
   const handleAskAI = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!aiPrompt.trim()) return;
+    if (!aiPrompt.trim() || aiAnswer === "Thinking...") return; // one question at a time
     setAiAnswer("Thinking...");
     try {
       const res = await fetch("/api/ai/listing", {
@@ -762,7 +692,7 @@ export default function DashboardOverviewPage() {
               Mobilization & Orientation Camp Preparation
             </h1>
             <p className="text-xs text-slate-300">
-              Stream call-up release approaching. Manage mandatory documents and camp kit.
+              Pack for camp and keep track of your camp date.
             </p>
           </div>
 
@@ -858,7 +788,7 @@ export default function DashboardOverviewPage() {
               </div>
               <h2 className="text-base font-bold text-[#121815] dark:text-white font-display">Questions on Mobilization or Relocation?</h2>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                Instant answers trained on official NYSC Bye-laws.
+                Quick general answers from an AI assistant. Confirm details with official NYSC sources.
               </p>
             </div>
 
@@ -871,7 +801,7 @@ export default function DashboardOverviewPage() {
                   placeholder="e.g. Relocation on medical grounds?"
                   className="flex-1 px-4 py-3 text-xs bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none focus:border-emerald-600"
                 />
-                <button type="submit" className="px-5 py-3 bg-[#121815] text-white text-xs font-bold uppercase tracking-wider hover:bg-emerald-700 transition-colors">
+                <button type="submit" disabled={aiAnswer === "Thinking..."} className="px-5 py-3 disabled:opacity-50 bg-[#121815] text-white text-xs font-bold uppercase tracking-wider hover:bg-emerald-700 transition-colors">
                   Ask AI
                 </button>
               </div>
@@ -934,7 +864,7 @@ export default function DashboardOverviewPage() {
     // Dynamic Clearance Notice & Metric Card Data
     let clearanceNotice = `Monthly LGA Clearance (${hubLocation}).`;
     let clearanceVal = "Available";
-    let nextDateStr = "Schedule Set";
+    let nextDateStr = "Not scheduled";
 
     if (clearanceInfo?.nextEligibleAt) {
       const now = Date.now();
@@ -985,7 +915,7 @@ export default function DashboardOverviewPage() {
             </p>
           </div>
 
-          <ClearanceWidget userId={userId} />
+          <ClearanceWidget userId={userId} onChange={loadClearanceInfo} />
         </div>
 
         {/* Timeline Completion Prompt */}
@@ -1020,10 +950,12 @@ export default function DashboardOverviewPage() {
                 Service Start: {journeyInfo.serviceStartDate ? new Date(journeyInfo.serviceStartDate).toLocaleDateString("en-NG", { month: "short", year: "numeric" }) : "N/A"} · Expected Completion: {new Date(journeyInfo.serviceEndDate).toLocaleDateString("en-NG", { month: "short", year: "numeric" })}
               </p>
             </div>
-            <div className="px-4 py-2 bg-emerald-700 text-white text-xs font-bold font-mono uppercase tracking-wider flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-300" />
-              <span>Your POP is approaching</span>
-            </div>
+            {daysToPop !== null && daysToPop > 0 && daysToPop <= 60 && (
+              <div className="px-4 py-2 bg-emerald-700 text-white text-xs font-bold font-mono uppercase tracking-wider flex items-center gap-2">
+                <Award className="w-4 h-4 text-amber-300" />
+                <span>POP in {daysToPop} day{daysToPop === 1 ? "" : "s"}</span>
+              </div>
+            )}
           </div>
         )}
 

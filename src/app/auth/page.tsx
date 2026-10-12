@@ -170,9 +170,9 @@ function AuthPageContent() {
   };
   const handleGoogleAuth = () => {
     setLoading(true);
-    const callbackUrl = mode === "signup"
-      ? (redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding")
-      : (redirectUrl ? getRouteForRole(redirectUrl, "serving") : "/dashboard");
+    // Every Google sign-in passes through onboarding: new accounts finish their profile there,
+    // and complete profiles are forwarded straight on (with the role from the saved profile)
+    const callbackUrl = `/onboarding?check=1${redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ""}`;
 
     // NextAuth handles session creation after OAuth — no localStorage token
     signIn("google", { callbackUrl });

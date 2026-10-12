@@ -65,11 +65,11 @@ export default function CampEssentialsChecklist() {
 
   const removeItem = async (item: PackingItem) => {
     setActionError("");
-    const before = items;
     setItems((prev) => prev?.filter((i) => i.id !== item.id) ?? prev);
     const { ok } = await send("DELETE", { itemId: item.id });
     if (!ok) {
-      setItems(before);
+      // Put back just this item; other edits made meanwhile stay
+      setItems((prev) => (prev && !prev.some((i) => i.id === item.id) ? [...prev, item] : prev));
       setActionError(`"${item.name}" was not removed.`);
     }
   };

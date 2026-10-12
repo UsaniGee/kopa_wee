@@ -256,8 +256,6 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   const [state, setState] = useState("");
   const [availableLgas, setAvailableLgas] = useState<string[]>([]);
   const [lga, setLga] = useState("");
-  const [area, setArea] = useState("");
-  const [street, setStreet] = useState("");
   const [description, setDescription] = useState("");
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [aiPrompt, setAiPrompt] = useState("");
@@ -603,35 +601,6 @@ function PostItemModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
                     <option key={l} value={l}>{l}</option>
                   ))}
                 </select>
-              </div>
-            </div>
-
-            {/* Specific Area & Street / Landmark inputs */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                  Area / Neighborhood
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter area / neighborhood..."
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold uppercase tracking-wider text-[10px] text-slate-700 dark:text-slate-300 block">
-                  Street / Landmark
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter street / landmark..."
-                  value={street}
-                  onChange={(e) => setStreet(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 text-[#121815] dark:text-white focus:outline-none"
-                />
               </div>
             </div>
 
