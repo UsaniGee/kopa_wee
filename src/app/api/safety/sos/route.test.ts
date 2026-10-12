@@ -3,6 +3,7 @@ import { POST } from "./route";
 import { prismaMock } from "@/test/prismaMock";
 import { signInAs } from "@/test/authMock";
 import { makeRequest } from "@/test/request";
+import { sendEmail } from "@/shared/lib/email";
 
 vi.mock("@/shared/lib/email", () => ({ sendEmail: vi.fn(async () => ({ success: true })) }));
 
@@ -60,5 +61,17 @@ describe("POST /api/safety/sos", () => {
     expect(body.notified).toEqual({ emailToYou: true, trustedContacts: false, nyscOfficials: false });
     expect(body.message).toMatch(/112/);
     expect(body.message).not.toMatch(/contacts? (&|and) local NYSC reps notified|BROADCAST SENT/i);
+  });
+
+  it("does not claim an email was sent when sending failed", async () => {
+    signInAs({ id: "user_1" });
+    stubUser({ deployedState: "Kaduna", lga: "Chikun" });
+    vi.mocked(sendEmail).mockResolvedValueOnce({ success: false, error: "EMAIL_NOT_CONFIGURED" });
+
+    const body = await (await sos({ latitude: 10.52, longitude: 7.44 })).json();
+
+    expect(body.notified.emailToYou).toBe(false);
+    expect(body.message).not.toMatch(/emailed to you/i);
+    expect(body.message).toMatch(/112/);
   });
 });

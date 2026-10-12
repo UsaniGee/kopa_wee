@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { requireAuth } from "@/shared/lib/apiAuth";
 
 // employerId is not accepted from the client: it would let anyone link an entry to any user
@@ -9,6 +10,9 @@ const logbookSchema = z.object({
   summary: z.string().trim().min(5, "Describe what you did (at least 5 characters)").max(1000),
   hoursWorked: z.number().int("Hours must be a whole number").min(1).max(24),
 });
+
+const alreadyLogged = () =>
+  NextResponse.json({ success: false, error: "ALREADY_LOGGED", message: "You have already logged this day." }, { status: 409 });
 
 export async function GET() {
   const auth = await requireAuth();
@@ -44,12 +48,7 @@ export async function POST(req: Request) {
       where: { userId: auth.user.id, date: validatedData.date },
       select: { id: true },
     });
-    if (existing) {
-      return NextResponse.json(
-        { success: false, error: "ALREADY_LOGGED", message: "You have already logged this day." },
-        { status: 409 }
-      );
-    }
+    if (existing) return alreadyLogged();
 
     const newEntry = await prisma.pPALogbookEntry.create({
       data: { userId: auth.user.id, ...validatedData },
@@ -60,6 +59,8 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
+    // Two saves for the same day at once: the unique (userId, date) index decides
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return alreadyLogged();
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },

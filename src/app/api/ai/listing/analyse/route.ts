@@ -5,8 +5,11 @@ import { prisma } from "@/shared/lib/prisma";
 import { requireAuth } from "@/shared/lib/apiAuth";
 import { getGeminiModel } from "@/shared/lib/gemini";
 import { MARKETPLACE_CATEGORIES } from "@/shared/data/referenceData";
+import { createHourlyLimiter } from "@/shared/lib/rateLimit";
 
 const MAX_IMAGES = 3;
+// Each call can send up to 3 photos to Gemini (paid)
+const checkRateLimit = createHourlyLimiter(10);
 // ~2 MB of base64 per photo; the form downsizes before sending
 const MAX_IMAGE_CHARS = 2_800_000;
 const DATA_URL = /^data:(image\/(?:jpeg|png|webp|heic|heif));base64,([A-Za-z0-9+/=]+)$/;
@@ -86,6 +89,10 @@ export async function POST(req: Request) {
     generationConfig: { responseMimeType: "application/json", responseSchema: RESPONSE_SCHEMA, temperature: 0.2 },
   });
   if (!model) return jsonError(503, "AI_NOT_CONFIGURED");
+
+  if (!checkRateLimit(auth.user.id).allowed) {
+    return jsonError(429, "RATE_LIMIT_EXCEEDED", "You've used the AI draft helper a lot this hour. Try again later or fill in the form yourself.");
+  }
 
   let input: z.infer<typeof requestSchema>;
   try {

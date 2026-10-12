@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Prisma } from "@prisma/client";
 import { POST } from "./route";
 import { prismaMock } from "@/test/prismaMock";
 import { signInAs } from "@/test/authMock";
@@ -27,7 +28,7 @@ describe("POST /api/users/status", () => {
     expect(res.status).toBe(200);
     expect(prismaMock.user.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "user_1" },
+        where: { id: "user_1", nyscStatus: "SERVING" },
         data: expect.objectContaining({ nyscStatus: "ALUMNI", role: "ALUMNI" }),
       })
     );
@@ -44,7 +45,7 @@ describe("POST /api/users/status", () => {
 
     expect(res.status).toBe(200);
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "user_1" } }));
-    expect(prismaMock.user.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "user_1" } }));
+    expect(prismaMock.user.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "user_1", nyscStatus: "PCM" } }));
   });
 
   it("rejects a transition that skips a stage", async () => {
@@ -62,5 +63,18 @@ describe("POST /api/users/status", () => {
     signInAs({ id: "user_1" });
     const res = await post({ newStatus: "RETIRED" });
     expect(res.status).toBe(400);
+  });
+
+  it("returns 409 when the status changed in the meantime (e.g. the nightly job ran)", async () => {
+    signInAs({ id: "user_1" });
+    stubUser("PCM");
+    prismaMock.$transaction.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError("Record to update not found.", { code: "P2025", clientVersion: "5.22.0" })
+    );
+
+    const res = await post({ newStatus: "SERVING" });
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("STATUS_CHANGED");
   });
 });

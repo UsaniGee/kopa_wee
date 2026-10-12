@@ -167,6 +167,10 @@ export async function PATCH(req: Request) {
     }
 
     const { institution, courseOfStudy, batch, stream, nyscStatus, ...userFields } = input;
+    // A new deployed state without an LGA would leave the old state's LGA behind
+    if (input.deployedState !== undefined && input.deployedState !== current.deployedState && input.lga === undefined) {
+      userFields.lga = null;
+    }
     const journeyFields = Object.fromEntries(
       Object.entries({ institution, courseOfStudy, batch, stream }).filter(([, v]) => v !== undefined)
     );

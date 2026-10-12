@@ -17,16 +17,23 @@ describe("listing contact details", () => {
     expect(sellerSelect()).toHaveProperty("name", true);
   });
 
-  it("shows seller phone and email to signed-in users", async () => {
+  it("shows the seller's phone, never their email, to signed-in users", async () => {
     signInAs();
     prismaMock.marketplaceItem.findMany.mockResolvedValue([]);
     await marketplaceGET(makeRequest("/api/marketplace"));
-    expect(sellerSelect()).toMatchObject({ phone: true, email: true });
+    expect(sellerSelect()).toMatchObject({ phone: true });
+    expect(sellerSelect()).not.toHaveProperty("email");
+  });
+
+  it("returns only the first photo per listing in lists", async () => {
+    prismaMock.marketplaceItem.findMany.mockResolvedValue([{ id: "m1", images: ["data:a", "data:b", "data:c"], seller: { name: "S" } }]);
+    const body = await (await marketplaceGET(makeRequest("/api/marketplace"))).json();
+    expect(body.data[0].images).toEqual(["data:a"]);
   });
 
   it("hides lodge owner contact and the listing phone from signed-out visitors", async () => {
     prismaMock.accommodationListing.findMany.mockResolvedValue([
-      { id: "l1", contactPhone: "08030000000", owner: { name: "Owner" } },
+      { id: "l1", contactPhone: "08030000000", images: [], owner: { name: "Owner" } },
     ]);
 
     const body = await (await accommodationGET(makeRequest("/api/accommodation"))).json();
@@ -36,12 +43,15 @@ describe("listing contact details", () => {
     expect(body.data[0].contactPhone).toBeNull();
   });
 
-  it("shows the lodge contact phone to signed-in users", async () => {
+  it("shows the lodge contact phone to signed-in users, but not the owner's personal phone or email", async () => {
     signInAs();
     prismaMock.accommodationListing.findMany.mockResolvedValue([
-      { id: "l1", contactPhone: "08030000000", owner: { name: "Owner" } },
+      { id: "l1", contactPhone: "08030000000", images: ["data:a", "data:b"], owner: { name: "Owner" } },
     ]);
     const body = await (await accommodationGET(makeRequest("/api/accommodation"))).json();
     expect(body.data[0].contactPhone).toBe("08030000000");
+    expect(ownerSelect()).not.toHaveProperty("phone");
+    expect(ownerSelect()).not.toHaveProperty("email");
+    expect(body.data[0].images).toEqual(["data:a"]);
   });
 });

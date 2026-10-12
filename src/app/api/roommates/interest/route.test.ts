@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Prisma } from "@prisma/client";
 import { GET, PATCH, POST } from "./route";
 import { GET as roommatesGET, PATCH as roommatesPATCH } from "../route";
 import { prismaMock } from "@/test/prismaMock";
@@ -43,14 +44,18 @@ describe("roommate interest flow", () => {
     stubInterest("ACTIVE");
     prismaMock.roommateInterest.update.mockResolvedValue({});
     prismaMock.roommateInterest.updateMany.mockResolvedValue({ count: 2 });
-    prismaMock.roommateRequest.update.mockResolvedValue({});
+    prismaMock.roommateRequest.updateMany.mockResolvedValue({ count: 1 });
     prismaMock.notification.create.mockResolvedValue({});
 
     const res = await respond({ interestId: "int_1", action: "ACCEPT" });
 
     expect(res.status).toBe(200);
     expect(prismaMock.roommateInterest.update).toHaveBeenCalledWith({ where: { id: "int_1" }, data: { status: "ACCEPTED" } });
-    expect(prismaMock.roommateRequest.update).toHaveBeenCalledWith({ where: { id: "req_1" }, data: { status: "MATCHED" } });
+    // Claims the request only if it is still ACTIVE, so two accepts at once cannot both win
+    expect(prismaMock.roommateRequest.updateMany).toHaveBeenCalledWith({
+      where: { id: "req_1", status: "ACTIVE" },
+      data: { status: "MATCHED" },
+    });
     expect(prismaMock.roommateInterest.updateMany).toHaveBeenCalledWith({
       where: { requestId: "req_1", status: "PENDING", NOT: { id: "int_1" } },
       data: { status: "DECLINED" },
@@ -125,5 +130,28 @@ describe("roommate interest flow", () => {
       where: { id: "req_1", userId: "owner_1", status: "ACTIVE" },
     });
     expect(prismaMock.roommateRequest.update).not.toHaveBeenCalled();
+  });
+
+  it("a second accept that loses the race gets 409 and changes nothing", async () => {
+    signInAs({ id: "owner_1" });
+    stubInterest("ACTIVE");
+    prismaMock.roommateRequest.updateMany.mockResolvedValue({ count: 0 }); // the other accept matched it first
+
+    const res = await respond({ interestId: "int_2", action: "ACCEPT" });
+
+    expect(res.status).toBe(409);
+    expect(prismaMock.roommateInterest.update).not.toHaveBeenCalled();
+    expect(prismaMock.notification.create).not.toHaveBeenCalled();
+  });
+
+  it("a duplicate interest that slips past the check returns 409, not 500", async () => {
+    signInAs({ id: "seeker_1" });
+    prismaMock.roommateRequest.findUnique.mockResolvedValue({ id: "req_1", userId: "owner_1", status: "ACTIVE" });
+    prismaMock.roommateInterest.findUnique.mockResolvedValue(null);
+    prismaMock.roommateInterest.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", { code: "P2002", clientVersion: "5.22.0" })
+    );
+
+    expect((await express({ requestId: "req_1" })).status).toBe(409);
   });
 });

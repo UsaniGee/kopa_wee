@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { CONTACT_SELECT, contactIfAccepted } from "@/shared/lib/roommateContact";
 
 // POST /api/roommates/interest — express interest in a roommate request
@@ -96,6 +97,13 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ success: false, error: error.errors[0].message }, { status: 400 });
     }
+    // Two clicks at once: the unique (requestId, interestedUserId) index rejects the second
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json(
+        { success: false, error: "You have already expressed interest in this request." },
+        { status: 409 }
+      );
+    }
     console.error("[POST /api/roommates/interest]", error);
     return NextResponse.json({ success: false, error: "Failed to express interest" }, { status: 500 });
   }
@@ -156,37 +164,45 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (action === "ACCEPT") {
-      // Accept: mark interest as ACCEPTED, mark request as MATCHED, close the other pending interests
-      await prisma.$transaction([
-        prisma.roommateInterest.update({
-          where: { id: interestId },
-          data: { status: "ACCEPTED" },
-        }),
-        prisma.roommateRequest.update({
-          where: { id: interest.request.id },
+      // Claim the request first: only one accept can move it from ACTIVE to MATCHED, so two
+      // accepts at once cannot both share the owner's contact details
+      const matched = await prisma.$transaction(async (tx) => {
+        const { count } = await tx.roommateRequest.updateMany({
+          where: { id: interest.request.id, status: "ACTIVE" },
           data: { status: "MATCHED" },
-        }),
-        prisma.roommateInterest.updateMany({
+        });
+        if (count === 0) return false;
+
+        await tx.roommateInterest.update({ where: { id: interestId }, data: { status: "ACCEPTED" } });
+        await tx.roommateInterest.updateMany({
           where: { requestId: interest.request.id, status: "PENDING", NOT: { id: interestId } },
           data: { status: "DECLINED" },
-        }),
+        });
         // Notify the interested user
-        prisma.notification.create({
+        await tx.notification.create({
           data: {
             userId: interest.interestedUser.id,
             title: "🎉 Roommate request accepted!",
             message: `${owner?.name || "A corps member"} has accepted your roommate interest. Their phone number and email are now shown under "My interests" in the Accommodation tab.`,
           },
-        }),
+        });
         // Notify the request owner
-        prisma.notification.create({
+        await tx.notification.create({
           data: {
             userId: auth.user!.id,
             title: "Roommate match confirmed!",
             message: `You accepted ${interest.interestedUser.name}'s roommate request. Their phone number and email are now shown on your request in the Accommodation tab.`,
           },
-        }),
-      ]);
+        });
+        return true;
+      });
+
+      if (!matched) {
+        return NextResponse.json(
+          { success: false, error: "This roommate request is no longer active." },
+          { status: 409 }
+        );
+      }
 
       return NextResponse.json({
         success: true,

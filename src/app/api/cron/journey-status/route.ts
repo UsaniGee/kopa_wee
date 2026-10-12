@@ -35,8 +35,7 @@ export async function GET(req: NextRequest) {
 
     for (const { userId } of eligibleForServing) {
       try {
-        await applyAutomaticTransition(userId, "PCM", "SERVING", "CAMP_EXIT_DATE_REACHED");
-        results.pcmToServing++;
+        if (await applyAutomaticTransition(userId, "PCM", "SERVING", "CAMP_EXIT_DATE_REACHED")) results.pcmToServing++;
       } catch (err) {
         console.error(`[CRON] Failed PCM->SERVING for userId ${userId}:`, err);
         results.errors++;
@@ -50,8 +49,7 @@ export async function GET(req: NextRequest) {
 
     for (const { userId } of eligibleForAlumni) {
       try {
-        await applyAutomaticTransition(userId, "SERVING", "ALUMNI", "SERVICE_END_DATE_REACHED");
-        results.servingToAlumni++;
+        if (await applyAutomaticTransition(userId, "SERVING", "ALUMNI", "SERVICE_END_DATE_REACHED")) results.servingToAlumni++;
       } catch (err) {
         console.error(`[CRON] Failed SERVING->ALUMNI for userId ${userId}:`, err);
         results.errors++;
@@ -101,7 +99,9 @@ export async function POST() {
       });
     }
 
-    await applyAutomaticTransition(userId, user.nyscStatus, due.to, due.reason);
+    if (!(await applyAutomaticTransition(userId, user.nyscStatus, due.to, due.reason))) {
+      return NextResponse.json({ success: true, transitioned: false, newStatus: null, message: "Your status was already updated." });
+    }
 
     return NextResponse.json({
       success: true,

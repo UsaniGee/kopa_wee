@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     const previousStatus = targetUser.nyscStatus;
 
     // Execute admin reversal in a transaction
+    const now = new Date();
     const [updatedUser, historyEntry] = await prisma.$transaction([
       prisma.user.update({
         where: { id: targetUserId },
@@ -69,6 +70,13 @@ export async function POST(req: NextRequest) {
           reason,
         },
       }),
+      // Clear a past date that would make the nightly job redo the change this reversal undoes
+      // (nothing moves automatically out of ALUMNI, so that case keeps its dates)
+      ...(newStatus === "SERVING"
+        ? [prisma.nYSCJourney.updateMany({ where: { userId: targetUserId, serviceEndDate: { lte: now } }, data: { serviceEndDate: null } })]
+        : newStatus === "PCM"
+          ? [prisma.nYSCJourney.updateMany({ where: { userId: targetUserId, campExitDate: { lte: now } }, data: { campExitDate: null } })]
+          : []),
     ]);
 
     // Send notification to user about admin correction

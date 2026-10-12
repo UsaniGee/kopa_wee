@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHourlyLimiter } from "@/shared/lib/rateLimit";
 import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
 import { getGeminiModel } from "@/shared/lib/gemini";
@@ -8,30 +9,10 @@ const requestSchema = z.object({
   context: z.string().max(500).optional(),
 });
 
-// Simple in-memory rate limiter: userId -> { count, windowStart }
-// Resets every hour. Acceptable for single-instance deployments; use Redis for multi-instance.
-const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
 const MAX_REQUESTS_PER_HOUR = 20;
-const WINDOW_MS = 60 * 60 * 1000;
+const checkRateLimit = createHourlyLimiter(MAX_REQUESTS_PER_HOUR);
 
-function checkRateLimit(userId: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const entry = rateLimitMap.get(userId);
-
-  if (!entry || now - entry.windowStart > WINDOW_MS) {
-    rateLimitMap.set(userId, { count: 1, windowStart: now });
-    return { allowed: true, remaining: MAX_REQUESTS_PER_HOUR - 1 };
-  }
-
-  if (entry.count >= MAX_REQUESTS_PER_HOUR) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  entry.count++;
-  return { allowed: true, remaining: MAX_REQUESTS_PER_HOUR - entry.count };
-}
-
-const KOPAWEE_SYSTEM_PROMPT = `You are KopaBot, the intelligent assistant embedded in KopaWee — the official companion platform for Nigerian NYSC (National Youth Service Corps) corps members.
+const KOPAWEE_SYSTEM_PROMPT = `You are KopaBot, the intelligent assistant embedded in KopaWee — an independent companion app for Nigerian NYSC (National Youth Service Corps) corps members.
 
 Your expertise covers:
 - NYSC processes: registration, call-up letters, orientation camp, postings, redeployment

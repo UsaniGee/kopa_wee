@@ -31,4 +31,17 @@ describe("POST /api/clearance", () => {
 
     expect(res.status).toBe(403);
   });
+
+  it("locks per user before checking eligibility, so a double tap cannot record two clearances", async () => {
+    signInAs({ id: "user_1" });
+    prismaMock.user.findUnique.mockResolvedValue({ nyscStatus: "SERVING" });
+    const order: string[] = [];
+    prismaMock.$executeRaw.mockImplementation(async () => { order.push("lock"); return 1; });
+    prismaMock.monthlyClearance.findFirst.mockImplementation(async () => { order.push("check"); return null; });
+    prismaMock.monthlyClearance.create.mockResolvedValue({ completedAt: new Date(), nextEligibleAt: new Date() });
+
+    await POST();
+
+    expect(order).toEqual(["lock", "check"]);
+  });
 });

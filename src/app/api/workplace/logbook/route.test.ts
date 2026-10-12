@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Prisma } from "@prisma/client";
 import { POST } from "./route";
 import { prismaMock } from "@/test/prismaMock";
 import { signInAs } from "@/test/authMock";
@@ -52,5 +53,18 @@ describe("POST /api/workplace/logbook", () => {
       expect.objectContaining({ where: { userId: "user_1", date: "2026-10-12" } })
     );
     expect(prismaMock.pPALogbookEntry.create).not.toHaveBeenCalled();
+  });
+
+  it("turns a same-day race (unique index) into 409, not 500", async () => {
+    signInAs({ id: "user_1" });
+    prismaMock.pPALogbookEntry.findFirst.mockResolvedValue(null);
+    prismaMock.pPALogbookEntry.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", { code: "P2002", clientVersion: "5.22.0" })
+    );
+
+    const res = await post(entry);
+
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("ALREADY_LOGGED");
   });
 });

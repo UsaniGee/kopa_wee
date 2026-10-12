@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/shared/lib/prisma";
 
 export type NyscStage = "PCM" | "SERVING" | "ALUMNI";
@@ -46,23 +47,31 @@ export function dueAutomaticTransition(
 /**
  * Applies a system-initiated stage change atomically: user update, audit row and notification.
  * `changedBy` is null because no user made the change (the column references User).
+ * Returns false (and writes nothing) if the user is no longer in `from`, e.g. they changed it
+ * themselves while the nightly job was running.
  */
-export function applyAutomaticTransition(
+export async function applyAutomaticTransition(
   userId: string,
   from: NyscStage,
   to: NyscStage,
   reason: AutomaticReason
-) {
-  return prisma.$transaction([
-    prisma.user.update({
-      where: { id: userId },
-      data: { nyscStatus: to, role: LEGACY_ROLE_FOR_STAGE[to] },
-    }),
-    prisma.userStatusHistory.create({
-      data: { userId, previousStatus: from, newStatus: to, changedBy: null, changeType: "AUTOMATIC", reason },
-    }),
-    prisma.notification.create({
-      data: { userId, ...NOTIFICATIONS[reason] },
-    }),
-  ]);
+): Promise<boolean> {
+  try {
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId, nyscStatus: from },
+        data: { nyscStatus: to, role: LEGACY_ROLE_FOR_STAGE[to] },
+      }),
+      prisma.userStatusHistory.create({
+        data: { userId, previousStatus: from, newStatus: to, changedBy: null, changeType: "AUTOMATIC", reason },
+      }),
+      prisma.notification.create({
+        data: { userId, ...NOTIFICATIONS[reason] },
+      }),
+    ]);
+    return true;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") return false;
+    throw error;
+  }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { requireAuth } from "@/shared/lib/apiAuth";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { LEGACY_ROLE_FOR_STAGE } from "@/shared/lib/statusTransitions";
 
 // Users may only move one stage forward themselves; reversals go through an admin
@@ -59,8 +60,9 @@ export async function POST(req: NextRequest) {
 
     // Execute transition in a transaction with audit log
     const [updatedUser, historyEntry] = await prisma.$transaction([
+      // Matches only if the status is still the one checked above (the nightly job may have moved it)
       prisma.user.update({
-        where: { id: userId },
+        where: { id: userId, nyscStatus: currentStatus },
         data: {
           nyscStatus: newStatus,
           // Keep the legacy role field in sync
@@ -94,6 +96,12 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json(
+        { success: false, error: "STATUS_CHANGED", message: "Your status was just updated. Refresh the page to see it." },
+        { status: 409 }
+      );
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: error.errors[0].message },

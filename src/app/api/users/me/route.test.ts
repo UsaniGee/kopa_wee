@@ -167,4 +167,17 @@ describe("PATCH /api/users/me", () => {
     expect(res.status).toBe(409);
     expect((await res.json()).error).toBe("STATUS_ALREADY_SET");
   });
+
+  it("clears the old LGA when the deployed state changes without a new LGA", async () => {
+    signInAs({ id: "user_1" });
+    stubLocations();
+    stubWrites();
+    prismaMock.user.findUnique.mockResolvedValue({ deployedState: "Kaduna", nyscStatus: "PCM" });
+
+    expect((await patch({ deployedState: "Lagos" })).status).toBe(200);
+
+    expect(prismaMock.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ deployedState: "Lagos", lga: null }) })
+    );
+  });
 });

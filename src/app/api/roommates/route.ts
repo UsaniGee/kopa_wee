@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
       // Return the session user's active request + interests received
       const activeRequest = await prisma.roommateRequest.findFirst({
         where: { userId: auth.user!.id, status: { in: ["ACTIVE", "MATCHED"] } },
+        orderBy: { createdAt: "desc" },
         include: {
           interests: {
             include: {
@@ -136,13 +137,17 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    await prisma.roommateRequest.updateMany({
+    // MATCHED requests can be closed too; otherwise the user could never post a new one
+    const { count } = await prisma.roommateRequest.updateMany({
       where: {
         ...(id ? { id, userId: auth.user!.id } : { userId: auth.user!.id }),
-        status: "ACTIVE",
+        status: { in: ["ACTIVE", "MATCHED"] },
       },
       data: { status: "CANCELLED" },
     });
+    if (count === 0) {
+      return NextResponse.json({ success: false, message: "No open roommate request to cancel.", code: "NOT_FOUND" }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true, message: "Roommate request cancelled successfully" });
   } catch (error) {

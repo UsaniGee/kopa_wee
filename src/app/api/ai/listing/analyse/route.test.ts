@@ -123,4 +123,16 @@ describe("POST /api/ai/listing/analyse", () => {
     const res = await analyse({ description: "fan" });
     expect(res.status).toBe(502);
   });
+
+  it("rate-limits each user (photos to Gemini cost money)", async () => {
+    signInAs({ id: "limit_check_user" });
+    stubLocations();
+    geminiReturns({ title: "Fan", category: null, price: null, condition: null, state: null, lga: null, description: "", missingFields: [] });
+
+    const statuses: number[] = [];
+    for (let i = 0; i < 11; i++) statuses.push((await analyse({ description: "fan" })).status);
+
+    expect(statuses.slice(0, 10).every((s) => s === 200)).toBe(true);
+    expect(statuses[10]).toBe(429);
+  });
 });

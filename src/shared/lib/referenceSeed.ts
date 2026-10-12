@@ -29,9 +29,13 @@ export async function seedAdmin(
     throw new Error(`SEED_ADMIN_PASSWORD must be at least ${MIN_ADMIN_PASSWORD_LENGTH} characters`);
   }
 
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true, isVerified: true, applicationRole: true } });
   if (existing) {
-    await prisma.user.update({ where: { email }, data: { applicationRole: "ADMIN", isVerified: true } });
+    // Anyone can register an unverified account with this email; never hand that account admin rights
+    if (!existing.isVerified && existing.applicationRole !== "ADMIN") {
+      throw new Error("SEED_ADMIN_EMAIL belongs to an unverified account; verify it or delete it, then seed again");
+    }
+    await prisma.user.update({ where: { email }, data: { applicationRole: "ADMIN" } });
     log(`Admin: ${email} already exists; role ensured, password unchanged`);
     return "kept";
   }

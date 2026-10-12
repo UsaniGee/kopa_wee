@@ -47,27 +47,31 @@ export async function POST(req: Request) {
       },
     });
 
-    // Not awaited: the alert is already saved, and SMTP must not delay the response
-    if (user) {
-      sendEmail({
-        to: user.email,
-        subject: "🚨 SOS Alert Received — KopaWee Safety",
-        template: React.createElement(SOSAlertEmail, {
-          name: user.name,
-          location: `${lga}, ${state} (${input.latitude.toFixed(4)}, ${input.longitude.toFixed(4)})`,
-          timestamp: new Date().toLocaleString("en-NG"),
-          alertId: sosAlert.id,
-        }),
-      }).catch((err) => console.error("[SOS] Email send failed:", err));
-    }
+    // Awaited so the response says exactly what happened (a background send could be cut off)
+    const emailed = user
+      ? (
+          await sendEmail({
+            to: user.email,
+            subject: "🚨 SOS Alert Received — KopaWee Safety",
+            template: React.createElement(SOSAlertEmail, {
+              name: user.name,
+              location: `${lga}, ${state} (${input.latitude.toFixed(4)}, ${input.longitude.toFixed(4)})`,
+              timestamp: new Date().toLocaleString("en-NG"),
+              alertId: sosAlert.id,
+            }),
+          }).catch((err) => {
+            console.error("[SOS] Email send failed:", err);
+            return { success: false };
+          })
+        ).success
+      : false;
 
     return NextResponse.json(
       {
         success: true,
         data: sosAlert,
-        notified: { emailToYou: Boolean(user), trustedContacts: false, nyscOfficials: false },
-        message:
-          "SOS logged with your location and a copy emailed to you. KopaWee cannot alert your contacts or NYSC officials yet. If you are in danger, call 112 now.",
+        notified: { emailToYou: emailed, trustedContacts: false, nyscOfficials: false },
+        message: `SOS logged with your location${emailed ? " and a copy emailed to you" : ""}. KopaWee cannot alert your contacts or NYSC officials yet. If you are in danger, call 112 now.`,
       },
       { status: 201 }
     );

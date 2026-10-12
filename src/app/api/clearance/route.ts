@@ -83,6 +83,8 @@ export async function POST() {
     }
 
     const result = await prisma.$transaction(async (tx) => {
+      // Serialises this user's requests until commit: a double tap waits, then sees the new row
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${sessionUserId}))`;
       const latestClearance = await tx.monthlyClearance.findFirst({
         where: { userId: sessionUserId },
         orderBy: { completedAt: "desc" },

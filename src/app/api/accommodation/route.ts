@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { z } from "zod";
+import { listingPhotosSchema, withCoverPhotoOnly } from "@/shared/lib/listingPhotos";
 import { ListingStatus } from "@prisma/client";
 import { requireAdmin, requireAuth } from "@/shared/lib/apiAuth";
 
@@ -13,12 +14,12 @@ const listingSchema = z.object({
   price: z.string(),
   splitInfo: z.string().optional(),
   contactPhone: z.string(),
-  images: z.array(z.string()).default([]),
+  images: listingPhotosSchema,
 });
 
-// Contact details are for signed-in users only; visitors see who is listing, not how to reach them
+// The listing's contactPhone (signed-in users only) is the way to reach a host; the owner's
+// personal phone and email are never listed
 const PUBLIC_PERSON = { name: true, stateCode: true, avatarUrl: true } as const;
-const MEMBER_PERSON = { ...PUBLIC_PERSON, phone: true, email: true } as const;
 
 export async function GET(req: Request) {
   const viewer = (await requireAuth()).user;
@@ -55,14 +56,14 @@ export async function GET(req: Request) {
         ...(lga && { lga }),
       },
       include: {
-        owner: { select: viewer ? MEMBER_PERSON : PUBLIC_PERSON },
+        owner: { select: PUBLIC_PERSON },
       },
       orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json({
       success: true,
-      data: viewer ? listings : listings.map((l) => ({ ...l, contactPhone: null })),
+      data: listings.map((l) => withCoverPhotoOnly(viewer ? l : { ...l, contactPhone: null })),
     });
   } catch (error) {
     return NextResponse.json(

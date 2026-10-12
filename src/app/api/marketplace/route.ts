@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/prisma";
 import { z } from "zod";
+import { listingPhotosSchema, withCoverPhotoOnly } from "@/shared/lib/listingPhotos";
 import { ListingStatus } from "@prisma/client";
 import { requireAdmin, requireAuth } from "@/shared/lib/apiAuth";
 
@@ -11,12 +12,12 @@ const itemSchema = z.object({
   description: z.string(),
   state: z.string(),
   lga: z.string(),
-  images: z.array(z.string()).default([]),
+  images: listingPhotosSchema,
 });
 
-// Contact details are for signed-in users only; visitors see who is selling, not how to reach them
+// The seller's phone is for signed-in users only (for WhatsApp/call); their email is never listed
 const PUBLIC_PERSON = { name: true, stateCode: true, avatarUrl: true } as const;
-const MEMBER_PERSON = { ...PUBLIC_PERSON, phone: true, email: true } as const;
+const MEMBER_PERSON = { ...PUBLIC_PERSON, phone: true } as const;
 
 export async function GET(req: Request) {
   const viewer = (await requireAuth()).user;
@@ -60,7 +61,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      data: items,
+      data: items.map(withCoverPhotoOnly),
     });
   } catch (error) {
     return NextResponse.json(

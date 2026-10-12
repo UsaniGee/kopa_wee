@@ -29,16 +29,23 @@ describe("seedAdmin", () => {
     expect(JSON.stringify(log.mock.calls)).not.toContain(ADMIN_ENV.SEED_ADMIN_PASSWORD);
   }, 15_000); // real bcrypt (cost 12) takes ~2 s and can pass 5 s on a busy machine
 
-  it("does not overwrite an existing admin's password", async () => {
-    prismaMock.user.findUnique.mockResolvedValue({ id: "admin_1" });
+  it("does not overwrite an existing verified account's password", async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ id: "admin_1", isVerified: true, applicationRole: "USER" });
     prismaMock.user.update.mockResolvedValue({});
 
     const result = await seedAdmin(prismaMock as never, ADMIN_ENV, vi.fn());
 
     expect(result).toBe("kept");
     const data = prismaMock.user.update.mock.calls[0][0].data;
-    expect(data).toEqual({ applicationRole: "ADMIN", isVerified: true });
+    expect(data).toEqual({ applicationRole: "ADMIN" });
     expect(prismaMock.user.create).not.toHaveBeenCalled();
+  });
+
+  it("refuses to promote an unverified account (anyone can register the admin email)", async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ id: "squatter", isVerified: false, applicationRole: "USER" });
+
+    await expect(seedAdmin(prismaMock as never, ADMIN_ENV, vi.fn())).rejects.toThrow(/unverified/);
+    expect(prismaMock.user.update).not.toHaveBeenCalled();
   });
 
   it("rejects a weak seed password", async () => {
