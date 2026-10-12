@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FiArrowRight, FiLock, FiMail, FiUser, FiArrowLeft, FiShield, FiCheckCircle } from "react-icons/fi";
-import { getRouteForRole } from "@/shared/utils/authNav";
+import { clearLegacySessionStorage, deriveRole, getRouteForRole } from "@/shared/utils/authNav";
 
 function AuthPageContent() {
   const router = useRouter();
@@ -74,12 +74,6 @@ function AuthPageContent() {
           return;
         }
 
-        // Store non-sensitive UX state only (no auth token)
-        const user = data.data;
-        localStorage.setItem("kopawee_user_email", user.email);
-        localStorage.setItem("kopawee_user_name", user.name);
-        localStorage.setItem("kopawee_active_role", "pcm");
-
         setShowVerificationNotice(true);
         setLoading(false);
         return;
@@ -110,24 +104,20 @@ function AuthPageContent() {
           return;
         }
 
-        // Fetch user profile to set UX state in localStorage (non-security)
+        // The profile decides where to go next (onboarding, or the route this role may open)
+        clearLegacySessionStorage();
         let needsOnboarding = false;
+        let role = "pcm";
         try {
           const profileRes = await fetch("/api/users/me");
           const profileData = await profileRes.json();
           if (profileData.success && profileData.data) {
             const u = profileData.data;
             needsOnboarding = !u.onboardingComplete;
-            localStorage.setItem("kopawee_user_email", u.email);
-            localStorage.setItem("kopawee_user_name", u.name);
-            localStorage.setItem("kopawee_active_role",
-              u.nyscStatus?.toLowerCase() === "pcm" ? "pcm"
-              : u.nyscStatus?.toLowerCase() === "alumni" ? "alumni"
-              : "serving"
-            );
+            role = deriveRole(u.nyscStatus, u.role);
           }
         } catch {
-          // Non-fatal — UX state defaults will apply
+          // Non-fatal: falls back to the dashboard home
         }
 
         // Email sign-ups finish their profile on first sign-in, as Google sign-ups do
@@ -136,7 +126,7 @@ function AuthPageContent() {
           return;
         }
 
-        const dest = redirectUrl ? getRouteForRole(redirectUrl, localStorage.getItem("kopawee_active_role") || "serving") : "/dashboard";
+        const dest = redirectUrl ? getRouteForRole(redirectUrl, role) : "/dashboard";
         router.push(dest);
       }
     } catch {

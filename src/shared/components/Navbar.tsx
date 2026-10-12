@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FiMenu, FiX, FiArrowRight } from "react-icons/fi";
-import { navigateWithAuthCheck, isUserAuthenticated } from "@/shared/utils/authNav";
+import { useSession } from "next-auth/react";
+import { useAuthNavigate } from "@/shared/utils/authNav";
 
 const Menu = FiMenu, X = FiX, ArrowRight = FiArrowRight;
 
@@ -14,13 +14,12 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps) {
-  const router = useRouter();
+  const navigate = useAuthNavigate();
+  const authenticated = useSession().status === "authenticated";
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    setAuthenticated(isUserAuthenticated());
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -30,7 +29,7 @@ export default function Navbar({ onOpenRoleModal, overHero = true }: NavbarProps
     if (href.startsWith("#")) return; // allow anchor smooth scroll
     e.preventDefault();
     setMobileMenuOpen(false);
-    navigateWithAuthCheck(router, href);
+    navigate(href);
   };
 
   return (

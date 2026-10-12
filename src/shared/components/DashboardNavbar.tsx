@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { clearLegacySessionStorage } from "@/shared/utils/authNav";
 import { FiBell, FiUser, FiLogOut, FiX, FiSettings, FiChevronDown } from "react-icons/fi";
 
 const Bell = FiBell;
@@ -107,18 +108,9 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
     }
   };
 
-  // ── User profile from localStorage ────────────────────────────────────────
+  // ── User profile from the API (the session holds only the basics) ────────
   useEffect(() => {
-    const storedName = localStorage.getItem("kopawee_user_name");
-    const storedEmail = localStorage.getItem("kopawee_user_email");
-
-    if (storedName) {
-      setUserName(storedName.startsWith("Corper ") ? storedName : `Corper ${storedName.split(" ")[0]}`);
-    } else if (storedEmail) {
-      setUserName(`Corper ${storedEmail.split("@")[0].replace(".", " ")}`);
-    }
-
-    // Fetch live profile
+    clearLegacySessionStorage();
     fetch("/api/users/me")
       .then((res) => res.json())
       .then((data) => {
@@ -127,7 +119,6 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
           if (dbUser.name) {
             const formatted = dbUser.name.startsWith("Corper ") ? dbUser.name : `Corper ${dbUser.name.split(" ")[0]}`;
             setUserName(formatted);
-            localStorage.setItem("kopawee_user_name", dbUser.name);
           }
           if (dbUser.stateCode) setStateCode(dbUser.stateCode);
         }
@@ -136,10 +127,7 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("kopawee_active_role");
-    localStorage.removeItem("kopawee_user_name");
-    localStorage.removeItem("kopawee_user_email");
-    localStorage.removeItem("kopawee_user_id");
+    clearLegacySessionStorage();
     signOut({ callbackUrl: "/auth?mode=signin" });
   };
 

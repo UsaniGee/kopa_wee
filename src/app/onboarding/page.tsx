@@ -195,9 +195,6 @@ function OnboardingContent() {
       await update();
 
       const role = ROLE_FOR_STATUS[data.data.nyscStatus as NyscStatus] ?? "pcm";
-      localStorage.removeItem("kopawee_user_profile"); // left by the old onboarding; never read
-      localStorage.setItem("kopawee_active_role", role);
-      if (data.data.name) localStorage.setItem("kopawee_user_name", data.data.name);
 
       router.push(redirectUrl ? getRouteForRole(redirectUrl, role) : "/dashboard");
     } catch {

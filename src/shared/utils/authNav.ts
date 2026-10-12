@@ -1,72 +1,42 @@
 "use client";
 
+import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { destinationFor } from "./roleRoutes";
 
-export const ROLE_ALLOWED_ROUTES: Record<string, string[]> = {
-  pcm: ["/dashboard", "/dashboard/companion", "/dashboard/marketplace", "/dashboard/safety"],
-  serving: ["/dashboard", "/dashboard/companion", "/dashboard/marketplace", "/dashboard/accommodation", "/dashboard/safety", "/dashboard/workplace", "/dashboard/community"],
-  alumni: ["/dashboard", "/dashboard/marketplace", "/dashboard/workplace"],
-  cds_exec: ["/dashboard", "/dashboard/community", "/dashboard/safety"],
-  ppa: ["/dashboard", "/dashboard/workplace"],
-  nysc_official: ["/dashboard", "/dashboard/companion"],
-};
+export { getRouteForRole, deriveRole, ROLE_ALLOWED_ROUTES } from "./roleRoutes";
 
 /**
- * React hook — returns true when the NextAuth session is authenticated.
- * Use this in client components instead of checking localStorage.
+ * Keys older versions wrote to localStorage as a stand-in for the session (name, email,
+ * role, onboarding profile). The session is the only source now; these are cleared so
+ * personal data does not linger on shared devices.
  */
-export function useIsAuthenticated(): boolean {
-  const { status } = useSession();
-  return status === "authenticated";
-}
+const LEGACY_SESSION_KEYS = [
+  "kopawee_user_id",
+  "kopawee_user_email",
+  "kopawee_user_name",
+  "kopawee_active_role",
+  "kopawee_user_profile",
+];
 
-/**
- * Legacy check kept for non-React contexts (e.g. redirect logic outside hooks).
- * Reads from localStorage UX state — NOT a security gate. Use useIsAuthenticated() for UI guards.
- * Real auth gating is handled by proxy.ts and requireAuth() in API routes.
- */
-export function isUserAuthenticated(): boolean {
-  if (typeof window === "undefined") return false;
-  // Check localStorage UX state only — not a security decision
-  const userId = localStorage.getItem("kopawee_user_id");
-  const userEmail = localStorage.getItem("kopawee_user_email");
-  return Boolean(userId || userEmail);
-}
-
-/**
- * Returns the currently stored user role from localStorage (UX display only).
- * Defaults to "serving".
- */
-export function getUserRole(): string {
-  if (typeof window === "undefined") return "serving";
-  return localStorage.getItem("kopawee_active_role") || "serving";
-}
-
-/**
- * Resolves the destination route based on user role and allowed routes.
- */
-export function getRouteForRole(targetRoute: string, role: string): string {
-  const allowed = ROLE_ALLOWED_ROUTES[role] || ROLE_ALLOWED_ROUTES.serving;
-  if (allowed.includes(targetRoute)) {
-    return targetRoute;
+export function clearLegacySessionStorage(): void {
+  try {
+    LEGACY_SESSION_KEYS.forEach((key) => localStorage.removeItem(key));
+  } catch {
+    // Storage can be unavailable (private mode); nothing to clear then
   }
-  return allowed[0] || "/dashboard";
 }
 
-/**
- * Smart Navigation Action:
- * - If user IS authenticated: navigates directly to role-appropriate route
- * - If user IS NOT authenticated: redirects to sign-up page with redirect callback
- */
-export function navigateWithAuthCheck(
-  router: { push: (url: string) => void },
-  targetRoute: string
-): void {
-  if (isUserAuthenticated()) {
-    const role = getUserRole();
-    const dest = getRouteForRole(targetRoute, role);
-    router.push(dest);
-  } else {
-    router.push(`/auth?mode=signup&redirect=${encodeURIComponent(targetRoute)}`);
-  }
+/** Navigates to a dashboard route: visitors go to sign-up, signed-in users to what their role allows. */
+export function useAuthNavigate(): (targetRoute: string) => void {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  return useCallback(
+    (targetRoute: string) => {
+      const user = status === "authenticated" && session?.user ? session.user : null;
+      router.push(destinationFor(targetRoute, user));
+    },
+    [router, session, status]
+  );
 }

@@ -2,16 +2,15 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FiShield, FiHeart } from "react-icons/fi";
-import { navigateWithAuthCheck } from "@/shared/utils/authNav";
+import { useAuthNavigate } from "@/shared/utils/authNav";
 
 export default function Footer() {
-  const router = useRouter();
+  const navigate = useAuthNavigate();
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    navigateWithAuthCheck(router, href);
+    navigate(href);
   };
 
   return (
