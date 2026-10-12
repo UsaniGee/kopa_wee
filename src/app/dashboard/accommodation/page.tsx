@@ -38,27 +38,10 @@ interface Lodge {
   price: string;
   location: string;
   lga: string;
-  distanceKm: number;
-  badgeType: "verified" | "unverified" | "corps_member" | "property_owner";
-  features: string[];
   split: string;
   image: string;
   contactPhone: string | null;
-  forRoles: ("pcm" | "serving" | "alumni")[];
 }
-
-interface Roommate {
-  id: string;
-  name: string;
-  gender: string;
-  ppa: string;
-  lga: string;
-  budget: string;
-  preference: string;
-  distanceKm: number;
-  matchScore: number;
-}
-
 
 export default function AccommodationPage() {
   const { currentRole } = useRole();
@@ -75,8 +58,6 @@ export default function AccommodationPage() {
   const [cancellingRequest, setCancellingRequest] = useState(false);
 
   // Filters
-  const [distanceKmFilter, setDistanceKmFilter] = useState<number>(10);
-  const [badgeFilter, setBadgeFilter] = useState<string>("all");
   const [lgaFilter, setLgaFilter] = useState<string>("all");
 
   const userId = session?.user?.id || "";
@@ -126,13 +107,9 @@ export default function AccommodationPage() {
             price: item.price,
             location: item.location,
             lga: item.lga,
-            distanceKm: 1.5,
-            badgeType: "verified",
-            features: ["Verified Host", "Corper Suitable"],
             split: item.splitInfo || "",
             image: item.images?.[0] || "",
             contactPhone: item.contactPhone ?? null,
-            forRoles: ["pcm", "serving", "alumni"],
           }));
           setLodges(apiLodges);
         }
@@ -145,31 +122,12 @@ export default function AccommodationPage() {
   }, []);
 
 
-  const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [reportedItemName, setReportedItemName] = useState("");
-  const [reportReason, setReportReason] = useState("");
-  const [reportSubmitted, setReportSubmitted] = useState(false);
 
   const filteredLodges = lodges.filter(lodge => {
-    const matchesDistance = lodge.distanceKm <= distanceKmFilter;
-    const matchesLGA = lgaFilter === "all" || lodge.lga.toLowerCase() === lgaFilter.toLowerCase();
-    return matchesDistance && matchesLGA;
+    return lgaFilter === "all" || lodge.lga.toLowerCase() === lgaFilter.toLowerCase();
   });
 
-  const handleFlagItem = (itemName: string) => {
-    setReportedItemName(itemName);
-    setReportReason("");
-    setReportSubmitted(false);
-    setReportModalOpen(true);
-  };
-
-  const handleSendReport = (e: React.FormEvent) => {
-    e.preventDefault();
-    setReportSubmitted(true);
-    setTimeout(() => {
-      setReportModalOpen(false);
-    }, 1500);
-  };
+  const lodgeLgas = [...new Set(lodges.map((l) => l.lga))].sort();
 
   return (
     <div className="space-y-8 font-sans">
@@ -228,18 +186,20 @@ export default function AccommodationPage() {
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 font-display hidden sm:inline">
-              Max Distance:
-            </span>
-            <input
-              type="range"
-              min="1"
-              max="20"
-              value={distanceKmFilter}
-              onChange={(e) => setDistanceKmFilter(Number(e.target.value))}
-              className="accent-emerald-600 cursor-pointer"
-            />
-            <span className="text-xs font-mono font-bold text-[#121815] dark:text-white">{distanceKmFilter}km</span>
+            <label htmlFor="lgaFilter" className="text-xs font-semibold text-slate-600 dark:text-slate-400 font-display hidden sm:inline">
+              LGA:
+            </label>
+            <select
+              id="lgaFilter"
+              value={lgaFilter}
+              onChange={(e) => setLgaFilter(e.target.value)}
+              className="px-3 py-2 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 text-xs text-[#121815] dark:text-white"
+            >
+              <option value="all">All LGAs</option>
+              {lodgeLgas.map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
@@ -280,7 +240,7 @@ export default function AccommodationPage() {
                     </div>
                   )}
                   <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold px-2.5 py-1">
-                    {lodge.lga} LGA · {lodge.distanceKm}km from PPA
+                    {lodge.lga} LGA
                   </span>
                 </div>
 
@@ -316,11 +276,13 @@ export default function AccommodationPage() {
 
                 <div className="pt-3 border-t border-slate-300/50 dark:border-slate-800 flex items-center justify-between text-xs">
                   <span className="text-slate-600 dark:text-slate-400">{lodge.split || "\u00a0"}</span>
-                  <button 
-                    onClick={() => handleFlagItem(lodge.name)}
-                    className="text-red-600 hover:text-red-700 flex items-center gap-1 font-semibold cursor-pointer text-xs"
+                  <button
+                    type="button"
+                    disabled
+                    title="Reporting listings is coming soon"
+                    className="text-slate-400 flex items-center gap-1 font-semibold cursor-not-allowed text-xs"
                   >
-                    <Flag className="w-3.5 h-3.5" /> Report
+                    <Flag className="w-3.5 h-3.5" /> Report · soon
                   </button>
                 </div>
               </div>
@@ -417,10 +379,10 @@ export default function AccommodationPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">
-                        {rm.user?.name || "Corper Seeking Roommate"}
+                        {rm.user?.name ?? "Corps member"}
                       </h3>
                       <p className="text-xs text-slate-600 dark:text-slate-400">
-                        {rm.user?.ppaName || "Serving Corper"} · {rm.lga}, {rm.state}
+                        {[rm.user?.ppaName, `${rm.lga}, ${rm.state}`].filter(Boolean).join(" · ")}
                       </p>
                     </div>
                     <span className="px-2.5 py-1 bg-emerald-700 text-white text-[10px] font-mono font-bold uppercase">
@@ -513,59 +475,6 @@ export default function AccommodationPage() {
                 <span>Yes, cancel request</span>
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {reportModalOpen && (
-        <div className="fixed inset-0 z-50 bg-[#0a0f0d]/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#121815] text-white p-8 max-w-md w-full border border-slate-800 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-red-400 font-bold font-display">
-                <Flag className="w-5 h-5" />
-                <span>Report Listing Incident</span>
-              </div>
-              <button onClick={() => setReportModalOpen(false)} className="p-1 text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {!reportSubmitted ? (
-              <form onSubmit={handleSendReport} className="space-y-4">
-                <p className="text-xs text-slate-300">
-                  Reporting: <strong>{reportedItemName}</strong>
-                </p>
-
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-300 font-display">Reason for Report</label>
-                  <select
-                    required
-                    value={reportReason}
-                    onChange={(e) => setReportReason(e.target.value)}
-                    className="w-full px-3 py-3 text-xs bg-[#1a231f] border border-slate-800 text-white focus:outline-none focus:border-emerald-500"
-                  >
-                    <option value="">-- Select Reason --</option>
-                    <option value="scam_request">Demanding advance money prior to inspection</option>
-                    <option value="fake_photos">Fake or duplicate photos</option>
-                    <option value="invalid_phone">Phone number invalid</option>
-                    <option value="already_taken">Property no longer available</option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  Submit Incident Report
-                </button>
-              </form>
-            ) : (
-              <div className="p-4 bg-emerald-950/40 border border-emerald-600/50 text-center space-y-2">
-                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-                <h4 className="font-bold text-sm font-display text-white">Report Submitted</h4>
-                <p className="text-xs text-emerald-300">Our safety moderation team will investigate this listing immediately.</p>
-              </div>
-            )}
           </div>
         </div>
       )}

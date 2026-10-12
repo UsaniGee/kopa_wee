@@ -115,7 +115,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
             create: {
               email,
-              name: user.name ?? "Google Corper",
+              name: user.name ?? email.split("@")[0], // Google profile without a name: use the email handle
               avatarUrl: user.image ?? undefined,
               role: "PCM",
               applicationRole: "USER",

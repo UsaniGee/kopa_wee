@@ -3,10 +3,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { FiBell, FiSearch, FiUser, FiLogOut, FiX, FiSettings, FiChevronDown } from "react-icons/fi";
+import { FiBell, FiUser, FiLogOut, FiX, FiSettings, FiChevronDown } from "react-icons/fi";
 
 const Bell = FiBell;
-const Search = FiSearch;
 const User = FiUser;
 const LogOut = FiLogOut;
 const X = FiX;
@@ -168,18 +167,8 @@ export default function DashboardNavbar({ currentRole }: DashboardNavbarProps) {
             </Link>
           </div>
 
-          {/* Center: Search Bar */}
-          <div className="hidden lg:flex items-center flex-1 max-w-md mx-6">
-            <div className="relative w-full">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search LGA clearance, listings, roomies, SOS..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-900/90 border border-slate-800 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all font-sans"
-                aria-label="Search"
-              />
-            </div>
-          </div>
+          {/* Spacer keeps the controls on the right (the search box searched nothing and was removed) */}
+          <div className="flex-1" />
 
           {/* Right controls */}
           <div className="flex items-center gap-4">

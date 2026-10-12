@@ -31,30 +31,14 @@ const Wand2 = HiSparkles;
 interface Listing {
   id: string;
   title: string;
-  price: number;
+  price: string; // as entered, e.g. "₦15,000"
   state: string;
   location: string;
-  distanceKm: number;
   seller: string;
   sellerPhone?: string | null;
-  roleBadge: string;
-  badgeType: "verified" | "unverified" | "corps_member" | "business";
   category: string;
-  condition: string;
-  imageBg: string;
   imageUrl: string;
-  forRoles: ("pcm" | "serving" | "alumni")[];
 }
-
-const SAMPLE_LISTINGS: Listing[] = [
-  { id: "pcm_1", title: "Plain White Rubber Shoes (Size 42 - Camp Approved)", price: 4500, state: "Lagos", location: "Ikeja LGA, Lagos", distanceKm: 1.2, seller: "Corper Blessing", roleBadge: "Camp Essential", badgeType: "verified", category: "Pre-Camp Gear", condition: "Brand New", imageBg: "bg-emerald-700", imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85", forRoles: ["pcm"] },
-  { id: "pcm_2", title: "Original Anker 20,000mAh Power Bank", price: 16000, state: "Lagos", location: "Yaba, Lagos", distanceKm: 3.5, seller: "Ex-Corper Victor", roleBadge: "Camp Essential", badgeType: "unverified", category: "Electronics", condition: "Like New", imageBg: "bg-slate-800", imageUrl: "https://images.unsplash.com/photo-1609592424522-5c5c1a1f2d5d?auto=format&fit=crop&w=900&q=85", forRoles: ["pcm", "serving"] },
-  { id: "pcm_3", title: "Black Leather Waist Pouch + Padlocks", price: 3500, state: "Lagos", location: "Surulere, Lagos", distanceKm: 5.1, seller: "Corper Grace", roleBadge: "Camp Kit", badgeType: "corps_member", category: "Pre-Camp Gear", condition: "New", imageBg: "bg-black", imageUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=85", forRoles: ["pcm"] },
-  { id: "srv_1", title: "Mouka Foam High-Density Mattress 4.5ft", price: 25000, state: "Lagos", location: "Ikeja LGA, Lagos", distanceKm: 2.0, seller: "Corper Tunde (POP)", roleBadge: "POP Sale", badgeType: "verified", category: "Furniture", condition: "Like New", imageBg: "bg-emerald-800", imageUrl: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=85", forRoles: ["serving"] },
-  { id: "srv_2", title: "OX 18-inch Standing Fan (3 Speeds)", price: 12000, state: "Lagos", location: "Yaba LGA, Lagos", distanceKm: 4.2, seller: "Corper Grace", roleBadge: "Serving Corper", badgeType: "corps_member", category: "Electronics", condition: "Good", imageBg: "bg-slate-800", imageUrl: "https://images.unsplash.com/photo-1618944913480-50d1c4f0e1f4?auto=format&fit=crop&w=900&q=85", forRoles: ["serving"] },
-  { id: "srv_3", title: "6kg Gas Cylinder + Double Burner Stove", price: 18500, state: "Lagos", location: "Surulere LGA, Lagos", distanceKm: 6.0, seller: "Corper Amaka (POP)", roleBadge: "POP Sale", badgeType: "unverified", category: "Kitchenware", condition: "Excellent", imageBg: "bg-black", imageUrl: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=900&q=85", forRoles: ["serving"] },
-  { id: "alm_1", title: "Full Lodge Household Setup (Bed, Fan, Desk, Gas)", price: 65000, state: "Lagos", location: "Ikeja GRA, Lagos", distanceKm: 1.8, seller: "Corper Kunle (POP)", roleBadge: "POP Bundle", badgeType: "verified", category: "Full House", condition: "Complete Setup", imageBg: "bg-emerald-950", imageUrl: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=85", forRoles: ["alumni", "serving"] },
-];
 
 const NIGERIAN_STATES = ["All States", "Lagos", "Kaduna", "FCT - Abuja", "Oyo", "Rivers", "Kano"];
 
@@ -80,10 +64,6 @@ export default function MarketplacePage() {
 
   // Modal Form State
 
-  const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [reportedListingTitle, setReportedListingTitle] = useState("");
-  const [reportReason, setReportReason] = useState("");
-  const [reportSubmitted, setReportSubmitted] = useState(false);
 
   React.useEffect(() => {
     fetch("/api/marketplace")
@@ -93,19 +73,13 @@ export default function MarketplacePage() {
           const apiListings: Listing[] = data.data.map((item: any) => ({
             id: item.id,
             title: item.title,
-            price: parseInt(item.price.replace(/[^0-9]/g, ""), 10) || 5000,
-            state: item.state || "Lagos",
-            location: `${item.lga} LGA, ${item.state}`,
-            distanceKm: 1.5,
-            seller: item.seller?.name || "Verified Corper",
+            price: item.price,
+            state: item.state,
+            location: `${item.lga}, ${item.state}`,
+            seller: item.seller?.name ?? "Corps member",
             sellerPhone: item.seller?.phone ?? null,
-            roleBadge: "Direct Sale",
-            badgeType: "verified",
             category: item.category,
-            condition: "Good Condition",
-            imageBg: "bg-emerald-800",
             imageUrl: item.images?.[0] || "",
-            forRoles: ["pcm", "serving", "alumni"],
           }));
           setListings(apiListings);
         }
@@ -118,21 +92,6 @@ export default function MarketplacePage() {
     const matchesCat = selectedCategory === "All" || item.category === selectedCategory;
     return matchesState && matchesCat;
   });
-
-  const handleFlagListing = (title: string) => {
-    setReportedListingTitle(title);
-    setReportReason("");
-    setReportSubmitted(false);
-    setReportModalOpen(true);
-  };
-
-  const handleSendReport = (e: React.FormEvent) => {
-    e.preventDefault();
-    setReportSubmitted(true);
-    setTimeout(() => {
-      setReportModalOpen(false);
-    }, 1500);
-  };
 
   return (
     <div className="space-y-8 font-sans">
@@ -228,15 +187,15 @@ export default function MarketplacePage() {
                   </div>
                 )}
                 <span className="absolute top-3 left-3 bg-[#121815] text-white text-[10px] font-mono font-bold px-2.5 py-1">
-                  {item.roleBadge}
+                  {item.category}
                 </span>
               </div>
 
               <div className="space-y-1.5">
                 <h3 className="text-base font-bold text-[#121815] dark:text-white font-display line-clamp-1">{item.title}</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400">{item.location} · {item.distanceKm}km away</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">{item.location} · {item.seller}</p>
                 <div className="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400 pt-1">
-                  ₦{item.price.toLocaleString()}
+                  {item.price}
                 </div>
               </div>
 
@@ -260,10 +219,12 @@ export default function MarketplacePage() {
                 )}
 
                 <button
-                  onClick={() => handleFlagListing(item.title)}
-                  className="text-slate-500 hover:text-red-600 text-xs font-semibold cursor-pointer"
+                  type="button"
+                  disabled
+                  title="Reporting listings is coming soon"
+                  className="text-slate-400 text-xs font-semibold cursor-not-allowed"
                 >
-                  Report
+                  Report · soon
                 </button>
               </div>
             </div>

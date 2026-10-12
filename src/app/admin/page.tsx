@@ -488,7 +488,7 @@ export default function AdminDashboardPage() {
 
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono border-t border-slate-200/80 dark:border-slate-800/80 pt-2 flex items-center justify-between">
                   <span>WhatsApp Contact: {lodge.contactPhone}</span>
-                  <span>Owner: {lodge.owner?.name || "Corper User"}</span>
+                  <span>Owner: {lodge.owner?.name ?? "Unknown owner"}</span>
                 </div>
 
                 <div className="pt-2 flex items-center gap-3">
