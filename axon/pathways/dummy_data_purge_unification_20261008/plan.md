@@ -150,9 +150,9 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Delete the made-up fallbacks: `distanceKm` and the distance slider, fake verified badges and "condition", `|| 5000`, `|| "Lagos"`, "Corper User", "Google Corper", "Verified Corper".
   - [x] Delete the fake behaviour: `setTimeout` report submits, the label-flip contact button, buttons that do nothing, the navbar search box.
   - Split: arrays that are whole mockup screens (leave requests, CDS members/dues, safety contacts, vault documents) go with those screens in Phase 7; `services.ts` preview records go with "Honest marketing". Report buttons are disabled "Report · soon" until reporting exists.
-- [ ] Task: Remove localStorage stand-ins for the session
-  - [ ] Delete `kopawee_user_id`, `kopawee_user_email`, `kopawee_user_name`, `kopawee_active_role` and `kopawee_user_profile`.
-  - [ ] Navbar, Footer and authNav use `useSession()`. The auth page redirect uses the `/api/users/me` result. Remove the `RoleContext.setRole` no-op.
+- [x] Task: Remove localStorage stand-ins for the session e0b349d
+  - [x] Delete `kopawee_user_id`, `kopawee_user_email`, `kopawee_user_name`, `kopawee_active_role` and `kopawee_user_profile`.
+  - [x] Navbar, Footer and authNav use `useSession()`. The auth page redirect uses the `/api/users/me` result. Remove the `RoleContext.setRole` no-op.
 - [ ] Task: Honest marketing
   - [ ] Landing: remove the invented stats (or show a real public user count), the HQ partnership wording and the impact-calculator formula. Fix "Allawee".
   - [ ] Footer and `services.ts`: remove claims for features that don't exist. Remove the false "audited" claims from the admin login and invite email.
