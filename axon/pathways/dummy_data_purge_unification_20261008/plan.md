@@ -125,7 +125,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
   - [x] Start the login email field empty, use `signOut()` from `next-auth/react`, and fix the lodges list showing on the wrong tabs.
 - [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
-## Phase 5: Wire Existing Backends (FR4)
+## Phase 5: Wire Existing Backends (FR4) [checkpoint: 7a8dc03]
 
 - [x] Task: Contact flows 0a2c597
   - [x] Marketplace "Contact Seller" opens WhatsApp or a phone link. Lodge cards show `contactPhone`. Both only when signed in.
@@ -141,7 +141,7 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 - [x] Task: Clean up client requests 7a8dc03
   - [x] Remove every client-sent `userId`, `sellerId` and `ownerId`.
   - [x] Check every mutation's response before showing success, and roll back optimistic updates on failure.
-- [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
+- [x] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Phase 6: Remove Fabricated UI, localStorage Shadows & Dead Code (FR5)
 
