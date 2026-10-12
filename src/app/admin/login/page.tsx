@@ -116,9 +116,9 @@ export default function AdminLoginPage() {
           {/* Security notices */}
           <div className="space-y-2 pt-2">
             {[
-              "All sessions are logged and audited",
+              "For KopaWee administrators only",
               "Unauthorised access is a criminal offence",
-              "2FA enforcement coming in v2.0",
+              "Two-factor sign-in is planned",
             ].map((notice) => (
               <div key={notice} className="flex items-center gap-2.5 text-[11px] text-slate-500 font-mono">
                 <span className="w-1 h-1 bg-red-500 rounded-full shrink-0" />
@@ -131,7 +131,7 @@ export default function AdminLoginPage() {
         {/* Bottom: Version stamp */}
         <div className="relative z-10 flex items-center justify-between text-[10px] font-mono text-slate-600 border-t border-red-900/20 pt-5">
           <span>KOPAWEE ADMIN v1.0</span>
-          <span className="text-red-700">⬤ SECURE CHANNEL</span>
+          <span className="text-red-700">⬤ RESTRICTED</span>
         </div>
       </div>
 

@@ -17,8 +17,12 @@ export interface ServicePreviewContent {
   action: string;
 }
 
+/** live: works today; partial: some of it works today; soon: not built yet. */
+export type ServiceStatus = "live" | "partial" | "soon";
+
 export interface Service {
   id: string;
+  status: ServiceStatus;
   title: string;
   tagline: string;
   category: string;
@@ -26,7 +30,10 @@ export interface Service {
   color: string;
   accentBg: string;
   description: string;
+  /** What works today. */
   highlights: string[];
+  /** Planned, not built yet. */
+  comingSoon: string[];
   previewContent: ServicePreviewContent;
   storyChapter: string;
   storyHeadline: string;
@@ -39,233 +46,258 @@ export interface Service {
 export const services: Service[] = [
   {
     id: "camp",
+    status: "live",
     title: "Pre-Camp & Orientation Camp Guide",
-    tagline: "Offline Vault & Camp Survival Kit",
+    tagline: "Camp Packing Checklist & Countdown",
     category: "Companion Module",
     icon: FiCompass,
     color: "from-emerald-600 to-emerald-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
-      "Everything a Prospective Corps Member needs before hitting camp. Features encrypted offline storage for green cards and call-up letters, plus interactive packing checklists.",
+      "Everything a Prospective Corps Member needs before camp: a packing checklist saved to your account and a countdown to your camp date.",
     highlights: [
-      "Encrypted offline vault for call-up letters & green cards",
-      "Interactive camp packing checklist with progress bar",
-      "36 State Orientation Camp survival guides & platoon tips",
-      "Pre-camp travel route planner",
+      "Camp packing checklist saved to your account",
+      "Add your own items and track progress",
+      "Countdown to your camp entry date",
+    ],
+    comingSoon: [
+      "Document vault for your call-up letter and green card",
+      "State-by-state camp guides",
     ],
     previewContent: {
-      badge: "Offline Vault Ready",
-      title: "NYSC Call-Up Letter & Medical Fitness PDF",
-      detail: "Encrypted & stored locally · No internet needed",
-      action: "Open Document Vault",
+      badge: "Packing checklist",
+      title: "Call-up Letter (3 colored copies)",
+      detail: "Ticked items stay ticked on any device",
+      action: "Start your checklist",
     },
     storyChapter: "Chapter 01",
     storyHeadline: "The call-up arrives. Are you ready?",
     storyNarrative:
-      "Your green card is in hand, camp is three weeks away. Pack smart with state-specific survival guides and keep every document safe — even when there's no signal at camp.",
+      "Your call-up letter is in hand and camp is weeks away. Tick off what you have packed, add what you need, and see exactly how many days are left.",
     image: "/images/hero/camp.png",
     imageAlt: "NYSC corps members in khaki uniform at orientation camp, Nigeria",
   },
   {
     id: "safety",
+    status: "partial",
     title: "Travel Safety & Emergency SOS Tracker",
-    tagline: "Real-Time Highway Trip Check-Ins & Alerts",
+    tagline: "One-Tap SOS With Your Real Location",
     category: "Safety Module",
     icon: FiShield,
     color: "from-emerald-600 to-emerald-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
-      "Interstate journeys to camp or PPA can be stressful. KopaWee features active status trip check-ins and one-tap SOS alerts sent to trusted contacts.",
+      "Send an SOS that records your phone's current location and emails you a copy, with a one-tap link to call 112. KopaWee does not alert other people yet.",
     highlights: [
-      "Highway trip status reporter (e.g. Lokoja-Abuja Expressway)",
-      "One-tap SOS emergency trigger with location broadcasting",
-      "Emergency contact tree (Family, LGA rep, CDS coordinator)",
-      "Nearby police & accredited hospital directory",
+      "One-tap SOS with your phone's GPS location",
+      "Email copy of every alert",
+      "Quick link to call 112",
+    ],
+    comingSoon: [
+      "Trip check-ins for interstate travel",
+      "Alerts to trusted contacts",
     ],
     previewContent: {
-      badge: "Active Journey Monitoring",
-      title: "Enugu → Abuja Highway Travel",
-      detail: "Last check-in: Lokoja Bypass (2:14 PM) · Status Normal",
-      action: "Send Status Check-in",
+      badge: "SOS",
+      title: "Send SOS with my location",
+      detail: "Logs your GPS position and emails you a copy · Call 112 in danger",
+      action: "Set up your account",
     },
     storyChapter: "Chapter 02",
     storyHeadline: "The long road to your posting state",
     storyNarrative:
-      "Lagos to Kaduna. Enugu to Abuja. Every corper knows the highway anxiety. Check in at each stop, and if anything goes wrong — one tap alerts your family and LGA rep.",
+      "Long trips to camp and to your posting state can be stressful. Keep an SOS one tap away that records exactly where you are.",
     image: "/images/hero/safety.png",
     imageAlt: "NYSC corps members travelling by coach bus to posting state, Nigeria",
   },
   {
     id: "housing",
+    status: "live",
     title: "Accommodation & Roommate Matching",
-    tagline: "Corper Lodges & Compatibility Finder",
+    tagline: "Corper Lodges & Roommate Requests",
     category: "Housing Module",
     icon: FiHome,
     color: "from-emerald-600 to-emerald-800",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
-      "Find corper-friendly apartments near your PPA and split rent with verified roommates using our preference compatibility quiz.",
+      "Browse lodges listed by corpers and hosts after a moderation check, post a roommate request with your budget, and share contact details only when both of you agree.",
     highlights: [
-      "Directory of corper lodges near PPA & LGA centers",
-      "Roommate compatibility finder (Budget, Gender, PPA distance)",
-      "Rent split estimator & landlord rating system",
-      "Verified corper tenant reviews",
+      "Lodge listings reviewed before they go live",
+      "Roommate requests filtered by state and LGA",
+      "Phone and email shared only after a match",
+      "WhatsApp or call hosts in one tap",
+    ],
+    comingSoon: [
+      "Reviews from past tenants",
     ],
     previewContent: {
-      badge: "94% Match Found",
-      title: "2-Bedroom Corper Lodge near Ikeja LGA",
-      detail: "₦180,000/yr split · 2 Roommate slots open",
-      action: "View Lodge & Connect Roommate",
+      badge: "Roommate request",
+      title: "Self-contain near your PPA",
+      detail: "Contact details are shared only after both of you agree",
+      action: "Browse lodges",
     },
     storyChapter: "Chapter 03",
     storyHeadline: "Luggage in hand. Where will you sleep tonight?",
     storyNarrative:
-      "Camp is over. You step off the bus with your travelling bag, posted to a city you've never lived in. Find corper-friendly lodges near your PPA and match with roommates who share your budget.",
+      "Camp is over and you are posted to a city you have never lived in. Find a lodge near your PPA and a roommate who fits your budget.",
     image: "/images/hero/housing.png",
     imageAlt: "NYSC corps member with travelling bag at Nigerian bus terminal",
   },
   {
     id: "clearance",
+    status: "partial",
     title: "Smart LGA Clearance & Admin Assistant",
-    tagline: "Proactive Notifications over Passive Portals",
+    tagline: "Monthly Clearance Tracker",
     category: "Companion Module",
     icon: FiBell,
     color: "from-emerald-500 to-teal-600",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
-      "The official portal requires manual logins to discover clearance dates. KopaWee transforms passive data into proactive push notifications, Google Calendar sync, LGA office map routes, traffic estimations, and document checklists.",
+      "Log each monthly clearance, see when the next one is due, and add that date to Google Calendar.",
     highlights: [
-      "Push notifications 48h, 24h & 2h before LGA clearance",
-      "One-tap Google Calendar integration & LGA route map",
-      "Document checklist (Call-up, Green Card, PPA Letter)",
-      "Clearance history log & monthly status tracking",
+      "Log each monthly clearance",
+      "See when your next clearance is due",
+      "Add the date to Google Calendar",
+    ],
+    comingSoon: [
+      "Reminders before clearance day",
     ],
     previewContent: {
-      badge: "Clearance Reminder Active",
-      title: "Monthly Clearance Scheduled",
-      detail: "Thursday, 2:00 PM - 3:30 PM at Ikeja LGA Office",
-      action: "Add to Calendar & Get Map Route",
+      badge: "Clearance tracker",
+      title: "Next clearance date",
+      detail: "Worked out from your last logged clearance",
+      action: "Track your clearance",
     },
     storyChapter: "Chapter 04",
     storyHeadline: "Clearance day shouldn't be a surprise",
     storyNarrative:
-      "Every month, the same scramble — when is clearance? Which documents? KopaWee pushes reminders 48 hours ahead, syncs your calendar, and maps the route to your LGA office.",
+      "Every month the same question: when is clearance? Log it once and KopaWee tells you when the next one is due.",
     image: "/images/hero/clearance.png",
     imageAlt: "NYSC corps member with call-up letter and green card at LGA secretariat",
   },
   {
     id: "marketplace",
+    status: "live",
     title: "Peer-to-Peer Corper Marketplace",
-    tagline: "Buy, Sell & Swap Household Gear Directly",
+    tagline: "Buy & Sell Gear With Other Corpers",
     category: "Marketplace Module",
     icon: FiShoppingBag,
     color: "from-emerald-500 to-emerald-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
-      "Passing out corpers hand off mattresses, gas cylinders, fans, and appliances directly to incoming corpers in the same LGA. Complete with verified state code badges and safe meetup locations.",
+      "Corpers passing out sell mattresses, gas cylinders, fans and appliances to incoming corpers in the same state. Listings are reviewed before they go live; contact the seller on WhatsApp or by phone.",
     highlights: [
-      "Dedicated categories: Mattresses, Gas Cylinders, Fans, Books",
-      "Verified seller badges with NYSC State Codes",
-      "POP Deal bundles for full room hand-offs",
-      "Direct chat & location-based filtering by LGA",
+      "Listings reviewed before they go live",
+      "Photos and an optional AI-written draft",
+      "Filter by state and category",
+      "WhatsApp or call the seller in one tap",
+    ],
+    comingSoon: [
+      "Reporting a listing",
     ],
     previewContent: {
-      badge: "POP Special Deal",
-      title: "6kg Gas Cylinder + Double Mattress",
-      detail: "₦35,000 · Seller: NY/25A/1429 (Surulere LGA)",
-      action: "Contact Seller on WhatsApp",
+      badge: "Marketplace",
+      title: "6kg gas cylinder + burner",
+      detail: "Example listing · contact the seller on WhatsApp",
+      action: "Browse the marketplace",
     },
     storyChapter: "Chapter 05",
     storyHeadline: "Pass it on — don't pay full price twice",
     storyNarrative:
-      "The corper before you is passing out. Their mattress, gas cylinder, and fan are still good. Buy directly from verified corpers in your LGA and save thousands on setup costs.",
+      "The corper before you is passing out, and their mattress, gas cylinder and fan are still good. Buy directly from corpers in your state and save on setup costs.",
     image: "/images/hero/marketplace.png",
     imageAlt: "NYSC corps members exchanging household items during POP handover",
   },
   {
     id: "workplace",
+    status: "partial",
     title: "Workplace & PPA Management Portal",
-    tagline: "Clock-In, Attendance & Leave Requests",
+    tagline: "Daily PPA Logbook",
     category: "Workplace Module",
     icon: FiBriefcase,
     color: "from-emerald-600 to-teal-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
-      "Allows Places of Primary Assignment (PPAs) to manage assigned corps members efficiently with digital clock-in, leave approval workflows, and monthly evaluations.",
+      "Keep a daily logbook of what you did at your place of primary assignment and how many hours you worked.",
     highlights: [
-      "Corper clock-in & attendance verification",
-      "Digital leave request application (Medical, Clearance, Annual)",
-      "PPA employer feedback & rating repository",
-      "Monthly attendance report generation",
+      "Daily logbook with summary and hours",
+      "One entry per day, saved to your account",
+    ],
+    comingSoon: [
+      "Employer tools for PPAs",
+      "Leave requests",
     ],
     previewContent: {
-      badge: "PPA Manager",
-      title: "Leave Application: 3-Day Clearance Leave",
-      detail: "Requested by: Grace Okafor (LA/25B/0812)",
-      action: "Approve Leave Request",
+      badge: "PPA logbook",
+      title: "Today's log",
+      detail: "What you did and how many hours",
+      action: "Start your logbook",
     },
     storyChapter: "Chapter 06",
     storyHeadline: "Your PPA deserves a corper who shows up",
     storyNarrative:
-      "Clock in digitally, request clearance leave without paper forms, and build a track record your PPA employer can vouch for when you need a reference letter.",
+      "Keep a simple record of your days at your PPA, so you have your own track record when you need it.",
     image: "/images/hero/workplace.png",
     imageAlt: "NYSC corps member serving at Place of Primary Assignment office in Nigeria",
   },
   {
     id: "community",
+    status: "soon",
     title: "CDS Community & Group Hub",
-    tagline: "Meeting Manager & Attendance Register",
+    tagline: "CDS Group Hub (Coming Soon)",
     category: "Community Module",
     icon: FiUsers,
     color: "from-emerald-500 to-emerald-700",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
-      "Connects CDS executives and group members with automated meeting reminders, dues collection tracking, project updates, and attendance logs.",
-    highlights: [
-      "CDS weekly meeting reminders & agenda feed",
-      "Digital attendance barcode / QR scanner",
-      "Group dues tracking & community project updates",
-      "Photo gallery & event announcements",
+      "A hub for CDS groups to share meeting times, attendance and project updates. This is not built yet.",
+    highlights: [],
+    comingSoon: [
+      "CDS meeting reminders",
+      "Attendance register",
+      "Group project updates",
     ],
     previewContent: {
-      badge: "Editorial CDS Group",
-      title: "Weekly Meeting: Thursday 8:00 AM",
-      detail: "LGA Secretariat Hall · Agenda: Magazine Launch",
-      action: "Mark Attendance & View Agenda",
+      badge: "Coming soon",
+      title: "CDS group hub",
+      detail: "Not available yet",
+      action: "Join KopaWee",
     },
     storyChapter: "Chapter 07",
     storyHeadline: "Your CDS group is your second family",
     storyNarrative:
-      "Thursday mornings at the LGA secretariat. Magazine launch this week. Track attendance, collect dues, and never miss a community project meeting again.",
+      "Your CDS group is a big part of your service year. A hub for meetings and projects is on the way.",
     image: "/images/hero/community.png",
     imageAlt: "NYSC corps members on Community Development Service project in Nigeria",
   },
   {
     id: "ai",
+    status: "partial",
     title: "AI Knowledge & Regulatory Assistant",
-    tagline: "Instant Answers on NYSC Guidelines",
+    tagline: "AI Assistant (Beta)",
     category: "AI Module",
     icon: FiCpu,
     color: "from-emerald-700 to-emerald-900",
     accentBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
     description:
-      "Ask questions in natural language about NYSC bye-laws, relocation procedures, concessionary deployment, and monthly clearance guidelines.",
+      "Ask general questions about the service year and get a quick answer from an AI model (Google Gemini). Answers can be wrong; always confirm with official NYSC sources.",
     highlights: [
-      "Instant responses trained on official NYSC Bye-Laws",
-      "Step-by-step relocation application guidance",
-      "Concessionary deployment (marital / medical) advice",
-      "Post-POP career transition tips",
+      "Quick answers to general NYSC questions",
+      "Help writing marketplace listings",
+    ],
+    comingSoon: [
+      "Answers grounded in official NYSC documents",
     ],
     previewContent: {
-      badge: "AI Assistant Query",
-      title: "How do I process relocation on medical grounds?",
-      detail: "Provides exact document requirements & step-by-step steps",
-      action: "Ask AI Assistant",
+      badge: "AI assistant",
+      title: "How does monthly clearance work?",
+      detail: "General guidance; confirm with official NYSC sources",
+      action: "Try the assistant",
     },
     storyChapter: "Chapter 08",
     storyHeadline: "Confused? Ask before you make a costly mistake",
     storyNarrative:
-      "Can I relocate on medical grounds? What documents do I need for concessionary deployment? Get instant, accurate answers trained on official NYSC bye-laws — anytime.",
+      "Not sure about something? Ask the assistant for a quick explanation, then confirm the details with official NYSC sources.",
     image: "/images/hero/ai.png",
     imageAlt: "NYSC corps member using smartphone for instant NYSC guidance",
   },

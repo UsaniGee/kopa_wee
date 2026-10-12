@@ -6,18 +6,22 @@ import Link from "next/link";
 import Navbar from "@/shared/components/Navbar";
 import Footer from "@/shared/components/Footer";
 import HeroCarousel from "@/shared/components/HeroCarousel";
-import { services } from "@/shared/data/services";
+import { services, type ServiceStatus } from "@/shared/data/services";
 import { FiArrowRight, FiCheckCircle } from "react-icons/fi";
 
 const ArrowRight = FiArrowRight;
 const CheckCircle2 = FiCheckCircle;
 
+const STATUS_BADGE: Record<ServiceStatus, { label: string; className: string }> = {
+  live: { label: "Live", className: "border-emerald-600 text-emerald-700 dark:text-emerald-400" },
+  partial: { label: "Partly live", className: "border-amber-500 text-amber-700 dark:text-amber-400" },
+  soon: { label: "Coming soon", className: "border-slate-400 text-slate-500" },
+};
+
 export default function LandingPage() {
   const [selectedService, setSelectedService] = useState<number>(0);
   const [navOverHero, setNavOverHero] = useState(true);
 
-  const [monthlyAllowance, setMonthlyAllowance] = useState<number>(77000);
-  const [monthsInService, setMonthsInService] = useState<number>(12);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,10 +51,10 @@ export default function LandingPage() {
         <section className="py-12 bg-[#dcece1] dark:bg-[#121a16] border-y border-slate-300/60 dark:border-slate-800">
           <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { value: "50,000+", label: "Active Corps Members" },
-              { value: "36", label: "States + FCT Covered" },
-              { value: "8", label: "Core Mini-Products" },
-              { value: "100%", label: "Offline Ready Vault" },
+              { value: String(services.filter((s) => s.status !== "soon").length), label: "Tools you can use today" },
+              { value: "36 + FCT", label: "States covered" },
+              { value: "₦0", label: "Free during early access" },
+              { value: "Reviewed", label: "Listings checked before going live" },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -154,7 +158,9 @@ export default function LandingPage() {
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-display">
                             {svc.storyChapter} · {svc.category}
                           </span>
-                          {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+                          <span className={`text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 border ${STATUS_BADGE[svc.status].className}`}>
+                            {STATUS_BADGE[svc.status].label}
+                          </span>
                         </div>
                         <h3 className="text-base font-bold text-[#121815] dark:text-white font-display">{svc.storyHeadline}</h3>
                         <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mt-1">{svc.tagline}</p>
@@ -197,8 +203,9 @@ export default function LandingPage() {
                     {currentService.description}
                   </p>
 
+                  {currentService.highlights.length > 0 && (
                   <div className="space-y-3 pt-2">
-                    <h4 className="text-xs font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display">Key Capabilities</h4>
+                    <h4 className="text-xs font-bold text-[#121815] dark:text-white uppercase tracking-widest font-display">Live today</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {currentService.highlights.map((hl, i) => (
                         <div
@@ -211,6 +218,20 @@ export default function LandingPage() {
                       ))}
                     </div>
                   </div>
+                  )}
+
+                  {currentService.comingSoon.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest font-display">Coming soon</h4>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {currentService.comingSoon.map((item) => (
+                          <li key={item} className="text-xs text-slate-500 dark:text-slate-400 p-3 border border-dashed border-slate-300 dark:border-slate-700">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   <div className="pt-4 border-t border-slate-300/60 dark:border-slate-800">
                     <Link
@@ -229,7 +250,7 @@ export default function LandingPage() {
 
         {/* 4-YEAR ROLLOUT ROADMAP */}
         <section id="roadmap" className="py-24 bg-[#dcece1] dark:bg-[#121a16] border-t border-slate-300/60 dark:border-slate-800">
-          <div className="max-w-[360 mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
             <div className="flex flex-col items-center text-center space-y-4 mb-16">
               <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-800 dark:text-emerald-300 font-display">
                 Phased Strategy
@@ -241,10 +262,10 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
-                { year: "Year 1 (MVP)", title: "Companion + Safety + Marketplace", text: "50,000 corps members across 36 states with clearance reminders and P2P gear trade.", target: "50,000 Corps Members" },
-                { year: "Year 2", title: "Workplace Module", text: "PPA employers join to streamline digital clock-in attendance and clearance leave approvals.", target: "2,500 PPAs Registered" },
-                { year: "Year 3", title: "CDS Community Module", text: "Community Development Service groups onboard for barcode attendance and dues collection.", target: "Nationwide CDS Adoption" },
-                { year: "Year 4", title: "Official Integration", text: "Direct API synchronization with NYSC Directorate HQ for automated biometric verification.", target: "Directorate Partnership" },
+                { year: "Year 1 (now)", title: "Companion + Safety + Marketplace", text: "Camp checklist, SOS, clearance tracker, lodges, roommates and a peer-to-peer marketplace.", target: "Goal: corpers in all 36 states + FCT" },
+                { year: "Year 2", title: "Workplace Module", text: "PPA employers join to streamline digital clock-in attendance and clearance leave approvals.", target: "Goal: PPAs using the logbook" },
+                { year: "Year 3", title: "CDS Community Module", text: "Community Development Service groups onboard for barcode attendance and dues collection.", target: "Goal: CDS groups on KopaWee" },
+                { year: "Year 4", title: "Verified Corps Members", text: "Confirm that every member is a real corps member, through a licensed identity-verification provider.", target: "Goal: verified profiles" },
               ].map((item, idx) => (
                 <div key={idx} className="p-8 bg-[#eaf5ed] dark:bg-[#0a0f0d] border border-slate-300/60 dark:border-slate-800 space-y-4">
                   <span className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400 block">{item.year}</span>
@@ -255,70 +276,6 @@ export default function LandingPage() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CORPER VALUE CALCULATOR */}
-        <section id="calculator" className="py-24 bg-[#eaf5ed] dark:bg-[#0a0f0d]">
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="p-8 sm:p-12 bg-[#dcece1] dark:bg-[#121a16] border border-slate-300/60 dark:border-slate-800 space-y-8">
-              <div className="text-center space-y-2">
-                <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-800 dark:text-emerald-300 font-display">
-                  Interactive Impact Quiz
-                </span>
-                <h3 className="text-3xl sm:text-4xl font-medium text-[#121815] dark:text-white font-display">Estimate Your Service Year Impact</h3>
-              </div>
-
-              <div className="space-y-6 max-w-xl mx-auto">
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-2">
-                    <span className="text-slate-600 dark:text-slate-400">Monthly Allawee (₦)</span>
-                    <span className="text-[#121815] dark:text-white font-mono font-bold">₦{monthlyAllowance.toLocaleString()}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="33000"
-                    max="100000"
-                    step="1000"
-                    value={monthlyAllowance}
-                    onChange={(e) => setMonthlyAllowance(Number(e.target.value))}
-                    className="w-full accent-emerald-600 cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-2">
-                    <span className="text-slate-600 dark:text-slate-400">Service Duration</span>
-                    <span className="text-[#121815] dark:text-white font-mono font-bold">{monthsInService} Months</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1"
-                    max="12"
-                    value={monthsInService}
-                    onChange={(e) => setMonthsInService(Number(e.target.value))}
-                    className="w-full accent-emerald-600 cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] p-6 text-center border border-slate-300/60 dark:border-slate-800">
-                  <span className="block text-xs font-semibold text-slate-500">Est. Gear Savings</span>
-                  <span className="text-2xl font-bold font-display text-[#121815] dark:text-white mt-1 block">
-                    ₦{Math.round(monthlyAllowance * 0.45).toLocaleString()}
-                  </span>
-                </div>
-                <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] p-6 text-center border border-slate-300/60 dark:border-slate-800">
-                  <span className="block text-xs font-semibold text-slate-500">Clearance Hours Saved</span>
-                  <span className="text-2xl font-bold font-display text-[#121815] dark:text-white mt-1 block">{monthsInService * 6} Hours</span>
-                </div>
-                <div className="bg-[#eaf5ed] dark:bg-[#0a0f0d] p-6 text-center border border-slate-300/60 dark:border-slate-800">
-                  <span className="block text-xs font-semibold text-slate-500">Highway Travel Safety</span>
-                  <span className="text-2xl font-bold font-display text-emerald-600 mt-1 block">100% Active</span>
-                </div>
-              </div>
             </div>
           </div>
         </section>
@@ -359,13 +316,13 @@ export default function LandingPage() {
                   What&apos;s Included:
                 </span>
                 {[
-                  "Core NYSC Mobilization & Camp Tools",
-                  "Monthly LGA Clearance Tracker & Biometrics Reminders",
-                  "Verified Corper Lodge & Roommate Finder",
-                  "Peer-to-Peer Classifieds Marketplace",
-                  "Highway Travel Safety SOS Monitor",
-                  "AI Regulatory & Bye-law Assistant",
-                  "Ex-Corpers Alumni Career Network",
+                  "Camp packing checklist and countdown",
+                  "Monthly clearance tracker with calendar link",
+                  "Lodge listings and roommate requests",
+                  "Peer-to-peer marketplace",
+                  "One-tap SOS with your location",
+                  "AI assistant (beta)",
+                  "PPA daily logbook",
                 ].map((feat, i) => (
                   <div key={i} className="flex items-center gap-3 text-xs text-slate-700 dark:text-slate-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />

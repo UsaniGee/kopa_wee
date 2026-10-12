@@ -26,7 +26,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              The active personal companion & modular platform for National Youth Service Corps (NYSC) members across Nigeria. Transforming passive administration into proactive alerts, corper marketplace, travel safety, and career growth.
+              The active personal companion & modular platform for National Youth Service Corps (NYSC) members across Nigeria. Camp checklist, clearance tracker, lodges and roommates, a corper marketplace and one-tap SOS, in one place.
             </p>
             <div className="flex items-center gap-2 text-xs text-emerald-400 font-semibold bg-slate-900 px-3 py-2 border border-slate-800 w-fit">
               <FiShield className="w-4 h-4 text-emerald-400" /> 
@@ -40,11 +40,11 @@ export default function Footer() {
             <ul className="flex flex-col gap-2.5 text-xs">
               {[
                 { label: "Main Dashboard", href: "/dashboard" },
-                { label: "Smart Clearance", href: "/dashboard/companion" },
+                { label: "Clearance & Checklist", href: "/dashboard/companion" },
                 { label: "Corper Marketplace", href: "/dashboard/marketplace" },
                 { label: "Housing & Roommates", href: "/dashboard/accommodation" },
                 { label: "Travel Safety SOS", href: "/dashboard/safety" },
-                { label: "Workplace & PPA Hub", href: "/dashboard/workplace" },
+                { label: "PPA Logbook", href: "/dashboard/workplace" },
               ].map((item) => (
                 <li key={item.label}>
                   <a 
@@ -71,21 +71,18 @@ export default function Footer() {
               <li>Prospective Corps Member</li>
               <li>Serving Corps Member</li>
               <li>Ex-Corps Member / POP Alumni</li>
-              <li>PPA Representative (Employer)</li>
-              <li>CDS Executive</li>
-              <li>LGA Inspector / Official</li>
+              <li className="text-slate-500">PPAs, CDS executives and LGA officials: coming soon</li>
             </ul>
           </div>
 
           {/* Infrastructure */}
           <div className="flex flex-col gap-4">
-            <h4 className="text-xs font-bold text-white font-display">Core Platform</h4>
+            <h4 className="text-xs font-bold text-white font-display">Coming Soon</h4>
             <ul className="flex flex-col gap-2.5 text-xs text-slate-400">
-              <li>Single Sign-On Auth</li>
-              <li>Push Notification Engine</li>
-              <li>Location GPS & Routing</li>
-              <li>Encrypted Document Vault</li>
-              <li>NiYA Job Integration</li>
+              <li>Document vault</li>
+              <li>Trip check-ins &amp; trusted contacts</li>
+              <li>Clearance reminders</li>
+              <li>CDS group hub</li>
             </ul>
           </div>
         </div>

@@ -41,7 +41,7 @@ export default function AdminInviteEmail({ inviterName, inviteUrl, role, expires
                 <p style={{ fontSize: "12px", color: "#64748b", wordBreak: "break-all", margin: "0 0 24px 0", fontFamily: "monospace" }}>{inviteUrl}</p>
                 <div style={{ borderTop: "1px solid #1e293b", paddingTop: "20px" }}>
                   <p style={{ fontSize: "12px", color: "#64748b", margin: 0, lineHeight: 1.6 }}>
-                    ⚠️ This invite expires in <strong style={{ color: "#94a3b8" }}>{expiresIn}</strong>. All admin sessions are logged and audited.
+                    ⚠️ This invite expires in <strong style={{ color: "#94a3b8" }}>{expiresIn}</strong>. Only accept it if you expected this invitation.
                   </p>
                 </div>
               </td></tr>
