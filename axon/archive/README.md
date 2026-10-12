@@ -1,15 +1,15 @@
 # Pathway Archive
 
-Every finished or superseded KopaWee pathway from **2026-08-12 to 2026-09-14**, archived on 2026-10-08 by [dummy_data_purge_unification_20261008](../pathways/dummy_data_purge_unification_20261008/index.md). Live pathways are in the [registry](../pathways.md).
+Every finished or superseded KopaWee pathway from **2026-08-12 to 2026-09-14**, archived on 2026-10-08 by [dummy_data_purge_unification_20261008](./dummy_data_purge_unification_20261008/index.md). Live pathways are in the [registry](../pathways.md).
 
 ## Read this before relying on these records
 
 - **Records were reconciled, not rewritten.** Statuses and open tasks were checked against the code on 2026-10-08. Tasks marked `⏭ Deferred` or `⏭ Not performed` never happened; they were not ticked after the fact. Specs and plans labelled *retroactive* were rebuilt from git history.
 - **Traceability is thin before 2026-10-08.** Most tasks have no recorded commit SHA, there were no git notes, and the only phase checkpoint is `957af04`.
 - **Design history.** The design went flat borderless → Rally Padel → soft-edge rounded and bordered (planned) → **sharp-edged and bordered**. The last step came from commit `c3a6671` (2026-08-31), which added a `border-radius: 0rem` base layer and removed 34 `rounded-*` classes inside a pathway-completion chore, with no pathway planning it. The product owner ratified sharp + bordered as canonical on 2026-10-08.
-- **"Dummy data removed" claims were wrong.** The 2026-10-08 audit found about 250 dummy-data and contract findings after three pathways had reported it gone (flagged ⚠ below). See [the audit](../pathways/dummy_data_purge_unification_20261008/audit.md).
+- **"Dummy data removed" claims were wrong.** The 2026-10-08 audit found about 250 dummy-data and contract findings after three pathways had reported it gone (flagged ⚠ below). See [the audit](./dummy_data_purge_unification_20261008/audit.md).
 
-## Pathways (45)
+## Pathways (46)
 
 | Created | Pathway | Status | Notes |
 |---|---|---|---|
@@ -58,3 +58,4 @@ Every finished or superseded KopaWee pathway from **2026-08-12 to 2026-09-14**, 
 | 2026-09-14 | [Admin Invites Tab — Missing Navigation Button](./admin_invite_tab_missing_20260914/index.md) | completed |  |
 | 2026-09-14 | [Email Delivery Fix, Admin Invite 400 & Auth Error UX Polish](./email_invite_auth_errors_20260914/index.md) | completed | Resend parts superseded by Nodemailer |
 | 2026-09-14 | [Roommate Request Cancel Alert & Missing Edit UI Fix, Document Upload, & Calendar Sync](./roommate_cancel_edit_fix_20260914/index.md) | completed |  |
+| 2026-10-12 | [Dummy Data Purge, Data Integrity & AXON Records Unification](./dummy_data_purge_unification_20261008/index.md) | completed | Reviewed by axon-inspect; production migrations, `NEXTAUTH_URL` and the old admin password still to do before deploy |
