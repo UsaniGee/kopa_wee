@@ -1,8 +1,9 @@
 {
   "id": "dummy_data_purge_unification_20261008",
   "type": "Refactor/Chore",
-  "status": "in_progress",
+  "status": "completed",
   "description": "Dummy Data Purge, Data Integrity & AXON Records Unification",
   "createdAt": "2026-10-08T00:00:00.000Z",
-  "updatedAt": "2026-10-08T00:00:00.000Z"
+  "updatedAt": "2026-10-08T00:00:00.000Z",
+  "updated_at": "2026-10-12T00:00:00Z"
 }
