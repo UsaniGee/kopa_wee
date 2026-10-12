@@ -183,7 +183,18 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 - [x] Task: Update `axon/tech-stack.md` (Nodemailer, no IndexedDB, pnpm, Vitest, image-storage debt), `axon/product-guidelines.md` (real colour tokens, light and dark; rewrite the radius rules for the canonical **sharp-edged (0rem) + bordered** system confirmed 2026-10-08) and `axon/product.md` (each pillar Live or Planned). 48f613c
 - [x] Task: Update `.env.example` with `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `CRON_SECRET` and `GEMINI_MODEL` (if made configurable). (already done: SEED_ADMIN_* in 4fe1d3d, GEMINI_MODEL in 570c58f, CRON_SECRET in 957af04)
-- [ ] Task: Re-run the audit greps and walk through every acceptance criterion in spec.md. Record the results in this plan.
+- [x] Task: Re-run the audit greps and walk through every acceptance criterion in spec.md. Record the results in this plan. f3daa9c
+  - Final audit 2026-10-12:
+    1. Onboarding, two users with different states: PASS (Phase 4, dev branch end-to-end; owner UI check).
+    2. SOS uses real location or clearly fails, no "contacts notified": PASS (fb42d73; owner check).
+    3. Status cron without DB errors, SERVING→ALUMNI from the dashboard: PASS. Cron run on the dev branch: 1 PCM→SERVING, 1 SERVING→ALUMNI, 0 errors, history rows with changedBy null; 401 without the secret. Dashboard transition refreshes the session (7a8dc03).
+    4. No hard-coded people/places/counts/dates/prices; unbuilt features say "Coming soon": PASS (Phase 6/7 greps; only format hints and placeholders remain).
+    5. Nothing reads/writes `kopawee_user_*` / `kopawee_active_role`: PASS with one deliberate exception: `clearLegacySessionStorage()` removes them to clean old browsers.
+    6. AI helper returns real Gemini output or `AI_NOT_CONFIGURED`: PASS (570c58f tests).
+    7. Registry lists only live pathways; archive README covers every archived pathway; metadata uses the allowed values: PASS, with a correction: 45 pathways were archived (the spec said 46). 47 metadata files: 42 completed, 2 in_progress, 3 superseded.
+    8. Docs match the code: PASS (48f613c; workflow.md from Phase 1).
+    9. Vitest runs and changed API routes are covered: PASS after adding the admin invite test (f3daa9c); 25 test files, 107 tests.
+  - Still open, outside this pathway: production still needs `migrate resolve --applied 0_init` + `migrate deploy` (3 migrations) before deploying; set `NEXTAUTH_URL` in Vercel.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
 ## Deferred (follow-up pathways, not part of this pathway)
