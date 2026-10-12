@@ -145,10 +145,11 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 
 ## Phase 6: Remove Fabricated UI, localStorage Shadows & Dead Code (FR5)
 
-- [ ] Task: Remove fake records and fallbacks
-  - [ ] Delete the fake arrays: `SAMPLE_LISTINGS`, leave requests, CDS members and dues, safety contacts, vault documents, `services.ts` preview records.
-  - [ ] Delete the made-up fallbacks: `distanceKm` and the distance slider, fake verified badges and "condition", `|| 5000`, `|| "Lagos"`, "Corper User", "Google Corper", "Verified Corper".
-  - [ ] Delete the fake behaviour: `setTimeout` report submits, the label-flip contact button, buttons that do nothing, the navbar search box.
+- [x] Task: Remove fake records and fallbacks 785d554
+  - [x] Delete the fake arrays: `SAMPLE_LISTINGS`, leave requests, CDS members and dues, safety contacts, vault documents, `services.ts` preview records.
+  - [x] Delete the made-up fallbacks: `distanceKm` and the distance slider, fake verified badges and "condition", `|| 5000`, `|| "Lagos"`, "Corper User", "Google Corper", "Verified Corper".
+  - [x] Delete the fake behaviour: `setTimeout` report submits, the label-flip contact button, buttons that do nothing, the navbar search box.
+  - Split: arrays that are whole mockup screens (leave requests, CDS members/dues, safety contacts, vault documents) go with those screens in Phase 7; `services.ts` preview records go with "Honest marketing". Report buttons are disabled "Report · soon" until reporting exists.
 - [ ] Task: Remove localStorage stand-ins for the session
   - [ ] Delete `kopawee_user_id`, `kopawee_user_email`, `kopawee_user_name`, `kopawee_active_role` and `kopawee_user_profile`.
   - [ ] Navbar, Footer and authNav use `useSession()`. The auth page redirect uses the `/api/users/me` result. Remove the `RoleContext.setRole` no-op.
