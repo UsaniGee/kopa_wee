@@ -166,14 +166,15 @@ Spec: [spec.md](./spec.md) · Audit: [audit.md](./audit.md). Labels like "FR3.2"
 ## Phase 7: Honest "Coming Soon" States (FR6)
 
 - [x] Task: Build a shared `ComingSoon` component (canonical sharp + bordered design, dark mode, mobile) and a "Soon" nav badge. 8319f70
-- [ ] Task: Replace the mockups
-  - [ ] CDS hub (community page and overview CDS view).
-  - [ ] PPA/employer view (overview and workplace).
-  - [ ] LGA inspector (overview and companion).
-  - [ ] Document vault (companion).
-  - [ ] Trusted contacts and trip monitor (safety).
-  - [ ] Leave requests, listing reports, job bank and CV builder (alumni card).
-  - [ ] The savings, CDS-attendance and safety-status overview cards.
+- [x] Task: Replace the mockups ceaa773
+  - [x] CDS hub (community page and overview CDS view).
+  - [x] PPA/employer view (overview and workplace).
+  - [x] LGA inspector (overview and companion).
+  - [x] Document vault (companion).
+  - [x] Trusted contacts and trip monitor (safety).
+  - [x] Leave requests, listing reports, job bank and CV builder (alumni card).
+  - [x] The savings, CDS-attendance and safety-status overview cards.
+  - The savings/CDS/safety overview cards were replaced with real data (clearances logged, LGA, days to passing out) instead of ComingSoon.
 - [ ] Task: Run the `axon-compose` checks on every changed screen.
 - [ ] Task: Phase Verification & Checkpoint (Refer to workflow.md)
 
