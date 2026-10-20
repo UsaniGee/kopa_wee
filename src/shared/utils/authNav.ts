@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { destinationFor } from "./roleRoutes";
 
-export { getRouteForRole, deriveRole, ROLE_ALLOWED_ROUTES } from "./roleRoutes";
+export { getRouteForRole, deriveRole, postSignInDestination, ROLE_ALLOWED_ROUTES } from "./roleRoutes";
 
 /**
  * Keys older versions wrote to localStorage as a stand-in for the session (name, email,

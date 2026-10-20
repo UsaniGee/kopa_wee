@@ -36,3 +36,19 @@ export function destinationFor(
   if (!sessionUser) return `/auth?mode=signup&redirect=${encodeURIComponent(targetRoute)}`;
   return getRouteForRole(targetRoute, deriveRole(sessionUser.nyscStatus, sessionUser.role));
 }
+
+/**
+ * Where to go right after signing in, from the /api/users/me profile (null if it failed to load).
+ * Admins go to the admin panel and skip onboarding, unless they followed a link to a user page.
+ */
+export function postSignInDestination(
+  profile: { applicationRole?: string | null; nyscStatus?: string | null; role?: string | null; onboardingComplete?: boolean } | null,
+  redirectUrl: string | null
+): string {
+  if (!profile) return "/dashboard";
+  if (profile.applicationRole === "ADMIN" && !redirectUrl) return "/admin";
+  if (profile.applicationRole !== "ADMIN" && !profile.onboardingComplete) {
+    return redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding";
+  }
+  return redirectUrl ? getRouteForRole(redirectUrl, deriveRole(profile.nyscStatus, profile.role)) : "/dashboard";
+}

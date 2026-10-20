@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { FiArrowRight, FiArrowLeft, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
-import { deriveRole, getRouteForRole } from "@/shared/utils/authNav";
+import { getRouteForRole, postSignInDestination } from "@/shared/utils/authNav";
 
 type NyscStatus = "PCM" | "SERVING" | "ALUMNI";
 type StateOption = { id: string; name: string; code: string; lgas: string[] };
@@ -101,8 +101,9 @@ function OnboardingContent() {
       .then((res) => res.json())
       .then(({ success, data: u }) => {
         if (!success || !u) return setChecking(false);
-        if (checking && u.onboardingComplete) {
-          router.replace(redirectUrl ? getRouteForRole(redirectUrl, deriveRole(u.nyscStatus, u.role)) : "/dashboard");
+        // After Google sign-in: admins and complete profiles go straight on
+        if (checking && (u.onboardingComplete || u.applicationRole === "ADMIN")) {
+          router.replace(postSignInDestination(u, redirectUrl));
           return;
         }
         setChecking(false);

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FiArrowRight, FiLock, FiMail, FiUser, FiArrowLeft, FiShield, FiCheckCircle } from "react-icons/fi";
-import { clearLegacySessionStorage, deriveRole, getRouteForRole } from "@/shared/utils/authNav";
+import { clearLegacySessionStorage, postSignInDestination } from "@/shared/utils/authNav";
 
 function AuthPageContent() {
   const router = useRouter();
@@ -104,30 +104,16 @@ function AuthPageContent() {
           return;
         }
 
-        // The profile decides where to go next (onboarding, or the route this role may open)
+        // The profile decides where to go next: admin panel, onboarding, or the route this role may open
         clearLegacySessionStorage();
-        let needsOnboarding = false;
-        let role = "pcm";
+        let profile = null;
         try {
-          const profileRes = await fetch("/api/users/me");
-          const profileData = await profileRes.json();
-          if (profileData.success && profileData.data) {
-            const u = profileData.data;
-            needsOnboarding = !u.onboardingComplete;
-            role = deriveRole(u.nyscStatus, u.role);
-          }
+          const profileData = await (await fetch("/api/users/me")).json();
+          if (profileData.success && profileData.data) profile = profileData.data;
         } catch {
           // Non-fatal: falls back to the dashboard home
         }
-
-        // Email sign-ups finish their profile on first sign-in, as Google sign-ups do
-        if (needsOnboarding) {
-          router.push(redirectUrl ? `/onboarding?redirect=${encodeURIComponent(redirectUrl)}` : "/onboarding");
-          return;
-        }
-
-        const dest = redirectUrl ? getRouteForRole(redirectUrl, role) : "/dashboard";
-        router.push(dest);
+        router.push(postSignInDestination(profile, redirectUrl));
       }
     } catch {
       setErrorMsg("Network error. Please try again.");

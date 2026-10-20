@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveRole, destinationFor, getRouteForRole } from "./roleRoutes";
+import { deriveRole, destinationFor, getRouteForRole, postSignInDestination } from "./roleRoutes";
 
 describe("deriveRole", () => {
   it("maps NYSC status from the session", () => {
@@ -36,5 +36,36 @@ describe("destinationFor", () => {
   it("sends signed-in users to the route their session role allows", () => {
     expect(destinationFor("/dashboard/accommodation", { nyscStatus: "SERVING" })).toBe("/dashboard/accommodation");
     expect(destinationFor("/dashboard/accommodation", { nyscStatus: "PCM" })).toBe("/dashboard");
+  });
+});
+
+describe("postSignInDestination", () => {
+  const member = { applicationRole: "USER", nyscStatus: "SERVING", role: "SERVING_CORPER", onboardingComplete: true };
+  const admin = { ...member, applicationRole: "ADMIN" };
+
+  it("sends admins to the admin panel, even with an unfinished profile", () => {
+    expect(postSignInDestination(admin, null)).toBe("/admin");
+    expect(postSignInDestination({ ...admin, onboardingComplete: false }, null)).toBe("/admin");
+  });
+
+  it("lets an admin who followed a link to a user page go there", () => {
+    expect(postSignInDestination(admin, "/dashboard/marketplace")).toBe("/dashboard/marketplace");
+  });
+
+  it("sends members with an unfinished profile to onboarding, keeping the redirect", () => {
+    expect(postSignInDestination({ ...member, onboardingComplete: false }, null)).toBe("/onboarding");
+    expect(postSignInDestination({ ...member, onboardingComplete: false }, "/dashboard/workplace")).toBe(
+      "/onboarding?redirect=%2Fdashboard%2Fworkplace"
+    );
+  });
+
+  it("sends members to the route their role allows, or the dashboard", () => {
+    expect(postSignInDestination(member, "/dashboard/workplace")).toBe("/dashboard/workplace");
+    expect(postSignInDestination({ ...member, nyscStatus: "PCM", role: "PCM" }, "/dashboard/workplace")).toBe("/dashboard");
+    expect(postSignInDestination(member, null)).toBe("/dashboard");
+  });
+
+  it("falls back to the dashboard when the profile could not be loaded", () => {
+    expect(postSignInDestination(null, null)).toBe("/dashboard");
   });
 });
