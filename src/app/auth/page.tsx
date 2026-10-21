@@ -1,12 +1,13 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FiArrowRight, FiLock, FiMail, FiUser, FiArrowLeft, FiShield, FiCheckCircle } from "react-icons/fi";
 import { clearLegacySessionStorage, postSignInDestination } from "@/shared/utils/authNav";
+import { signInFailureCode } from "@/shared/utils/signInResult";
 
 function AuthPageContent() {
   const router = useRouter();
@@ -20,6 +21,7 @@ function AuthPageContent() {
   // Form State
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
 
@@ -85,9 +87,9 @@ function AuthPageContent() {
           redirect: false,
         });
 
-        if (!result?.ok) {
-          // NextAuth v5: result.code contains the CredentialsSignin subclass code
-          const errorCode = (result as any)?.code ?? result?.error ?? "";
+        // A wrong password still comes back as HTTP 200 (ok: true); the failure is in error/code
+        const errorCode = signInFailureCode(result);
+        if (errorCode) {
           if (errorCode === "EMAIL_NOT_VERIFIED") {
             setUnverifiedEmail(email);
             setShowUnverifiedNotice(true);
@@ -101,6 +103,11 @@ function AuthPageContent() {
           };
           setErrorMsg(errorMap[errorCode] || "No account found with this email, or your password is incorrect.");
           setLoading(false);
+          // Email stays filled in; put the cursor back in the password field, ready to retype
+          requestAnimationFrame(() => {
+            passwordRef.current?.focus();
+            passwordRef.current?.select();
+          });
           return;
         }
 
@@ -447,7 +454,7 @@ function AuthPageContent() {
 
               <form onSubmit={handleAuthSubmit} className="space-y-4">
                 {errorMsg && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 text-xs font-semibold">
+                  <div role="alert" className="p-3 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-400 text-xs font-semibold">
                     {errorMsg}
                   </div>
                 )}
@@ -505,8 +512,10 @@ function AuthPageContent() {
                   <div className="relative">
                     <FiLock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
+                      ref={passwordRef}
                       type="password"
                       required
+                      aria-invalid={Boolean(errorMsg)}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter password..."

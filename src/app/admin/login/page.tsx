@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn, signOut } from "next-auth/react";
+import { signInFailureCode } from "@/shared/utils/signInResult";
 import {
   FiShield,
   FiLock,
@@ -36,8 +37,9 @@ export default function AdminLoginPage() {
         password,
         redirect: false,
       });
-      if (!result?.ok) {
-        const errorCode = result?.code ?? result?.error ?? "";
+      // A wrong password still comes back as HTTP 200 (ok: true); the failure is in error/code
+      const errorCode = signInFailureCode(result);
+      if (errorCode) {
         if (errorCode === "EMAIL_NOT_VERIFIED") {
           setErrorMsg("Your admin account email has not been verified yet.");
         } else if (errorCode === "FetchError" || result?.status === 500) {
@@ -171,7 +173,7 @@ export default function AdminLoginPage() {
 
           {/* Error */}
           {errorMsg && (
-            <div className="flex items-center gap-3 p-3.5 bg-red-900/20 border border-red-700/60 text-red-400 text-xs font-semibold">
+            <div role="alert" className="flex items-center gap-3 p-3.5 bg-red-900/20 border border-red-700/60 text-red-400 text-xs font-semibold">
               <FiAlertTriangle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
