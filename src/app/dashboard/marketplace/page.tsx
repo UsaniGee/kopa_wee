@@ -7,6 +7,7 @@ import { FiShoppingBag, FiPlus, FiFilter, FiMapPin, FiTag, FiMessageSquare, FiCh
 import { HiSparkles } from "react-icons/hi2";
 import { FiImage } from "react-icons/fi";
 import { downscaleImage } from "@/shared/lib/downscaleImage";
+import NoticeModal from "@/shared/components/NoticeModal";
 import { telLink, whatsAppLink } from "@/shared/utils/phoneLinks";
 
 const MAX_PHOTOS = 3; // matches the AI draft limit
@@ -50,6 +51,7 @@ export default function MarketplacePage() {
   const [selectedState, setSelectedState] = useState("All States");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showModal, setShowModal] = useState(false);
+  const [submittedNotice, setSubmittedNotice] = useState(false);
 
   React.useEffect(() => {
     fetch("/api/states")
@@ -238,10 +240,17 @@ export default function MarketplacePage() {
           onClose={() => setShowModal(false)}
           onSuccess={() => {
             setShowModal(false);
-            alert("🎉 Ad submitted! Your item is currently under review by Platform Moderation. Once approved, it will go live for all corpers.");
+            setSubmittedNotice(true);
           }}
         />
       )}
+
+      <NoticeModal
+        open={submittedNotice}
+        title="Item submitted for review"
+        message="An admin will check your listing before it goes live in the marketplace. It won't appear in the list until it's approved."
+        onClose={() => setSubmittedNotice(false)}
+      />
 
     </div>
   );

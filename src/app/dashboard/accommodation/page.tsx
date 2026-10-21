@@ -7,6 +7,7 @@ import { FiHome, FiUsers, FiMapPin, FiCheckCircle, FiShield, FiHeart, FiPlus, Fi
 import { HiSparkles } from "react-icons/hi2";
 import { FiImage } from "react-icons/fi";
 import { downscaleImage } from "@/shared/lib/downscaleImage";
+import NoticeModal from "@/shared/components/NoticeModal";
 import { telLink, whatsAppLink } from "@/shared/utils/phoneLinks";
 import { ExpressInterestButton, IncomingInterests, MyInterests } from "./RoommateInterests";
 
@@ -54,6 +55,7 @@ export default function AccommodationPage() {
   const [roommateModalOpen, setRoommateModalOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<any | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [lodgeSubmittedNotice, setLodgeSubmittedNotice] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [cancellingRequest, setCancellingRequest] = useState(false);
 
@@ -411,10 +413,18 @@ export default function AccommodationPage() {
           onClose={() => setAddModalOpen(false)}
           onSuccess={() => {
             setAddModalOpen(false);
+            setLodgeSubmittedNotice(true);
             fetchAccommodationData();
           }}
         />
       )}
+
+      <NoticeModal
+        open={lodgeSubmittedNotice}
+        title="Lodge submitted for review"
+        message="An admin will check your listing before it goes live. It won't appear in the list until it's approved."
+        onClose={() => setLodgeSubmittedNotice(false)}
+      />
 
       {/* Request Roommate Modal */}
       {roommateModalOpen && (
