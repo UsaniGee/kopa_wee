@@ -43,3 +43,6 @@ next-env.d.ts
 
 # AXON plugin clone (skills are symlinked; reinstall via scripts/install-axon-cursor.sh)
 .cursor/plugins/axon/
+
+# Security review notes (kept local, not in the repo)
+docs/security/
